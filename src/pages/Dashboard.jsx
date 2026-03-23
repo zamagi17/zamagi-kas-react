@@ -25,10 +25,10 @@ export default function Dashboard() {
   const [portofolio, setPortofolio] = useState({});
   const [dataChartPengeluaran, setDataChartPengeluaran] = useState({});
   const [listAset, setListAset] = useState([
-    'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai', 
+    'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
     'e-Wallet (Gopay/OVO/Dana)', 'Bank RDN', 'Reksa Dana', 'Emas/Logam Mulia'
   ]);
-  
+
   // --- STATE TABEL & HISTORY ---
   const [historyData, setHistoryData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,7 +39,7 @@ export default function Dashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
-    tanggal: new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})).toISOString().split('T')[0],
+    tanggal: new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })).toISOString().split('T')[0],
     kategori: '', jenis: 'Pengeluaran', sumberDana: '', sumberDanaTujuan: '', nominal: '', keterangan: ''
   });
 
@@ -54,7 +54,7 @@ export default function Dashboard() {
     try {
       const res = await fetch(API_URL, { headers: { 'Authorization': 'Bearer ' + token } });
       if (res.status === 401) { alert("Sesi habis."); handleLogout(); return; }
-      
+
       const data = await res.json();
       let [fYear, fMonth] = filterBulan.split('-');
       let sAwal = 0, tMasuk = 0, tKeluar = 0, rMasuk = 0, rKeluar = 0, netWorth = 0, hMasuk = 0, hKeluar = 0;
@@ -113,13 +113,13 @@ export default function Dashboard() {
 
       // Gabungkan aset bawaan dengan aset dari database
       const asetSet = new Set([
-        'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai', 
+        'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
         'e-Wallet (Gopay/OVO/Dana)', 'Bank RDN', 'Reksa Dana', 'Emas/Logam Mulia'
       ]);
       Object.keys(portoAllTime).forEach(a => asetSet.add(a));
       setListAset(Array.from(asetSet));
 
-    } catch (err) { console.error("Error:", err); } 
+    } catch (err) { console.error("Error:", err); }
     finally { setIsLoading(false); }
   };
 
@@ -156,7 +156,7 @@ export default function Dashboard() {
 
       handleBatalEdit();
       fetchDashboardData();
-    } catch (err) { alert("Terjadi kesalahan."); } 
+    } catch (err) { alert("Terjadi kesalahan."); }
     finally { setIsSubmitting(false); }
   };
 
@@ -171,7 +171,7 @@ export default function Dashboard() {
 
   const handleBatalEdit = () => {
     setEditId(null);
-    const today = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})).toISOString().split('T')[0];
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })).toISOString().split('T')[0];
     setFormData({ tanggal: today, kategori: '', jenis: 'Pengeluaran', sumberDana: '', sumberDanaTujuan: '', nominal: '', keterangan: '' });
   };
 
@@ -183,9 +183,9 @@ export default function Dashboard() {
   };
 
   // --- PAGINASI & SEARCH & EXPORT ---
-  const filteredHistory = historyData.filter(h => 
-    h.kategori.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    h.keterangan.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredHistory = historyData.filter(h =>
+    h.kategori.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    h.keterangan.toLowerCase().includes(searchQuery.toLowerCase()) ||
     h.sumberDana.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const totalPages = Math.ceil(filteredHistory.length / itemsPerPage) || 1;
@@ -204,10 +204,10 @@ export default function Dashboard() {
   // --- CHART CONFIG ---
   const sisaKas = (summary.saldoAwal + summary.totalMasuk) - summary.totalKeluar;
   const estimasiAkhir = sisaKas + summary.rencanaMasuk - summary.rencanaKeluar;
-  
+
   const pengeluaranData = { labels: Object.keys(dataChartPengeluaran), datasets: [{ data: Object.values(dataChartPengeluaran), backgroundColor: ['#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#34495e'] }] };
   const asetLabels = []; const asetValues = [];
-  for (const [k, v] of Object.entries(portofolio)) { if(v > 0) { asetLabels.push(k); asetValues.push(v); } }
+  for (const [k, v] of Object.entries(portofolio)) { if (v > 0) { asetLabels.push(k); asetValues.push(v); } }
   const asetData = { labels: asetLabels, datasets: [{ data: asetValues, backgroundColor: ['#2ecc71', '#3498db', '#f1c40f', '#e67e22', '#9b59b6'] }] };
 
   if (!token) return null;
@@ -215,7 +215,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6 font-sans text-slate-800 pb-20">
       <div className="max-w-5xl mx-auto space-y-6">
-        
+
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
@@ -223,7 +223,7 @@ export default function Dashboard() {
             <p className="text-sm text-slate-500">Halo, <b>{currentUser}</b></p>
           </div>
           <div className="flex items-center gap-3">
-            <input type="month" value={filterBulan} onChange={(e) => setFilterBulan(e.target.value)} className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-400 outline-none"/>
+            <input type="month" value={filterBulan} onChange={(e) => setFilterBulan(e.target.value)} className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-400 outline-none" />
             <button onClick={handleLogout} className="px-4 py-2 bg-red-100 text-red-600 font-bold rounded-lg hover:bg-red-200 transition">Logout</button>
           </div>
         </div>
@@ -234,7 +234,7 @@ export default function Dashboard() {
           <>
             {/* --- DASHBOARD GRIDS --- */}
             <div className="grid md:grid-cols-2 gap-6">
-              
+
               {/* Kotak Arus Kas & Estimasi */}
               <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <h3 className="font-bold text-slate-700 uppercase mb-4 pb-2 border-b text-center">📊 Arus Kas & Estimasi Budget</h3>
@@ -243,7 +243,7 @@ export default function Dashboard() {
                   <div className="flex justify-between"><span>Total Masuk (Riil)</span><span className="font-bold text-emerald-600">+ {formatRp(summary.totalMasuk)}</span></div>
                   <div className="flex justify-between"><span>Total Keluar (Riil)</span><span className="font-bold text-red-600">- {formatRp(summary.totalKeluar)}</span></div>
                   <div className="flex justify-between p-2 bg-emerald-50 rounded text-emerald-800 font-bold text-base mt-2"><span>SISA KAS SAAT INI</span><span>{formatRp(sisaKas)}</span></div>
-                  
+
                   <div className="text-center text-xs font-bold text-slate-400 uppercase tracking-wide mt-4 mb-2 bg-slate-50 py-1 rounded">Proyeksi Kas</div>
                   <div className="flex justify-between text-orange-600 text-xs"><span>Rencana Masuk</span><span>+ {formatRp(summary.rencanaMasuk)}</span></div>
                   <div className="flex justify-between text-orange-600 text-xs"><span>Rencana Keluar</span><span>- {formatRp(summary.rencanaKeluar)}</span></div>
@@ -315,7 +315,7 @@ export default function Dashboard() {
                 {formData.jenis === 'Transfer' && (<div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200 border-dashed"><label className="block text-sm font-semibold text-blue-800 mb-1">Ke Dompet / Aset (Tujuan)</label><input type="text" name="sumberDanaTujuan" list="listSumberDana" value={formData.sumberDanaTujuan} onChange={handleInputChange} required placeholder="Pilih atau ketik aset baru..." autoComplete="off" className="w-full p-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>)}
                 <div><label className="block text-sm font-semibold text-slate-700 mb-1">Nominal (Rp)</label><input type="text" name="nominal" value={formData.nominal ? new Intl.NumberFormat('id-ID').format(formData.nominal) : ''} onChange={handleInputChange} required placeholder="Contoh: 150000" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>
                 <div><label className="block text-sm font-semibold text-slate-700 mb-1">Keterangan Detail</label><input type="text" name="keterangan" value={formData.keterangan} onChange={handleInputChange} required placeholder="Contoh: Makan siang / Budget kuota" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>
-                
+
                 <div className="md:col-span-2 flex flex-col md:flex-row gap-3 mt-2">
                   <button type="submit" disabled={isSubmitting} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 shadow-sm">{isSubmitting ? 'Memproses...' : (editId ? 'Simpan Perubahan' : 'Simpan Transaksi')}</button>
                   {editId && <button type="button" onClick={handleBatalEdit} className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition shadow-sm">Batal Edit</button>}
@@ -326,7 +326,7 @@ export default function Dashboard() {
             {/* --- TABEL HISTORY TRANSAKSI --- */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-8">
               <h3 className="text-lg font-bold text-slate-800 mb-5 pb-2 border-b">Riwayat Transaksi</h3>
-              
+
               <div className="flex flex-col md:flex-row justify-between gap-4 mb-5">
                 <div className="relative w-full md:w-1/2">
                   <span className="absolute left-3 top-2.5 text-slate-400">🔍</span>
@@ -338,41 +338,78 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto rounded-lg border border-slate-200">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-700 text-white text-center">
+              {/* --- TABEL / CARD HISTORY TRANSAKSI --- */}
+              <div className="md:overflow-x-auto md:rounded-lg md:border border-slate-200">
+                <table className="w-full text-sm text-left border-collapse">
+
+                  {/* Header hanya muncul di mode Desktop (md:table-header-group) */}
+                  <thead className="hidden md:table-header-group bg-slate-700 text-white text-center">
                     <tr>
                       <th className="px-4 py-3 font-semibold">Tanggal</th>
                       <th className="px-4 py-3 font-semibold">Kategori & Keterangan</th>
                       <th className="px-4 py-3 font-semibold">Dompet / Aset</th>
                       <th className="px-4 py-3 font-semibold">Nominal</th>
-                      <th className="px-4 py-3 font-semibold">Aksi</th>
+                      <th className="px-4 py-3 font-semibold text-center">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody>
+
+                  <tbody className="block md:table-row-group">
                     {dataTampil.length === 0 ? (
-                      <tr><td colSpan="5" className="px-4 py-8 text-center text-slate-500 font-medium">Data tidak ditemukan.</td></tr>
+                      <tr className="block md:table-row bg-white border md:border-0 rounded-lg shadow-sm md:shadow-none mb-4">
+                        <td colSpan="5" className="block md:table-cell px-4 py-8 text-center text-slate-500 font-medium">Data tidak ditemukan.</td>
+                      </tr>
                     ) : (
                       dataTampil.map(h => {
                         let rowBg = 'bg-white hover:bg-slate-50';
                         let badge = null;
                         let textStyle = 'font-bold text-slate-800';
-                        
-                        if (h.jenis.includes('Rencana')) { rowBg = 'bg-orange-50/50 hover:bg-orange-100/50'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2 tracking-wide">PROYEKSI</span>; textStyle = 'font-bold text-orange-600'; } 
-                        else if (h.jenis === 'Transfer') { rowBg = 'bg-blue-50/50 hover:bg-blue-100/50'; badge = <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2 tracking-wide">TRANSFER</span>; }
+
+                        if (h.jenis.includes('Rencana')) { rowBg = 'bg-orange-50/80 hover:bg-orange-100/80'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2 tracking-wide">PROYEKSI</span>; textStyle = 'font-bold text-orange-600'; }
+                        else if (h.jenis === 'Transfer') { rowBg = 'bg-blue-50/80 hover:bg-blue-100/80'; badge = <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2 tracking-wide">TRANSFER</span>; }
                         else if (h.jenis === 'Pemasukan') { textStyle = 'font-bold text-emerald-600'; }
                         else if (h.jenis === 'Pengeluaran') { textStyle = 'font-bold text-red-600'; }
 
                         return (
-                          <tr key={h.id} className={`${rowBg} border-b border-slate-100 transition-colors`}>
-                            <td className="px-4 py-3 whitespace-nowrap text-slate-600">{h.tglStr}</td>
-                            <td className="px-4 py-3">{badge} <span className="font-semibold text-slate-800">{h.kategori}</span><br/><span className="text-xs text-slate-500 mt-0.5 block">{h.keterangan}</span></td>
-                            <td className="px-4 py-3 text-slate-700">{h.sumberDana}</td>
-                            <td className={`px-4 py-3 text-right ${textStyle}`}>{formatRp(h.nominal)}</td>
-                            <td className="px-4 py-3 text-center whitespace-nowrap">
-                              <button onClick={() => siapkanEdit(h)} className="px-3 py-1.5 bg-amber-500 text-white rounded hover:bg-amber-600 mr-2 text-xs font-bold shadow-sm transition-transform active:scale-95">✎</button>
-                              <button onClick={() => handleHapus(h.id)} className="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 text-xs font-bold shadow-sm transition-transform active:scale-95">✖</button>
+                          // Menggunakan flex-col untuk HP (Card), dan table-row untuk Laptop (Tabel)
+                          <tr key={h.id} className={`flex flex-col md:table-row mb-4 md:mb-0 border border-slate-200 md:border-0 md:border-b md:border-slate-100 rounded-xl md:rounded-none shadow-sm md:shadow-none overflow-hidden transition-colors ${rowBg}`}>
+
+                            {/* Tanggal */}
+                            <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 whitespace-nowrap">
+                              <span className="md:hidden font-bold text-xs text-slate-400 uppercase tracking-wider">Tanggal</span>
+                              <span className="text-slate-700 font-medium">{h.tglStr}</span>
                             </td>
+
+                            {/* Kategori & Keterangan */}
+                            <td className="flex flex-col md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
+                              <span className="md:hidden font-bold text-xs text-slate-400 uppercase tracking-wider mb-1.5">Info Transaksi</span>
+                              <div>
+                                {badge} <span className="font-bold text-slate-800 text-base md:text-sm">{h.kategori}</span>
+                                <span className="text-sm md:text-xs text-slate-500 mt-0.5 block">{h.keterangan}</span>
+                              </div>
+                            </td>
+
+                            {/* Dompet / Aset */}
+                            <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
+                              <span className="md:hidden font-bold text-xs text-slate-400 uppercase tracking-wider">Sumber Dana</span>
+                              <span className="text-slate-700 font-medium bg-slate-100 md:bg-transparent px-2 md:px-0 py-0.5 rounded text-sm">{h.sumberDana}</span>
+                            </td>
+
+                            {/* Nominal */}
+                            <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 md:text-right">
+                              <span className="md:hidden font-bold text-xs text-slate-400 uppercase tracking-wider">Nominal</span>
+                              <span className={`text-lg md:text-sm ${textStyle}`}>{formatRp(h.nominal)}</span>
+                            </td>
+
+                            {/* Aksi (Tombol Edit/Hapus) */}
+                            <td className="flex justify-end md:justify-center md:table-cell px-4 py-3.5 bg-slate-50/50 md:bg-transparent gap-2">
+                              <button onClick={() => siapkanEdit(h)} className="px-4 md:px-3 py-2 md:py-1.5 bg-amber-500 text-white rounded-lg md:rounded hover:bg-amber-600 md:mr-2 text-xs font-bold shadow-sm transition-transform active:scale-95">
+                                ✎ <span className="md:hidden ml-1">Edit</span>
+                              </button>
+                              <button onClick={() => handleHapus(h.id)} className="px-4 md:px-3 py-2 md:py-1.5 bg-red-500 text-white rounded-lg md:rounded hover:bg-red-600 text-xs font-bold shadow-sm transition-transform active:scale-95">
+                                ✖ <span className="md:hidden ml-1">Hapus</span>
+                              </button>
+                            </td>
+
                           </tr>
                         );
                       })
