@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Sembunyikan ikon mata bawaan Microsoft Edge / Browser */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
