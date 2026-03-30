@@ -79,14 +79,21 @@ export default function Dashboard() {
           else if (row.jenis === 'Pengeluaran') { portoAllTime[sumber] -= nom; netWorth -= nom; }
         }
 
+        // Cek apakah transaksi adalah transfer antar aset
+        const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" || 
+                                   (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
+
         // Filter per Bulan Aktif
         if (rYear < fYear || (rYear === fYear && rMonth < fMonth)) {
           if (row.jenis === 'Pemasukan') sAwal += nom;
           else if (row.jenis === 'Pengeluaran') sAwal -= nom;
         } else if (rYear === fYear && rMonth === fMonth) {
-          if (row.jenis === 'Pemasukan') tMasuk += nom;
+          
+          if (row.jenis === 'Pemasukan') {
+            if (!isTransferOrMutasi) tMasuk += nom; // Mengabaikan mutasi masuk dari Total Riil
+          } 
           else if (row.jenis === 'Pengeluaran') {
-            tKeluar += nom;
+            if (!isTransferOrMutasi) tKeluar += nom; // Mengabaikan mutasi keluar dari Total Riil
             if (row.kategori !== "Transfer Aset (Auto)") chartPengeluaranBulanan[row.kategori] = (chartPengeluaranBulanan[row.kategori] || 0) + nom;
           }
           else if (row.jenis === 'Rencana Pemasukan') rMasuk += nom;
@@ -108,7 +115,14 @@ export default function Dashboard() {
       setSummary({ saldoAwal: sAwal, totalMasuk: tMasuk, totalKeluar: tKeluar, rencanaMasuk: rMasuk, rencanaKeluar: rKeluar, totalNetWorth: netWorth, hariIniMasuk: hMasuk, hariIniKeluar: hKeluar });
       setPortofolio(portoAllTime);
       setDataChartPengeluaran(chartPengeluaranBulanan);
-      setHistoryData(historyTemp.sort((a, b) => b.id - a.id));
+      
+      // Sorting by Tanggal (Terbaru) lalu ID (Terbaru)
+      setHistoryData(historyTemp.sort((a, b) => {
+        const timeA = new Date(a.tanggalAsli).getTime();
+        const timeB = new Date(b.tanggalAsli).getTime();
+        if (timeB !== timeA) return timeB - timeA;
+        return b.id - a.id;
+      }));
       setCurrentPage(1);
 
       // Gabungkan aset bawaan dengan aset dari database
@@ -328,9 +342,24 @@ export default function Dashboard() {
               <h3 className="text-lg font-bold text-slate-800 mb-5 pb-2 border-b">Riwayat Transaksi</h3>
 
               <div className="flex flex-col md:flex-row justify-between gap-4 mb-5">
-                <div className="relative w-full md:w-1/2">
-                  <span className="absolute left-3 top-2.5 text-slate-400">🔍</span>
-                  <input type="text" placeholder="Cari kategori, keterangan, dompet..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full pl-10 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50" />
+                <div className="relative w-full md:w-1/2 flex items-center">
+                  <span className="absolute left-3 text-slate-400">🔍</span>
+                  <input 
+                    type="text" 
+                    placeholder="Cari kategori, keterangan, dompet..." 
+                    value={searchQuery} 
+                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} 
+                    className="w-full pl-10 pr-10 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50" 
+                  />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => { setSearchQuery(''); setCurrentPage(1); }} 
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                      title="Reset Pencarian"
+                    >
+                      ✖
+                    </button>
+                  )}
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
                   <button onClick={fetchDashboardData} className="flex-1 md:flex-none px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-sm">🔄 Refresh Data</button>
