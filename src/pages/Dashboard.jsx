@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut, Pie } from 'react-chartjs-2';
+import {
+  Wallet, PieChart, TrendingUp, TrendingDown, ArrowRightLeft,
+  Edit3, Trash2, Search, Download, RefreshCw, Calendar, LogOut
+} from 'lucide-react';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -27,6 +31,12 @@ export default function Dashboard() {
   const [listAset, setListAset] = useState([
     'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
     'e-Wallet (Gopay/OVO/Dana)', 'Bank RDN', 'Reksa Dana', 'Emas/Logam Mulia'
+  ]);
+
+  const [listKategori, setListKategori] = useState([
+    'Transfer Aset (Auto)', 'Gaji & Pendapatan', 'Makan & Minum',
+    'Transportasi / Bensin', 'Tanggungan Orang Tua', 'Pembelian Aset / Investasi',
+    'Tagihan (Listrik / Internet)', 'Hiburan / Jajan'
   ]);
 
   // --- STATE TABEL & HISTORY ---
@@ -81,17 +91,17 @@ export default function Dashboard() {
 
         // Cek apakah transaksi adalah transfer antar aset
         const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" &&
-                                   (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
+          (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
 
         // Filter per Bulan Aktif
         if (rYear < fYear || (rYear === fYear && rMonth < fMonth)) {
           if (row.jenis === 'Pemasukan') sAwal += nom;
           else if (row.jenis === 'Pengeluaran') sAwal -= nom;
         } else if (rYear === fYear && rMonth === fMonth) {
-          
+
           if (row.jenis === 'Pemasukan') {
             if (!isTransferOrMutasi) tMasuk += nom; // Mengabaikan mutasi masuk dari Total Riil
-          } 
+          }
           else if (row.jenis === 'Pengeluaran') {
             if (!isTransferOrMutasi) tKeluar += nom; // Mengabaikan mutasi keluar dari Total Riil
             if (row.kategori !== "Transfer Aset (Auto)") chartPengeluaranBulanan[row.kategori] = (chartPengeluaranBulanan[row.kategori] || 0) + nom;
@@ -115,7 +125,7 @@ export default function Dashboard() {
       setSummary({ saldoAwal: sAwal, totalMasuk: tMasuk, totalKeluar: tKeluar, rencanaMasuk: rMasuk, rencanaKeluar: rKeluar, totalNetWorth: netWorth, hariIniMasuk: hMasuk, hariIniKeluar: hKeluar });
       setPortofolio(portoAllTime);
       setDataChartPengeluaran(chartPengeluaranBulanan);
-      
+
       // Sorting by Tanggal (Terbaru) lalu ID (Terbaru)
       setHistoryData(historyTemp.sort((a, b) => {
         const timeA = new Date(a.tanggalAsli).getTime();
@@ -132,6 +142,16 @@ export default function Dashboard() {
       ]);
       Object.keys(portoAllTime).forEach(a => asetSet.add(a));
       setListAset(Array.from(asetSet));
+
+      const kategoriSet = new Set([
+        'Transfer Aset (Auto)', 'Gaji & Pendapatan', 'Makan & Minum',
+        'Transportasi / Bensin', 'Tanggungan Orang Tua', 'Pembelian Aset / Investasi',
+        'Tagihan (Listrik / Internet)', 'Hiburan / Jajan'
+      ]);
+      data.forEach(row => {
+        if (row.kategori) kategoriSet.add(row.kategori); // Masukkan semua kategori yang pernah diketik
+      });
+      setListKategori(Array.from(kategoriSet));
 
     } catch (err) { console.error("Error:", err); }
     finally { setIsLoading(false); }
@@ -219,10 +239,26 @@ export default function Dashboard() {
   const sisaKas = (summary.saldoAwal + summary.totalMasuk) - summary.totalKeluar;
   const estimasiAkhir = sisaKas + summary.rencanaMasuk - summary.rencanaKeluar;
 
-  const pengeluaranData = { labels: Object.keys(dataChartPengeluaran), datasets: [{ data: Object.values(dataChartPengeluaran), backgroundColor: ['#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#34495e'] }] };
+  const pengeluaranData = {
+    labels: Object.keys(dataChartPengeluaran),
+    datasets: [{
+      data: Object.values(dataChartPengeluaran),
+      backgroundColor: ['#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#34495e'],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
+  };
   const asetLabels = []; const asetValues = [];
   for (const [k, v] of Object.entries(portofolio)) { if (v > 0) { asetLabels.push(k); asetValues.push(v); } }
-  const asetData = { labels: asetLabels, datasets: [{ data: asetValues, backgroundColor: ['#2ecc71', '#3498db', '#f1c40f', '#e67e22', '#9b59b6'] }] };
+  const asetData = {
+    labels: asetLabels,
+    datasets: [{
+      data: asetValues,
+      backgroundColor: ['#2ecc71', '#3498db', '#f1c40f', '#e67e22', '#9b59b6'],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
+  };
 
   if (!token) return null;
 
@@ -238,12 +274,21 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             <input type="month" value={filterBulan} onChange={(e) => setFilterBulan(e.target.value)} className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-400 outline-none" />
-            <button onClick={handleLogout} className="px-4 py-2 bg-red-100 text-red-600 font-bold rounded-lg hover:bg-red-200 transition">Logout</button>
+            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 font-bold rounded-lg hover:bg-red-200 transition">
+              <LogOut size={16} /> Logout
+            </button>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-10 font-bold text-slate-500 animate-pulse">Memuat data...</div>
+          <div className="animate-pulse space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="h-[400px] bg-slate-200 rounded-xl shadow-sm border border-slate-100"></div>
+              <div className="h-[400px] bg-slate-200 rounded-xl shadow-sm border border-slate-100"></div>
+              <div className="h-[300px] bg-slate-200 rounded-xl shadow-sm border border-slate-100"></div>
+              <div className="h-[300px] bg-slate-200 rounded-xl shadow-sm border border-slate-100"></div>
+            </div>
+          </div>
         ) : (
           <>
             {/* --- DASHBOARD GRIDS --- */}
@@ -251,12 +296,17 @@ export default function Dashboard() {
 
               {/* Kotak Arus Kas & Estimasi */}
               <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <h3 className="font-bold text-slate-700 uppercase mb-4 pb-2 border-b text-center">📊 Arus Kas & Estimasi Budget</h3>
+                <h3 className="flex items-center justify-center gap-2 font-bold text-slate-700 uppercase mb-4 pb-2 border-b">
+                  <PieChart size={18} className="text-emerald-500" /> Arus Kas & Estimasi Budget
+                </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span>Saldo Awal Bulan</span><span className="font-bold">{formatRp(summary.saldoAwal)}</span></div>
                   <div className="flex justify-between"><span>Total Masuk (Riil)</span><span className="font-bold text-emerald-600">+ {formatRp(summary.totalMasuk)}</span></div>
                   <div className="flex justify-between"><span>Total Keluar (Riil)</span><span className="font-bold text-red-600">- {formatRp(summary.totalKeluar)}</span></div>
-                  <div className="flex justify-between p-2 bg-emerald-50 rounded text-emerald-800 font-bold text-base mt-2"><span>SISA KAS SAAT INI</span><span>{formatRp(sisaKas)}</span></div>
+                  <div className="flex justify-between items-center p-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-lg text-white shadow-md mt-3 transform transition-transform hover:scale-[1.02]">
+                    <span className="font-bold text-sm tracking-wide">SISA KAS SAAT INI</span>
+                    <span className="font-bold text-lg">{formatRp(sisaKas)}</span>
+                  </div>
 
                   <div className="text-center text-xs font-bold text-slate-400 uppercase tracking-wide mt-4 mb-2 bg-slate-50 py-1 rounded">Proyeksi Kas</div>
                   <div className="flex justify-between text-orange-600 text-xs"><span>Rencana Masuk</span><span>+ {formatRp(summary.rencanaMasuk)}</span></div>
@@ -277,11 +327,16 @@ export default function Dashboard() {
 
               {/* Kotak Net Worth */}
               <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200">
-                <h3 className="font-bold text-blue-700 uppercase mb-4 pb-2 border-b border-blue-100 text-center">💼 Net Worth & Saldo Aset</h3>
+                <h3 className="flex items-center justify-center gap-2 font-bold text-blue-700 uppercase mb-4 pb-2 border-b border-blue-100">
+                  <Wallet size={18} /> Net Worth & Saldo Aset
+                </h3>
                 <div className="space-y-2 text-sm max-h-48 overflow-y-auto pr-2">
                   {Object.entries(portofolio).map(([aset, nilai]) => (nilai !== 0 && <div key={aset} className="flex justify-between border-b border-slate-200/50 pb-1"><span className="text-slate-600 truncate">{aset}</span><span className="font-bold">{formatRp(nilai)}</span></div>))}
                 </div>
-                <div className="flex justify-between p-3 bg-blue-100/50 mt-4 rounded-lg text-blue-800 font-bold text-lg border border-blue-200"><span>TOTAL NET WORTH</span><span>{formatRp(summary.totalNetWorth)}</span></div>
+                <div className="flex justify-between items-center p-3.5 bg-gradient-to-r from-blue-600 to-indigo-500 mt-4 rounded-lg text-white shadow-md transform transition-transform hover:scale-[1.02]">
+                  <span className="font-bold text-sm tracking-wide">TOTAL NET WORTH</span>
+                  <span className="font-bold text-lg">{formatRp(summary.totalNetWorth)}</span>
+                </div>
               </div>
 
               {/* Grafik Aset */}
@@ -293,16 +348,9 @@ export default function Dashboard() {
 
             {/* --- DATALISTS --- */}
             <datalist id="kategoriList">
-              <option value="Transfer Aset (Auto)" />
-              <option value="Gaji & Pendapatan" />
-              <option value="Makan & Minum" />
-              <option value="Transportasi / Bensin" />
-              <option value="Tanggungan Orang Tua" />
-              <option value="Pembelian Aset / Investasi" />
-              <option value="Tagihan (Listrik / Internet)" />
-              <option value="Hiburan / Jajan" />
-              <option value="Sinking Fund: Modal Bisnis Zamafinds" />
-              <option value="Sinking Fund: S2 Sistem Informasi" />
+              {listKategori.map((kat, index) => (
+                <option key={index} value={kat} />
+              ))}
             </datalist>
 
             <datalist id="listSumberDana">
@@ -311,7 +359,9 @@ export default function Dashboard() {
 
             {/* --- FORM INPUT TRANSAKSI --- */}
             <div id="form-section" className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-8">
-              <h3 className="text-lg font-bold text-slate-800 mb-5 pb-2 border-b">{editId ? '✏️ Edit Transaksi' : '✍️ Input Transaksi'}</h3>
+              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 mb-5 pb-2 border-b">
+                {editId ? <><Edit3 className="text-amber-500" /> Edit Transaksi</> : <><TrendingUp className="text-blue-500" /> Input Transaksi</>}
+              </h3>
               <form onSubmit={handleSimpan} className="grid md:grid-cols-2 gap-5">
                 <div><label className="block text-sm font-semibold text-slate-700 mb-1">Tanggal</label><input type="date" name="tanggal" value={formData.tanggal} onChange={handleInputChange} required className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>
                 <div>
@@ -343,17 +393,17 @@ export default function Dashboard() {
 
               <div className="flex flex-col md:flex-row justify-between gap-4 mb-5">
                 <div className="relative w-full md:w-1/2 flex items-center">
-                  <span className="absolute left-3 text-slate-400">🔍</span>
-                  <input 
-                    type="text" 
-                    placeholder="Cari kategori, keterangan, dompet..." 
-                    value={searchQuery} 
-                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} 
-                    className="w-full pl-10 pr-10 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50" 
+                  <Search size={18} className="absolute left-3 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Cari kategori, keterangan, dompet..."
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                    className="w-full pl-10 pr-10 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50"
                   />
                   {searchQuery && (
-                    <button 
-                      onClick={() => { setSearchQuery(''); setCurrentPage(1); }} 
+                    <button
+                      onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
                       className="absolute right-3 text-slate-400 hover:text-slate-600 focus:outline-none"
                       title="Reset Pencarian"
                     >
@@ -362,8 +412,12 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                  <button onClick={fetchDashboardData} className="flex-1 md:flex-none px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-sm">🔄 Refresh Data</button>
-                  <button onClick={exportCSV} className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition shadow-sm">⬇️ Unduh CSV Bulan Ini</button>
+                  <button onClick={fetchDashboardData} className="flex items-center justify-center gap-2 flex-1 md:flex-none px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-sm">
+                    <RefreshCw size={16} /> Refresh Data
+                  </button>
+                  <button onClick={exportCSV} className="flex items-center justify-center gap-2 flex-1 md:flex-none px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition shadow-sm">
+                    <Download size={16} /> Unduh CSV Bulan Ini
+                  </button>
                 </div>
               </div>
 
@@ -430,13 +484,30 @@ export default function Dashboard() {
                             </td>
 
                             {/* Aksi (Tombol Edit/Hapus) */}
-                            <td className="flex justify-end md:justify-center md:table-cell px-4 py-3.5 bg-slate-50/50 md:bg-transparent gap-2">
-                              <button onClick={() => siapkanEdit(h)} className="px-4 md:px-3 py-2 md:py-1.5 bg-amber-500 text-white rounded-lg md:rounded hover:bg-amber-600 md:mr-2 text-xs font-bold shadow-sm transition-transform active:scale-95">
-                                ✎ <span className="md:hidden ml-1">Edit</span>
-                              </button>
-                              <button onClick={() => handleHapus(h.id)} className="px-4 md:px-3 py-2 md:py-1.5 bg-red-500 text-white rounded-lg md:rounded hover:bg-red-600 text-xs font-bold shadow-sm transition-transform active:scale-95">
-                                ✖ <span className="md:hidden ml-1">Hapus</span>
-                              </button>
+                            <td className="px-4 py-3 border-b border-slate-100 md:border-0 align-middle">
+                              <div className="flex justify-end md:justify-center items-center gap-2">
+
+                                <button
+                                  onClick={() => siapkanEdit(h)}
+                                  className="flex items-center justify-center gap-1.5 p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors active:scale-95"
+                                  title="Edit Transaksi"
+                                >
+                                  <Edit3 size={18} />
+                                  {/* Teks hanya muncul di HP agar mudah dipencet, di laptop hanya icon */}
+                                  <span className="md:hidden text-xs font-bold">Edit</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleHapus(h.id)}
+                                  className="flex items-center justify-center gap-1.5 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors active:scale-95"
+                                  title="Hapus Transaksi"
+                                >
+                                  <Trash2 size={18} />
+                                  {/* Teks hanya muncul di HP agar mudah dipencet, di laptop hanya icon */}
+                                  <span className="md:hidden text-xs font-bold">Hapus</span>
+                                </button>
+
+                              </div>
                             </td>
 
                           </tr>
