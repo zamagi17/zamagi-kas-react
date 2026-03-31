@@ -80,7 +80,7 @@ export default function Dashboard() {
         }
 
         // Cek apakah transaksi adalah transfer antar aset
-        const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" || 
+        const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" &&
                                    (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
 
         // Filter per Bulan Aktif
