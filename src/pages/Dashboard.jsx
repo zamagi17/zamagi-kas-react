@@ -229,43 +229,35 @@ export default function Dashboard() {
 
     if (!konfirmasi) return;
 
+    // Helper fetch dengan token
+    const fetchWithToken = (url, method = 'DELETE') =>
+      fetch(url, { method, headers: { 'Authorization': 'Bearer ' + token } });
+
     if (isTransfer) {
       const keteranganDasar = item.keterangan
         .replace(' (Mutasi Keluar)', '')
         .replace(' (Mutasi Masuk)', '')
         .trim();
 
-      // Tentukan suffix pasangan — kalau ini Keluar, cari Masuk, begitu sebaliknya
       const suffixPasangan = item.keterangan.includes('(Mutasi Keluar)')
         ? '(Mutasi Masuk)'
         : '(Mutasi Keluar)';
 
-      // Cari pasangan dengan 4 kriteria sekaligus
       const pasangan = historyData.find(h =>
         h.id !== id &&
         h.kategori === 'Transfer Aset (Auto)' &&
-        h.tanggalAsli === item.tanggalAsli &&      // tanggal sama
-        h.nominal === item.nominal &&               // nominal sama
-        h.keterangan === `${keteranganDasar} ${suffixPasangan}` // keterangan pasangan
+        h.tanggalAsli === item.tanggalAsli &&
+        h.nominal === item.nominal &&
+        h.keterangan === `${keteranganDasar} ${suffixPasangan}`
       );
 
-      const hapusPromises = [
-        apiFetch(`${API_URL}/${id}`, { method: 'DELETE' })
-      ];
-
-      if (pasangan) {
-        hapusPromises.push(
-          apiFetch(`${API_URL}/${pasangan.id}`, { method: 'DELETE' })
-        );
-      } else {
-        // Pasangan tidak ditemukan, tetap hapus yang dipilih saja
-        console.warn("Pasangan transfer tidak ditemukan, hanya menghapus 1 data.");
-      }
+      const hapusPromises = [fetchWithToken(`${API_URL}/${id}`)];
+      if (pasangan) hapusPromises.push(fetchWithToken(`${API_URL}/${pasangan.id}`));
 
       await Promise.all(hapusPromises);
 
     } else {
-      await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      await fetchWithToken(`${API_URL}/${id}`);
     }
 
     fetchDashboardData();
