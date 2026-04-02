@@ -218,10 +218,57 @@ export default function Dashboard() {
   };
 
   const handleHapus = async (id) => {
-    if (window.confirm("Yakin ingin menghapus data ini?")) {
-      await fetch(`${API_URL}/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-      fetchDashboardData();
+    const item = historyData.find(h => h.id === id);
+    const isTransfer = item?.kategori === 'Transfer Aset (Auto)';
+
+    const konfirmasi = window.confirm(
+      isTransfer
+        ? "Ini adalah transaksi transfer. Menghapus ini akan menghapus pasangannya juga. Lanjutkan?"
+        : "Yakin ingin menghapus data ini?"
+    );
+
+    if (!konfirmasi) return;
+
+    if (isTransfer) {
+      const keteranganDasar = item.keterangan
+        .replace(' (Mutasi Keluar)', '')
+        .replace(' (Mutasi Masuk)', '')
+        .trim();
+
+      // Tentukan suffix pasangan — kalau ini Keluar, cari Masuk, begitu sebaliknya
+      const suffixPasangan = item.keterangan.includes('(Mutasi Keluar)')
+        ? '(Mutasi Masuk)'
+        : '(Mutasi Keluar)';
+
+      // Cari pasangan dengan 4 kriteria sekaligus
+      const pasangan = historyData.find(h =>
+        h.id !== id &&
+        h.kategori === 'Transfer Aset (Auto)' &&
+        h.tanggalAsli === item.tanggalAsli &&      // tanggal sama
+        h.nominal === item.nominal &&               // nominal sama
+        h.keterangan === `${keteranganDasar} ${suffixPasangan}` // keterangan pasangan
+      );
+
+      const hapusPromises = [
+        apiFetch(`${API_URL}/${id}`, { method: 'DELETE' })
+      ];
+
+      if (pasangan) {
+        hapusPromises.push(
+          apiFetch(`${API_URL}/${pasangan.id}`, { method: 'DELETE' })
+        );
+      } else {
+        // Pasangan tidak ditemukan, tetap hapus yang dipilih saja
+        console.warn("Pasangan transfer tidak ditemukan, hanya menghapus 1 data.");
+      }
+
+      await Promise.all(hapusPromises);
+
+    } else {
+      await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
     }
+
+    fetchDashboardData();
   };
 
   // --- PAGINASI & SEARCH & EXPORT ---
@@ -513,15 +560,16 @@ export default function Dashboard() {
                             <td className="px-4 py-3 border-b border-slate-100 md:border-0 align-middle">
                               <div className="flex justify-end md:justify-center items-center gap-2">
 
-                                <button
-                                  onClick={() => siapkanEdit(h)}
-                                  className="flex items-center justify-center gap-1.5 p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors active:scale-95"
-                                  title="Edit Transaksi"
-                                >
-                                  <Edit3 size={18} />
-                                  {/* Teks hanya muncul di HP agar mudah dipencet, di laptop hanya icon */}
-                                  <span className="md:hidden text-xs font-bold">Edit</span>
-                                </button>
+                                {h.kategori !== 'Transfer Aset (Auto)' && (
+                                  <button
+                                    onClick={() => siapkanEdit(h)}
+                                    className="flex items-center justify-center gap-1.5 p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors active:scale-95"
+                                    title="Edit Transaksi"
+                                  >
+                                    <Edit3 size={18} />
+                                    <span className="md:hidden text-xs font-bold">Edit</span>
+                                  </button>
+                                )}
 
                                 <button
                                   onClick={() => handleHapus(h.id)}
