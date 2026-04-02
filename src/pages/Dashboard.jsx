@@ -14,7 +14,7 @@ export default function Dashboard() {
   const currentUser = localStorage.getItem('username');
   const token = localStorage.getItem('token');
   const API_URL = 'https://increasing-felicity-zamagi-apps-3fc54a80.koyeb.app/api/transaksi';
-    //testing 
+  //testing 
   // const API_URL = 'http://localhost:8081/api/transaksi';
 
   // --- STATE DASHBOARD ---
@@ -160,6 +160,12 @@ export default function Dashboard() {
   };
 
   useEffect(() => { fetchDashboardData(); }, [filterBulan, token]);
+  // Kalau jenis = Transfer, otomatis set dan lock kategori
+  useEffect(() => {
+    if (formData.jenis === 'Transfer') {
+      setFormData(prev => ({ ...prev, kategori: 'Transfer Aset (Auto)' }));
+    }
+  }, [formData.jenis]);
 
   // --- HANDLE FORM SUBMIT ---
   const handleInputChange = (e) => {
@@ -376,7 +382,25 @@ export default function Dashboard() {
                     <option value="Rencana Pengeluaran" className="bg-orange-50">⏳ Rencana Pengeluaran (Budget / Proyeksi)</option>
                   </select>
                 </div>
-                <div><label className="block text-sm font-semibold text-slate-700 mb-1">Kategori Transaksi</label><input type="text" name="kategori" list="kategoriList" value={formData.kategori} onChange={handleInputChange} required placeholder="Pilih atau ketik kategori..." autoComplete="off" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Kategori Transaksi</label>
+                  <input
+                    type="text"
+                    name="kategori"
+                    list="kategoriList"
+                    value={formData.kategori}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Pilih atau ketik kategori..."
+                    autoComplete="off"
+                    disabled={formData.jenis === 'Transfer'}
+                    className={`w-full p-2.5 border rounded-lg outline-none transition
+            ${formData.jenis === 'Transfer'
+                        ? 'bg-blue-50 border-blue-300 text-blue-700 font-semibold cursor-not-allowed'
+                        : 'border-slate-300 focus:ring-2 focus:ring-blue-500'
+                      }`}
+                  />
+                </div>
                 <div><label className="block text-sm font-semibold text-slate-700 mb-1">{formData.jenis === 'Transfer' ? 'Dari Dompet (Asal)' : 'Sumber Dana / Lokasi Aset'}</label><input type="text" name="sumberDana" list="listSumberDana" value={formData.sumberDana} onChange={handleInputChange} required placeholder="Pilih atau ketik aset baru..." autoComplete="off" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>
                 {formData.jenis === 'Transfer' && (<div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200 border-dashed"><label className="block text-sm font-semibold text-blue-800 mb-1">Ke Dompet / Aset (Tujuan)</label><input type="text" name="sumberDanaTujuan" list="listSumberDana" value={formData.sumberDanaTujuan} onChange={handleInputChange} required placeholder="Pilih atau ketik aset baru..." autoComplete="off" className="w-full p-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>)}
                 <div><label className="block text-sm font-semibold text-slate-700 mb-1">Nominal (Rp)</label><input type="text" name="nominal" value={formData.nominal ? new Intl.NumberFormat('id-ID').format(formData.nominal) : ''} onChange={handleInputChange} required placeholder="Contoh: 150000" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" /></div>
