@@ -15,6 +15,9 @@ export default function Login() {
   const wasOffline = useRef(false);
 
   const BASE_URL = 'https://increasing-felicity-zamagi-apps-3fc54a80.koyeb.app';
+  // testing
+  // const BASE_URL = 'http://localhost:8081';
+
   const AUTH_URL = `${BASE_URL}/api/auth`;
 
   // --- FUNGSI CEK STATUS SERVER ---
