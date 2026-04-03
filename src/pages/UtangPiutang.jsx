@@ -345,12 +345,20 @@ export default function UtangPiutang() {
                                             {!isLunas && (
                                                 <div className="flex gap-2 pt-2">
                                                     <button
-                                                        onClick={() => { setSelectedItem(item); setShowModalBayar(true); }}
+                                                        onClick={() => {
+                                                            setSelectedItem(item);
+                                                            setFormBayar({ nominalBayar: '', asetBayar: item.asetTerkait, keterangan: '' });
+                                                            setShowModalBayar(true);
+                                                        }}
                                                         className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition">
                                                         💸 Bayar Cicilan
                                                     </button>
                                                     <button
-                                                        onClick={() => { setSelectedItem(item); setShowModalLunas(true); }}
+                                                        onClick={() => {
+                                                            setSelectedItem(item);
+                                                            setAsetLunas(item.asetTerkait);
+                                                            setShowModalLunas(true);
+                                                        }}
                                                         className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition">
                                                         ✓ Tandai Lunas
                                                     </button>
@@ -492,13 +500,7 @@ export default function UtangPiutang() {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Dari Aset</label>
-                                <input type="text" list="listAsetBayar" required placeholder="Bayar dari aset mana?"
-                                    value={formBayar.asetBayar}
-                                    onChange={e => setFormBayar(p => ({ ...p, asetBayar: e.target.value }))}
-                                    className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                                <datalist id="listAsetBayar">
-                                    {LIST_ASET.map(a => <option key={a} value={a} />)}
-                                </datalist>
+                                <input type="text" readOnly value={formBayar.asetBayar} className="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-100 cursor-not-allowed" />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Keterangan <span className="text-slate-400 font-normal">(opsional)</span></label>
@@ -533,13 +535,7 @@ export default function UtangPiutang() {
                             </p>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Dari Aset</label>
-                                <input type="text" list="listAsetLunas" required placeholder="Bayar dari aset mana?"
-                                    value={asetLunas}
-                                    onChange={e => setAsetLunas(e.target.value)}
-                                    className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                                <datalist id="listAsetLunas">
-                                    {LIST_ASET.map(a => <option key={a} value={a} />)}
-                                </datalist>
+                                <input type="text" readOnly value={asetLunas} className="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-100 cursor-not-allowed" />
                             </div>
                             <button onClick={handleLunas} disabled={isSubmitting}
                                 className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition disabled:opacity-50">
