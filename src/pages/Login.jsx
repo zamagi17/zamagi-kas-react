@@ -14,11 +14,9 @@ export default function Login() {
   const [serverStatus, setServerStatus] = useState({ status: 'checking', text: 'Menyiapkan Server...' });
   const wasOffline = useRef(false);
 
-  const BASE_URL = 'https://increasing-felicity-zamagi-apps-3fc54a80.koyeb.app';
-  // testing
-  // const BASE_URL = 'http://localhost:8081';
-
-  const AUTH_URL = `${BASE_URL}/api/auth`;
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
+  const BASE_URL = baseUrl;
+  const AUTH_URL = `${baseUrl}/api/auth`;
 
   // --- FUNGSI CEK STATUS SERVER ---
   const cekStatusServer = async () => {
