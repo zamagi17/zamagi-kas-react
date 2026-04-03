@@ -390,8 +390,11 @@ export default function Transaksi() {
                                             else if (h.jenis === 'Pemasukan') { textStyle = 'font-bold text-emerald-600'; }
                                             else if (h.jenis === 'Pengeluaran') { textStyle = 'font-bold text-red-600'; }
 
-                                            const canEdit = !['Transfer Aset (Auto)', 'Utang Masuk', 'Piutang Keluar', 'Bayar Utang', 'Terima Piutang'].includes(h.jenis);
-                                            const canDelete = !['Utang Masuk', 'Piutang Keluar'].includes(h.jenis);
+                                            const isTransferMutasi = h.kategori === 'Transfer Aset (Auto)' &&
+                                                (h.keterangan?.includes('Mutasi Masuk') || h.keterangan?.includes('Mutasi Keluar'));
+
+                                            const canEdit = !['Utang Masuk', 'Piutang Keluar', 'Bayar Utang', 'Terima Piutang'].includes(h.jenis) && !isTransferMutasi;
+                                            const canDelete = !['Utang Masuk', 'Piutang Keluar'].includes(h.jenis) && (h.jenis !== 'Transfer' ? true : isTransferMutasi || h.kategori !== 'Transfer Aset (Auto)');
 
                                             return (
                                                 <tr key={h.id} className={`flex flex-col md:table-row mb-4 md:mb-0 border border-slate-200 md:border-0 md:border-b md:border-slate-100 rounded-xl md:rounded-none shadow-sm md:shadow-none overflow-hidden transition-colors ${rowBg}`}>
