@@ -381,197 +381,199 @@ export default function Laporan() {
                         <p>Memuat data...</p>
                     </div>
                 ) : (
-                    /* ===== AREA PREVIEW (yang akan di-screenshot) ===== */
-                    <div ref={previewRef} className="bg-white rounded-xl shadow-sm overflow-hidden"
-                        style={{ fontFamily: 'sans-serif' }}>
+                    <div className="overflow-x-auto">
+                        {/* ===== AREA PREVIEW (yang akan di-screenshot) ===== */}
+                        <div ref={previewRef} className="bg-white rounded-xl shadow-sm overflow-hidden"
+                            style={{ fontFamily: 'sans-serif', minWidth: '900px' }}>
 
-                        {/* Header Laporan */}
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-6">
-                            <h1 className="text-2xl font-black tracking-tight">ZAMAGI KAS</h1>
-                            <p className="text-blue-200 text-sm mt-0.5">Laporan Keuangan Pribadi</p>
-                            <div className="mt-4 flex flex-col md:flex-row justify-between text-sm">
-                                <p>Periode: <b>{namaBulan(filterBulan)}</b></p>
-                                <p>Akun: <b>{currentUser}</b></p>
-                                <p>Dicetak: <b>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</b></p>
-                            </div>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-
-                            {/* Ringkasan Arus Kas */}
-                            <div>
-                                <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
-                                    Ringkasan Arus Kas
-                                </h2>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    {[
-                                        { label: 'Saldo Awal', value: summary.saldoAwal, warna: 'text-slate-700' },
-                                        { label: 'Total Masuk', value: summary.totalMasuk, warna: 'text-emerald-600' },
-                                        { label: 'Total Keluar', value: summary.totalKeluar, warna: 'text-red-600' },
-                                        { label: 'Sisa Kas', value: sisaKas, warna: sisaKas >= 0 ? 'text-blue-600' : 'text-red-600' },
-                                    ].map(item => (
-                                        <div key={item.label} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-                                            <p className="text-xs text-slate-500 font-semibold">{item.label}</p>
-                                            <p className={`text-base font-black mt-1 ${item.warna}`}>{formatRp(item.value)}</p>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Proyeksi */}
-                                <div className="mt-3 bg-orange-50 rounded-lg p-3 border border-orange-100 flex flex-col md:flex-row justify-between gap-2 text-sm">
-                                    <div><span className="text-slate-500">Rencana Masuk:</span> <b className="text-orange-600">{formatRp(summary.rencanaMasuk)}</b></div>
-                                    <div><span className="text-slate-500">Rencana Keluar:</span> <b className="text-orange-600">{formatRp(summary.rencanaKeluar)}</b></div>
-                                    <div><span className="text-slate-500">Estimasi Akhir Bulan:</span> <b className="text-orange-700">{formatRp(estimasiAkhir)}</b></div>
+                            {/* Header Laporan */}
+                            <div className="bg-linear-to-r from-blue-600 to-indigo-600 text-white px-8 py-6">
+                                <h1 className="text-2xl font-black tracking-tight">ZAMAGI KAS</h1>
+                                <p className="text-blue-200 text-sm mt-0.5">Laporan Keuangan Pribadi</p>
+                                <div className="mt-4 flex flex-col md:flex-row justify-between text-sm">
+                                    <p>Periode: <b>{namaBulan(filterBulan)}</b></p>
+                                    <p>Akun: <b>{currentUser}</b></p>
+                                    <p>Dicetak: <b>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</b></p>
                                 </div>
                             </div>
 
-                            {/* Net Worth & Portofolio */}
-                            <div className="grid md:grid-cols-2 gap-6">
+                            <div className="p-6 space-y-6">
+
+                                {/* Ringkasan Arus Kas */}
                                 <div>
                                     <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
-                                        Saldo Per Aset
+                                        Ringkasan Arus Kas
                                     </h2>
-                                    <div className="space-y-1.5">
-                                        {Object.entries(portofolio).filter(([, v]) => v !== 0).map(([aset, nilai]) => (
-                                            <div key={aset} className="flex justify-between text-sm py-1 border-b border-slate-100">
-                                                <span className="text-slate-600">{aset}</span>
-                                                <span className={`font-bold ${nilai >= 0 ? 'text-slate-800' : 'text-red-600'}`}>{formatRp(nilai)}</span>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {[
+                                            { label: 'Saldo Awal', value: summary.saldoAwal, warna: 'text-slate-700' },
+                                            { label: 'Total Masuk', value: summary.totalMasuk, warna: 'text-emerald-600' },
+                                            { label: 'Total Keluar', value: summary.totalKeluar, warna: 'text-red-600' },
+                                            { label: 'Sisa Kas', value: sisaKas, warna: sisaKas >= 0 ? 'text-blue-600' : 'text-red-600' },
+                                        ].map(item => (
+                                            <div key={item.label} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                                                <p className="text-xs text-slate-500 font-semibold">{item.label}</p>
+                                                <p className={`text-base font-black mt-1 ${item.warna}`}>{formatRp(item.value)}</p>
                                             </div>
                                         ))}
                                     </div>
 
-                                    {/* Net Worth Summary */}
-                                    <div className="mt-3 text-sm">
-                                        <div className="flex justify-between font-bold bg-blue-600 text-white px-3 py-2.5 rounded-lg">
-                                            <span>Total Net Worth</span>
-                                            <span>{formatRp(summary.totalNetWorth)}</span>
+                                    {/* Proyeksi */}
+                                    <div className="mt-3 bg-orange-50 rounded-lg p-3 border border-orange-100 flex flex-col md:flex-row justify-between gap-2 text-sm">
+                                        <div><span className="text-slate-500">Rencana Masuk:</span> <b className="text-orange-600">{formatRp(summary.rencanaMasuk)}</b></div>
+                                        <div><span className="text-slate-500">Rencana Keluar:</span> <b className="text-orange-600">{formatRp(summary.rencanaKeluar)}</b></div>
+                                        <div><span className="text-slate-500">Estimasi Akhir Bulan:</span> <b className="text-orange-700">{formatRp(estimasiAkhir)}</b></div>
+                                    </div>
+                                </div>
+
+                                {/* Net Worth & Portofolio */}
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
+                                            Saldo Per Aset
+                                        </h2>
+                                        <div className="space-y-1.5">
+                                            {Object.entries(portofolio).filter(([, v]) => v !== 0).map(([aset, nilai]) => (
+                                                <div key={aset} className="flex justify-between text-sm py-1 border-b border-slate-100">
+                                                    <span className="text-slate-600">{aset}</span>
+                                                    <span className={`font-bold ${nilai >= 0 ? 'text-slate-800' : 'text-red-600'}`}>{formatRp(nilai)}</span>
+                                                </div>
+                                            ))}
                                         </div>
 
-                                        {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                            <div className="mt-2 mb-2 bg-white border border-slate-200 rounded-lg overflow-hidden">
-                                                <div className="flex justify-between text-xs px-3 py-2 border-b border-slate-100">
-                                                    <span className="text-slate-500">Kewajiban (Utang Aktif)</span>
-                                                    <span className="text-red-500 font-bold">- {formatRp(totalUtangAktif)}</span>
-                                                </div>
-                                                <div className="flex justify-between text-xs px-3 py-2">
-                                                    <span className="text-slate-500">Tagihan (Piutang Aktif)</span>
-                                                    <span className="text-emerald-500 font-bold">+ {formatRp(totalPiutangAktif)}</span>
-                                                </div>
+                                        {/* Net Worth Summary */}
+                                        <div className="mt-3 text-sm">
+                                            <div className="flex justify-between font-bold bg-blue-600 text-white px-3 py-2.5 rounded-lg">
+                                                <span>Total Net Worth</span>
+                                                <span>{formatRp(summary.totalNetWorth)}</span>
                                             </div>
-                                        )}
 
-                                        {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                            <div className="flex justify-between font-bold bg-indigo-600 text-white px-3 py-2.5 rounded-lg">
-                                                <span>Net Worth Bersih</span>
-                                                <span>{formatRp(netWorthBersih)}</span>
+                                            {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
+                                                <div className="mt-2 mb-2 bg-white border border-slate-200 rounded-lg overflow-hidden">
+                                                    <div className="flex justify-between text-xs px-3 py-2 border-b border-slate-100">
+                                                        <span className="text-slate-500">Kewajiban (Utang Aktif)</span>
+                                                        <span className="text-red-500 font-bold">- {formatRp(totalUtangAktif)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-xs px-3 py-2">
+                                                        <span className="text-slate-500">Tagihan (Piutang Aktif)</span>
+                                                        <span className="text-emerald-500 font-bold">+ {formatRp(totalPiutangAktif)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
+                                                <div className="flex justify-between font-bold bg-indigo-600 text-white px-3 py-2.5 rounded-lg">
+                                                    <span>Net Worth Bersih</span>
+                                                    <span>{formatRp(netWorthBersih)}</span>
+                                                </div>
+                                            )}
+
+                                            {/* Tambahkan ini */}
+                                            {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
+                                                <p className="text-xs text-slate-400 mt-1 italic">
+                                                    *Utang/piutang aktif berdasarkan status saat ini
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Chart Pengeluaran */}
+                                    <div>
+                                        <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
+                                            Sebaran Pengeluaran
+                                        </h2>
+                                        {Object.keys(dataChartPengeluaran).length > 0 ? (
+                                            <div className="h-72">
+                                                <Doughnut
+                                                    data={pengeluaranData}
+                                                    options={{
+                                                        maintainAspectRatio: false,
+                                                        plugins: {
+                                                            legend: {
+                                                                position: 'bottom',
+                                                                labels: {
+                                                                    font: { size: 10 },
+                                                                    boxWidth: 10,
+                                                                    padding: 8
+                                                                }
+                                                            }
+                                                        }
+                                                    }}
+                                                />
                                             </div>
-                                        )}
-
-                                        {/* Tambahkan ini */}
-                                        {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                            <p className="text-xs text-slate-400 mt-1 italic">
-                                                *Utang/piutang aktif berdasarkan status saat ini
-                                            </p>
+                                        ) : (
+                                            <p className="text-slate-400 text-sm">Belum ada data pengeluaran.</p>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Chart Pengeluaran */}
+                                {/* Tabel Transaksi */}
                                 <div>
                                     <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
-                                        Sebaran Pengeluaran
+                                        Riwayat Transaksi — {namaBulan(filterBulan)} ({historyData.length} transaksi)
                                     </h2>
-                                    {Object.keys(dataChartPengeluaran).length > 0 ? (
-                                        <div className="h-72">
-                                            <Doughnut
-                                                data={pengeluaranData}
-                                                options={{
-                                                    maintainAspectRatio: false,
-                                                    plugins: {
-                                                        legend: {
-                                                            position: 'bottom',
-                                                            labels: {
-                                                                font: { size: 10 },
-                                                                boxWidth: 10,
-                                                                padding: 8
-                                                            }
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </div>
+                                    {historyData.length === 0 ? (
+                                        <p className="text-slate-400 text-sm text-center py-6">Tidak ada transaksi bulan ini.</p>
                                     ) : (
-                                        <p className="text-slate-400 text-sm">Belum ada data pengeluaran.</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Tabel Transaksi */}
-                            <div>
-                                <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
-                                    Riwayat Transaksi — {namaBulan(filterBulan)} ({historyData.length} transaksi)
-                                </h2>
-                                {historyData.length === 0 ? (
-                                    <p className="text-slate-400 text-sm text-center py-6">Tidak ada transaksi bulan ini.</p>
-                                ) : (
-                                    <table className="w-full text-xs border-collapse">
-                                        <thead>
-                                            <tr className="bg-slate-700 text-white">
-                                                <th className="px-3 py-2 text-left font-semibold">Tanggal</th>
-                                                <th className="px-3 py-2 text-left font-semibold">Kategori</th>
-                                                <th className="px-3 py-2 text-left font-semibold">Keterangan</th>
-                                                <th className="px-3 py-2 text-left font-semibold">Aset</th>
-                                                <th className="px-3 py-2 text-left font-semibold">Jenis</th>
-                                                <th className="px-3 py-2 text-right font-semibold">Nominal</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {historyData.map((h, i) => {
-                                                const badge = getBadgeJenis(h.jenis);
-                                                return (
-                                                    <tr key={h.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                                                        <td className="px-3 py-2 whitespace-nowrap">{h.tglStr}</td>
-                                                        <td className="px-3 py-2">{h.kategori}</td>
-                                                        <td className="px-3 py-2 text-slate-500 max-w-[180px] whitespace-normal break-words">{h.keterangan}</td>
-                                                        <td className="px-3 py-2 whitespace-nowrap">{h.sumberDana}</td>
-                                                        <td className="px-3 py-2">
-                                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.warna}`}>
-                                                                {badge.label}
-                                                            </span>
-                                                        </td>
-                                                        <td className={`px-3 py-2 text-right font-bold whitespace-nowrap
+                                        <table className="w-full text-xs border-collapse">
+                                            <thead>
+                                                <tr className="bg-slate-700 text-white">
+                                                    <th className="px-3 py-2 text-left font-semibold">Tanggal</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Kategori</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Keterangan</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Aset</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Jenis</th>
+                                                    <th className="px-3 py-2 text-right font-semibold">Nominal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {historyData.map((h, i) => {
+                                                    const badge = getBadgeJenis(h.jenis);
+                                                    return (
+                                                        <tr key={h.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                                                            <td className="px-3 py-2 whitespace-nowrap">{h.tglStr}</td>
+                                                            <td className="px-3 py-2">{h.kategori}</td>
+                                                            <td className="px-3 py-2 text-slate-500 max-w-45 whitespace-normal wrap-break-word">{h.keterangan}</td>
+                                                            <td className="px-3 py-2 whitespace-nowrap">{h.sumberDana}</td>
+                                                            <td className="px-3 py-2">
+                                                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.warna}`}>
+                                                                    {badge.label}
+                                                                </span>
+                                                            </td>
+                                                            <td className={`px-3 py-2 text-right font-bold whitespace-nowrap
                                                             ${h.jenis === 'Pemasukan' ? 'text-emerald-600' : ''}
                                                             ${h.jenis === 'Pengeluaran' ? 'text-red-600' : ''}
                                                             ${h.jenis.includes('Rencana') ? 'text-orange-600' : ''}
                                                         `}>
-                                                            {formatRp(h.nominal)}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                        <tfoot>
-                                            <tr className="bg-slate-100 font-bold text-slate-700">
-                                                <td colSpan="5" className="px-3 py-2 text-right">Total Masuk Riil:</td>
-                                                <td className="px-3 py-2 text-right text-emerald-600">{formatRp(summary.totalMasuk)}</td>
-                                            </tr>
-                                            <tr className="bg-slate-100 font-bold text-slate-700">
-                                                <td colSpan="5" className="px-3 py-2 text-right">Total Keluar Riil:</td>
-                                                <td className="px-3 py-2 text-right text-red-600">{formatRp(summary.totalKeluar)}</td>
-                                            </tr>
-                                            <tr className="bg-slate-700 text-white font-bold">
-                                                <td colSpan="5" className="px-3 py-2 text-right">Sisa Kas:</td>
-                                                <td className="px-3 py-2 text-right">{formatRp(sisaKas)}</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                )}
-                            </div>
+                                                                {formatRp(h.nominal)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr className="bg-slate-100 font-bold text-slate-700">
+                                                    <td colSpan="5" className="px-3 py-2 text-right">Total Masuk Riil:</td>
+                                                    <td className="px-3 py-2 text-right text-emerald-600">{formatRp(summary.totalMasuk)}</td>
+                                                </tr>
+                                                <tr className="bg-slate-100 font-bold text-slate-700">
+                                                    <td colSpan="5" className="px-3 py-2 text-right">Total Keluar Riil:</td>
+                                                    <td className="px-3 py-2 text-right text-red-600">{formatRp(summary.totalKeluar)}</td>
+                                                </tr>
+                                                <tr className="bg-slate-700 text-white font-bold">
+                                                    <td colSpan="5" className="px-3 py-2 text-right">Sisa Kas:</td>
+                                                    <td className="px-3 py-2 text-right">{formatRp(sisaKas)}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    )}
+                                </div>
 
-                            {/* Footer */}
-                            <div className="text-center text-xs text-slate-400 pt-4 border-t">
-                                Laporan ini digenerate otomatis oleh Zamagi Kas •{' '}
-                                {new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
+                                {/* Footer */}
+                                <div className="text-center text-xs text-slate-400 pt-4 border-t">
+                                    Laporan ini digenerate otomatis oleh Zamagi Kas •{' '}
+                                    {new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
+                                </div>
                             </div>
                         </div>
                     </div>
