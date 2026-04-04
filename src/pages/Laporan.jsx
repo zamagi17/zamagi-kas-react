@@ -335,6 +335,7 @@ export default function Laporan() {
         } finally {
             previewRef.current.style.minWidth = originalWidth;
             setIsGenerating(false);
+            window.location.reload();
         }
     };
 
@@ -524,57 +525,57 @@ export default function Laporan() {
                                         <p className="text-slate-400 text-sm text-center py-6">Tidak ada transaksi bulan ini.</p>
                                     ) : (
                                         <div className="overflow-x-auto">
-                                            <table className="text-xs border-collapse" style={{ minWidth: '700px' }}>
-                                                <thead>
-                                                    <tr className="bg-slate-700 text-white">
-                                                        <th className="px-3 py-2 text-left font-semibold">Tanggal</th>
-                                                        <th className="px-3 py-2 text-left font-semibold">Kategori</th>
-                                                        <th className="px-3 py-2 text-left font-semibold">Keterangan</th>
-                                                        <th className="px-3 py-2 text-left font-semibold">Aset</th>
-                                                        <th className="px-3 py-2 text-left font-semibold">Jenis</th>
-                                                        <th className="px-3 py-2 text-right font-semibold">Nominal</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {historyData.map((h, i) => {
-                                                        const badge = getBadgeJenis(h.jenis);
-                                                        return (
-                                                            <tr key={h.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                                                                <td className="px-3 py-2 whitespace-nowrap">{h.tglStr}</td>
-                                                                <td className="px-3 py-2">{h.kategori}</td>
-                                                                <td className="px-3 py-2 text-slate-500 max-w-45 whitespace-normal wrap-break-word">{h.keterangan}</td>
-                                                                <td className="px-3 py-2 whitespace-nowrap">{h.sumberDana}</td>
-                                                                <td className="px-3 py-2">
-                                                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.warna}`}>
-                                                                        {badge.label}
-                                                                    </span>
-                                                                </td>
-                                                                <td className={`px-3 py-2 text-right font-bold whitespace-nowrap
+    <table className="mx-auto text-xs border-collapse" style={{ minWidth: '800px' }}>
+                                            <thead>
+                                                <tr className="bg-slate-700 text-white">
+                                                    <th className="px-3 py-2 text-left font-semibold">Tanggal</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Kategori</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Keterangan</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Aset</th>
+                                                    <th className="px-3 py-2 text-left font-semibold">Jenis</th>
+                                                    <th className="px-3 py-2 text-right font-semibold">Nominal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {historyData.map((h, i) => {
+                                                    const badge = getBadgeJenis(h.jenis);
+                                                    return (
+                                                        <tr key={h.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                                                            <td className="px-3 py-2 whitespace-nowrap">{h.tglStr}</td>
+                                                            <td className="px-3 py-2">{h.kategori}</td>
+                                                            <td className="px-3 py-2 text-slate-500 max-w-45 whitespace-normal wrap-break-word">{h.keterangan}</td>
+                                                            <td className="px-3 py-2 whitespace-nowrap">{h.sumberDana}</td>
+                                                            <td className="px-3 py-2">
+                                                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.warna}`}>
+                                                                    {badge.label}
+                                                                </span>
+                                                            </td>
+                                                            <td className={`px-3 py-2 text-right font-bold whitespace-nowrap
                                                             ${h.jenis === 'Pemasukan' ? 'text-emerald-600' : ''}
                                                             ${h.jenis === 'Pengeluaran' ? 'text-red-600' : ''}
                                                             ${h.jenis.includes('Rencana') ? 'text-orange-600' : ''}
                                                         `}>
-                                                                    {formatRp(h.nominal)}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr className="bg-slate-100 font-bold text-slate-700">
-                                                        <td colSpan="5" className="px-3 py-2 text-right">Total Masuk Riil:</td>
-                                                        <td className="px-3 py-2 text-right text-emerald-600">{formatRp(summary.totalMasuk)}</td>
-                                                    </tr>
-                                                    <tr className="bg-slate-100 font-bold text-slate-700">
-                                                        <td colSpan="5" className="px-3 py-2 text-right">Total Keluar Riil:</td>
-                                                        <td className="px-3 py-2 text-right text-red-600">{formatRp(summary.totalKeluar)}</td>
-                                                    </tr>
-                                                    <tr className="bg-slate-700 text-white font-bold">
-                                                        <td colSpan="5" className="px-3 py-2 text-right">Sisa Kas:</td>
-                                                        <td className="px-3 py-2 text-right">{formatRp(sisaKas)}</td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
+                                                                {formatRp(h.nominal)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr className="bg-slate-100 font-bold text-slate-700">
+                                                    <td colSpan="5" className="px-3 py-2 text-right">Total Masuk Riil:</td>
+                                                    <td className="px-3 py-2 text-right text-emerald-600">{formatRp(summary.totalMasuk)}</td>
+                                                </tr>
+                                                <tr className="bg-slate-100 font-bold text-slate-700">
+                                                    <td colSpan="5" className="px-3 py-2 text-right">Total Keluar Riil:</td>
+                                                    <td className="px-3 py-2 text-right text-red-600">{formatRp(summary.totalKeluar)}</td>
+                                                </tr>
+                                                <tr className="bg-slate-700 text-white font-bold">
+                                                    <td colSpan="5" className="px-3 py-2 text-right">Sisa Kas:</td>
+                                                    <td className="px-3 py-2 text-right">{formatRp(sisaKas)}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                         </div>
                                     )}
                                 </div>
