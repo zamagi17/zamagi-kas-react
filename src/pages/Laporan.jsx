@@ -335,7 +335,7 @@ export default function Laporan() {
         } finally {
             previewRef.current.style.minWidth = originalWidth;
             setIsGenerating(false);
-            window.location.reload();
+            navigate('/laporan');
         }
     };
 
