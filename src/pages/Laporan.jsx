@@ -532,7 +532,7 @@ export default function Laporan() {
                                                     <tr key={h.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                                                         <td className="px-3 py-2 whitespace-nowrap">{h.tglStr}</td>
                                                         <td className="px-3 py-2">{h.kategori}</td>
-                                                        <td className="px-3 py-2 text-slate-500 max-w-[180px] truncate">{h.keterangan}</td>
+                                                        <td className="px-3 py-2 text-slate-500 max-w-[180px] whitespace-normal break-words">{h.keterangan}</td>
                                                         <td className="px-3 py-2 whitespace-nowrap">{h.sumberDana}</td>
                                                         <td className="px-3 py-2">
                                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.warna}`}>
