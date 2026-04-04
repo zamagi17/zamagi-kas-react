@@ -4,8 +4,9 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Transaksi from './pages/Transaksi';
 import UtangPiutang from './pages/UtangPiutang';
+import Laporan from './pages/Laporan';
 
-const HEALTH_URL = 'https://increasing-felicity-zamagi-apps-3fc54a80.koyeb.app/api/health';
+const HEALTH_URL = `${import.meta.env.VITE_API_URL}/api/health`;
 
 function App() {
     useEffect(() => {
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/transaksi" element={<Transaksi />} />
                 <Route path="/utang-piutang" element={<UtangPiutang />} />
+                <Route path="/laporan" element={<Laporan />} />
             </Routes>
         </Router>
     );

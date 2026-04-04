@@ -1,10 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, HandCoins, LogOut } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, HandCoins, FileText, LogOut } from 'lucide-react';
 
 const menus = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/transaksi', label: 'Transaksi', icon: ArrowLeftRight },
     { path: '/utang-piutang', label: 'Utang Piutang', icon: HandCoins },
+    { path: '/laporan', label: 'Laporan', icon: FileText },
 ];
 
 export default function Navbar() {

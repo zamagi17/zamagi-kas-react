@@ -283,25 +283,25 @@ export default function Dashboard() {
                                 <span className="font-bold text-sm tracking-wide">TOTAL NET WORTH</span>
                                 <span className="font-bold text-lg">{formatRp(summary.totalNetWorth)}</span>
                             </div>
-                        </div>
 
-                        {/* Tambahkan ini di dalam kotak Net Worth, setelah total net worth */}
-                        {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                            <div className="mt-3 pt-3 border-t border-blue-100 space-y-1 text-xs">
-                                <div className="flex justify-between text-slate-500">
-                                    <span>Kewajiban (Utang Aktif)</span>
-                                    <span className="font-bold text-red-500">- {formatRp(totalUtangAktif)}</span>
+                            {/* Tambahkan ini di dalam kotak Net Worth, setelah total net worth */}
+                            {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
+                                <div className="mt-3 pt-3 border-t border-blue-100 space-y-1 text-xs">
+                                    <div className="flex justify-between text-slate-500">
+                                        <span>Kewajiban (Utang Aktif)</span>
+                                        <span className="font-bold text-red-500">- {formatRp(totalUtangAktif)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-slate-500">
+                                        <span>Tagihan (Piutang Aktif)</span>
+                                        <span className="font-bold text-emerald-500">+ {formatRp(totalPiutangAktif)}</span>
+                                    </div>
+                                    <div className="flex justify-between font-bold text-slate-700 pt-1 border-t border-blue-100">
+                                        <span>Net Worth Bersih</span>
+                                        <span>{formatRp(summary.totalNetWorth + totalPiutangAktif - totalUtangAktif)}</span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between text-slate-500">
-                                    <span>Tagihan (Piutang Aktif)</span>
-                                    <span className="font-bold text-emerald-500">+ {formatRp(totalPiutangAktif)}</span>
-                                </div>
-                                <div className="flex justify-between font-bold text-slate-700 pt-1 border-t border-blue-100">
-                                    <span>Net Worth Bersih</span>
-                                    <span>{formatRp(summary.totalNetWorth + totalPiutangAktif - totalUtangAktif)}</span>
-                                </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* Grafik Aset */}
                         <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
