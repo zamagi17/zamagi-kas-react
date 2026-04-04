@@ -175,6 +175,13 @@ export default function Laporan() {
         if (!previewRef.current) return;
         setIsGenerating(true);
 
+        // Paksa lebar desktop sementara untuk screenshot
+        const originalWidth = previewRef.current.style.minWidth;
+        previewRef.current.style.minWidth = '900px';
+
+        // Tunggu sebentar agar browser re-render dulu
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         try {
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pageWidth = pdf.internal.pageSize.getWidth();
@@ -326,6 +333,7 @@ export default function Laporan() {
             console.error(err);
             alert("Gagal generate PDF: " + err.message);
         } finally {
+            previewRef.current.style.minWidth = originalWidth;
             setIsGenerating(false);
         }
     };
