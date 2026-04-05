@@ -23,6 +23,7 @@ export default function Transaksi() {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [showPanduan, setShowPanduan] = useState(false);
 
     const [listAset, setListAset] = useState([
         'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
@@ -107,6 +108,7 @@ export default function Transaksi() {
                 if (timeB !== timeA) return timeB - timeA;
                 return b.id - a.id;
             }));
+            setShowPanduan(data.length <= 10);
             setCurrentPage(1);
         } catch (err) {
             console.error("Error:", err);
@@ -253,6 +255,63 @@ export default function Transaksi() {
                     />
                 </div>
 
+                {/* Banner Panduan Pengguna Baru */}
+                {showPanduan && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 relative">
+                        {/* Tombol tutup */}
+                        <button
+                            onClick={() => setShowPanduan(false)}
+                            className="absolute top-3 right-3 text-blue-300 hover:text-blue-500 transition text-lg font-bold"
+                            title="Tutup panduan"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">👋</span>
+                            <div>
+                                <h3 className="font-bold text-blue-800 text-base mb-1">
+                                    Selamat datang! Yuk mulai catat keuangan kamu.
+                                </h3>
+                                <p className="text-blue-700 text-sm mb-3">
+                                    Langkah pertama yang disarankan adalah mencatat <b>saldo awal</b> di setiap aset yang kamu miliki (rekening, dompet tunai, e-wallet, dll).
+                                </p>
+
+                                <div className="space-y-2">
+                                    {[
+                                        { step: '1', icon: '📅', text: 'Isi Tanggal — gunakan tanggal hari ini atau tanggal mulai kamu mencatat' },
+                                        { step: '2', icon: '💰', text: 'Pilih Jenis Arus Kas → "Pemasukan Riil"' },
+                                        { step: '3', icon: '🏷️', text: 'Isi Kategori → ketik "Saldo Awal" atau "Transfer Aset"' },
+                                        { step: '4', icon: '🏦', text: 'Isi Sumber Dana → nama asetmu, misal "BCA", "Dompet Tunai", "GoPay"' },
+                                        { step: '5', icon: '🔢', text: 'Isi Nominal → jumlah saldo yang kamu punya di aset tersebut' },
+                                        { step: '6', icon: '📝', text: 'Keterangan → opsional, misal "Saldo awal BCA"' },
+                                        { step: '7', icon: '✅', text: 'Klik Simpan — ulangi untuk setiap aset yang kamu miliki' },
+                                    ].map(item => (
+                                        <div key={item.step} className="flex items-start gap-2.5 text-sm">
+                                            <span className="bg-blue-200 text-blue-800 font-black text-xs w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                                {item.step}
+                                            </span>
+                                            <span className="text-blue-700">
+                                                <span className="mr-1">{item.icon}</span>
+                                                {item.text}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-4 bg-blue-100 rounded-lg px-4 py-3 text-xs text-blue-700 border border-blue-200">
+                                    <b>💡 Contoh:</b> Punya saldo BCA Rp 2.500.000 dan GoPay Rp 150.000?<br />
+                                    Buat 2 transaksi terpisah — satu untuk BCA, satu untuk GoPay. Setelah itu kamu bisa mulai catat pengeluaran dan pemasukan seperti biasa.
+                                </div>
+
+                                <p className="text-xs text-blue-400 mt-3 italic">
+                                    * Panduan ini akan otomatis hilang setelah kamu memiliki lebih dari 10 transaksi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Datalists */}
                 <datalist id="kategoriList">
                     {listKategori.map((kat, i) => <option key={i} value={kat} />)}
@@ -312,8 +371,17 @@ export default function Transaksi() {
                             <input type="text" name="nominal" value={formData.nominal ? new Intl.NumberFormat('id-ID').format(formData.nominal) : ''} onChange={handleInputChange} required placeholder="Contoh: 150000" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Keterangan Detail</label>
-                            <input type="text" name="keterangan" value={formData.keterangan} onChange={handleInputChange} required placeholder="Contoh: Makan siang" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                Keterangan Detail <span className="text-slate-400 font-normal">(opsional)</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="keterangan"
+                                value={formData.keterangan}
+                                onChange={handleInputChange}
+                                placeholder="Contoh: Makan siang"
+                                className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
                         </div>
                         <div className="md:col-span-2 flex flex-col md:flex-row gap-3 mt-2">
                             <button type="submit" disabled={isSubmitting} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 shadow-sm">
