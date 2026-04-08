@@ -240,18 +240,18 @@ export default function Transaksi() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-24 md:pb-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
             <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-                    <h2 className="text-xl font-bold text-slate-800">Riwayat Transaksi</h2>
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Riwayat Transaksi</h2>
                     <input
                         type="month"
                         value={filterBulan}
                         onChange={(e) => setFilterBulan(e.target.value)}
-                        className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-400 outline-none"
+                        className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-400 outline-none"
                     />
                 </div>
 
@@ -299,12 +299,12 @@ export default function Transaksi() {
                                     ))}
                                 </div>
 
-                                <div className="mt-4 bg-blue-100 rounded-lg px-4 py-3 text-xs text-blue-700 border border-blue-200">
+                                <div className="mt-4 bg-blue-100 dark:bg-blue-900/20 rounded-lg px-4 py-3 text-xs text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                                     <b>💡 Contoh:</b> Punya saldo BCA Rp 2.500.000 dan GoPay Rp 150.000?<br />
                                     Buat 2 transaksi terpisah — satu untuk BCA, satu untuk GoPay. Setelah itu kamu bisa mulai catat pengeluaran dan pemasukan seperti biasa.
                                 </div>
 
-                                <p className="text-xs text-blue-400 mt-3 italic">
+                                <p className="text-xs text-blue-400 dark:text-blue-500 mt-3 italic">
                                     * Panduan ini akan otomatis hilang setelah kamu memiliki lebih dari 10 transaksi.
                                 </p>
                             </div>
@@ -321,18 +321,18 @@ export default function Transaksi() {
                 </datalist>
 
                 {/* Form Input */}
-                <div id="form-section" className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 mb-5 pb-2 border-b">
+                <div id="form-section" className="bg-white p-6 rounded-xl shadow-sm border border-slate-200  dark:bg-slate-900 dark:border-slate-700">
+                    <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100 mb-5 pb-2 border-b">
                         {editId ? <><Edit3 className="text-amber-500" /> Edit Transaksi</> : <><TrendingUp className="text-blue-500" /> Input Transaksi</>}
                     </h3>
                     <form onSubmit={handleSimpan} className="grid md:grid-cols-2 gap-5">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Tanggal</label>
-                            <input type="date" name="tanggal" value={formData.tanggal} onChange={handleInputChange} required className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Tanggal</label>
+                            <input type="date" name="tanggal" value={formData.tanggal} onChange={handleInputChange} required className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Jenis Arus Kas</label>
-                            <select name="jenis" value={formData.jenis} onChange={handleInputChange} required className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Jenis Arus Kas</label>
+                            <select name="jenis" value={formData.jenis} onChange={handleInputChange} required className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                                 <option value="Pemasukan">Pemasukan Riil</option>
                                 <option value="Pengeluaran">Pengeluaran Riil</option>
                                 <option value="Transfer">🔄 Transfer Aset (Auto 2 Baris)</option>
@@ -341,7 +341,7 @@ export default function Transaksi() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Kategori Transaksi</label>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Kategori Transaksi</label>
                             <input
                                 type="text" name="kategori" list="kategoriList"
                                 value={formData.kategori} onChange={handleInputChange}
@@ -350,29 +350,29 @@ export default function Transaksi() {
                                 disabled={formData.jenis === 'Transfer'}
                                 className={`w-full p-2.5 border rounded-lg outline-none transition
                                     ${formData.jenis === 'Transfer'
-                                        ? 'bg-blue-50 border-blue-300 text-blue-700 font-semibold cursor-not-allowed'
-                                        : 'border-slate-300 focus:ring-2 focus:ring-blue-500'}`}
+                                        ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 font-semibold cursor-not-allowed'
+                                        : 'border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500'}`}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">
                                 {formData.jenis === 'Transfer' ? 'Dari Dompet (Asal)' : 'Sumber Dana / Lokasi Aset'}
                             </label>
-                            <input type="text" name="sumberDana" list="listSumberDana" value={formData.sumberDana} onChange={handleInputChange} required placeholder="Pilih atau ketik aset..." autoComplete="off" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <input type="text" name="sumberDana" list="listSumberDana" value={formData.sumberDana} onChange={handleInputChange} required placeholder="Pilih atau ketik aset..." autoComplete="off" className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                         </div>
                         {formData.jenis === 'Transfer' && (
-                            <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200 border-dashed">
-                                <label className="block text-sm font-semibold text-blue-800 mb-1">Ke Dompet / Aset (Tujuan)</label>
-                                <input type="text" name="sumberDanaTujuan" list="listSumberDana" value={formData.sumberDanaTujuan} onChange={handleInputChange} required placeholder="Pilih atau ketik aset..." autoComplete="off" className="w-full p-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <div className="md:col-span-2 bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-700 border-dashed">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Ke Dompet / Aset (Tujuan)</label>
+                                <input type="text" name="sumberDanaTujuan" list="listSumberDana" value={formData.sumberDanaTujuan} onChange={handleInputChange} required placeholder="Pilih atau ketik aset..." autoComplete="off" className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                         )}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Nominal (Rp)</label>
-                            <input type="text" name="nominal" value={formData.nominal ? new Intl.NumberFormat('id-ID').format(formData.nominal) : ''} onChange={handleInputChange} required placeholder="Contoh: 150000" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Nominal (Rp)</label>
+                            <input type="text" name="nominal" value={formData.nominal ? new Intl.NumberFormat('id-ID').format(formData.nominal) : ''} onChange={handleInputChange} required placeholder="Contoh: 150000" className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                Keterangan Detail <span className="text-slate-400 font-normal">(opsional)</span>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">
+                                Keterangan Detail <span className="text-slate-400 dark:text-slate-500 font-normal">(opsional)</span>
                             </label>
                             <input
                                 type="text"
@@ -380,7 +380,7 @@ export default function Transaksi() {
                                 value={formData.keterangan}
                                 onChange={handleInputChange}
                                 placeholder="Contoh: Makan siang"
-                                className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div className="md:col-span-2 flex flex-col md:flex-row gap-3 mt-2">
@@ -397,19 +397,19 @@ export default function Transaksi() {
                 </div>
 
                 {/* Tabel Riwayat */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="text-lg font-bold text-slate-800 mb-5 pb-2 border-b">Riwayat Transaksi</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200  dark:bg-slate-900 dark:border-slate-700">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-5 pb-2 border-b">Riwayat Transaksi</h3>
                     <div className="flex flex-col md:flex-row justify-between gap-4 mb-5">
                         <div className="relative w-full md:w-1/2 flex items-center">
-                            <Search size={18} className="absolute left-3 text-slate-400" />
+                            <Search size={18} className="absolute left-3 text-slate-400 dark:text-slate-500" />
                             <input
                                 type="text" placeholder="Cari kategori, keterangan, dompet..."
                                 value={searchQuery}
                                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                                className="w-full pl-10 pr-10 p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50"
+                                className="w-full pl-10 pr-10 p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50 dark:bg-slate-950"
                             />
                             {searchQuery && (
-                                <button onClick={() => { setSearchQuery(''); setCurrentPage(1); }} className="absolute right-3 text-slate-400 hover:text-slate-600">✖</button>
+                                <button onClick={() => { setSearchQuery(''); setCurrentPage(1); }} className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-600">✖</button>
                             )}
                         </div>
                         <div className="flex gap-2 w-full md:w-auto">
@@ -424,7 +424,7 @@ export default function Transaksi() {
 
                     {isLoading ? (
                         <div className="animate-pulse space-y-3">
-                            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-slate-200 rounded-lg" />)}
+                            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg" />)}
                         </div>
                     ) : (
                         <>
@@ -442,21 +442,21 @@ export default function Transaksi() {
                                     <tbody className="block md:table-row-group">
                                         {dataTampil.length === 0 ? (
                                             <tr className="block md:table-row">
-                                                <td colSpan="5" className="block md:table-cell px-4 py-8 text-center text-slate-500">Data tidak ditemukan.</td>
+                                                <td colSpan="5" className="block md:table-cell px-4 py-8 text-center text-slate-500 dark:text-slate-400">Data tidak ditemukan.</td>
                                             </tr>
                                         ) : dataTampil.map(h => {
-                                            let rowBg = 'bg-white hover:bg-slate-50';
+                                            let rowBg = 'bg-white hover:bg-slate-50 dark:bg-slate-950';
                                             let badge = null;
                                             let textStyle = 'font-bold text-slate-800';
 
-                                            if (h.jenis.includes('Rencana')) { rowBg = 'bg-orange-50/80 hover:bg-orange-100/80'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">PROYEKSI</span>; textStyle = 'font-bold text-orange-600'; }
-                                            else if (h.jenis === 'Transfer') { rowBg = 'bg-blue-50/80'; badge = <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">TRANSFER</span>; }
-                                            else if (h.jenis === 'Utang Masuk') { rowBg = 'bg-purple-50/80'; badge = <span className="bg-purple-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">UTANG</span>; textStyle = 'font-bold text-purple-600'; }
-                                            else if (h.jenis === 'Piutang Keluar') { rowBg = 'bg-purple-50/80'; badge = <span className="bg-purple-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">PIUTANG</span>; textStyle = 'font-bold text-purple-600'; }
-                                            else if (h.jenis === 'Bayar Utang') { rowBg = 'bg-orange-50/80'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">BAYAR UTANG</span>; textStyle = 'font-bold text-orange-600'; }
-                                            else if (h.jenis === 'Terima Piutang') { rowBg = 'bg-orange-50/80'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">TERIMA PIUTANG</span>; textStyle = 'font-bold text-orange-600'; }
-                                            else if (h.jenis === 'Pemasukan') { textStyle = 'font-bold text-emerald-600'; }
-                                            else if (h.jenis === 'Pengeluaran') { textStyle = 'font-bold text-red-600'; }
+                                            if (h.jenis.includes('Rencana')) { rowBg = 'bg-orange-50/80 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-900/30'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">PROYEKSI</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
+                                            else if (h.jenis === 'Transfer') { rowBg = 'bg-blue-50/80 dark:bg-blue-900/20'; badge = <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">TRANSFER</span>; }
+                                            else if (h.jenis === 'Utang Masuk') { rowBg = 'bg-purple-50/80 dark:bg-purple-900/20'; badge = <span className="bg-purple-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">UTANG</span>; textStyle = 'font-bold text-purple-600 dark:text-purple-400'; }
+                                            else if (h.jenis === 'Piutang Keluar') { rowBg = 'bg-purple-50/80 dark:bg-purple-900/20'; badge = <span className="bg-purple-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">PIUTANG</span>; textStyle = 'font-bold text-purple-600 dark:text-purple-400'; }
+                                            else if (h.jenis === 'Bayar Utang') { rowBg = 'bg-orange-50/80 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-900/30'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">BAYAR UTANG</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
+                                            else if (h.jenis === 'Terima Piutang') { rowBg = 'bg-orange-50/80 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-900/30'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">TERIMA PIUTANG</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
+                                            else if (h.jenis === 'Pemasukan') { textStyle = 'font-bold text-emerald-600 dark:text-emerald-400'; }
+                                            else if (h.jenis === 'Pengeluaran') { textStyle = 'font-bold text-red-600 dark:text-red-400'; }
 
                                             const isTransferMutasi = h.kategori === 'Transfer Aset (Auto)' &&
                                                 (h.keterangan?.includes('Mutasi Masuk') || h.keterangan?.includes('Mutasi Keluar'));
@@ -467,16 +467,16 @@ export default function Transaksi() {
                                             return (
                                                 <tr key={h.id} className={`flex flex-col md:table-row mb-4 md:mb-0 border border-slate-200 md:border-0 md:border-b md:border-slate-100 rounded-xl md:rounded-none shadow-sm md:shadow-none overflow-hidden transition-colors ${rowBg}`}>
                                                     <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 whitespace-nowrap">
-                                                        <span className="md:hidden font-bold text-xs text-slate-400 uppercase">Tanggal</span>
-                                                        <span className="text-slate-700 font-medium">{h.tglStr}</span>
+                                                        <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase">Tanggal</span>
+                                                        <span className="text-slate-700 dark:text-slate-100 font-medium">{h.tglStr}</span>
                                                     </td>
                                                     <td className="flex flex-col md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
-                                                        <span className="md:hidden font-bold text-xs text-slate-400 uppercase mb-1">Info Transaksi</span>
-                                                        <div>{badge}<span className="font-bold text-slate-800">{h.kategori}</span><span className="text-xs text-slate-500 mt-0.5 block">{h.keterangan}</span></div>
+                                                        <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase mb-1">Info Transaksi</span>
+                                                        <div>{badge}<span className="font-bold text-slate-800 dark:text-slate-100">{h.kategori}</span><span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">{h.keterangan}</span></div>
                                                     </td>
                                                     <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
-                                                        <span className="md:hidden font-bold text-xs text-slate-400 uppercase">Sumber Dana</span>
-                                                        <span className="text-slate-700 font-medium bg-slate-100 md:bg-transparent px-2 md:px-0 py-0.5 rounded text-sm">{h.sumberDana}</span>
+                                                        <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase">Sumber Dana</span>
+                                                        <span className="text-slate-700 dark:text-slate-100 font-medium bg-slate-100 dark:bg-slate-800 px-2 md:px-0 py-0.5 rounded text-sm">{h.sumberDana}</span>
                                                     </td>
                                                     <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 md:text-right">
                                                         <span className="md:hidden font-bold text-xs text-slate-400 uppercase">Nominal</span>
@@ -485,12 +485,12 @@ export default function Transaksi() {
                                                     <td className="px-4 py-3 align-middle">
                                                         <div className="flex justify-end md:justify-center items-center gap-2">
                                                             {canEdit && (
-                                                                <button onClick={() => siapkanEdit(h)} className="flex items-center gap-1.5 p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition active:scale-95" title="Edit">
+                                                                <button onClick={() => siapkanEdit(h)} className="flex items-center gap-1.5 p-2 text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition active:scale-95" title="Edit">
                                                                     <Edit3 size={18} /><span className="md:hidden text-xs font-bold">Edit</span>
                                                                 </button>
                                                             )}
                                                             {canDelete && (
-                                                                <button onClick={() => handleHapus(h.id)} className="flex items-center gap-1.5 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition active:scale-95" title="Hapus">
+                                                                <button onClick={() => handleHapus(h.id)} className="flex items-center gap-1.5 p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition active:scale-95" title="Hapus">
                                                                     <Trash2 size={18} /><span className="md:hidden text-xs font-bold">Hapus</span>
                                                                 </button>
                                                             )}
@@ -505,7 +505,7 @@ export default function Transaksi() {
                             {totalPages > 1 && (
                                 <div className="flex justify-center gap-2 mt-5 flex-wrap">
                                     {[...Array(totalPages)].map((_, i) => (
-                                        <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-3.5 py-1.5 rounded border text-sm font-semibold transition ${currentPage === i + 1 ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'}`}>
+                                        <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-3.5 py-1.5 rounded border text-sm font-semibold transition ${currentPage === i + 1 ? 'bg-slate-700 dark:bg-slate-600 text-white border-slate-700 dark:border-slate-600' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                                             {i + 1}
                                         </button>
                                     ))}

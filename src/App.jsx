@@ -5,10 +5,14 @@ import Dashboard from './pages/Dashboard';
 import Transaksi from './pages/Transaksi';
 import UtangPiutang from './pages/UtangPiutang';
 import Laporan from './pages/Laporan';
+import useDarkMode from './hooks/useDarkMode';
+import Settings from './pages/Settings';
 
 const HEALTH_URL = `${import.meta.env.VITE_API_URL}/api/health`;
 
-function App() {
+function App() { 
+    useDarkMode();
+    
     useEffect(() => {
         fetch(HEALTH_URL).catch(() => {});
         const keepAlive = setInterval(() => {
@@ -25,6 +29,7 @@ function App() {
                 <Route path="/transaksi" element={<Transaksi />} />
                 <Route path="/utang-piutang" element={<UtangPiutang />} />
                 <Route path="/laporan" element={<Laporan />} />
+                <Route path="/settings" element={<Settings />} />
             </Routes>
         </Router>
     );

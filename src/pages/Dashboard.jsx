@@ -204,36 +204,36 @@ export default function Dashboard() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-24 md:pb-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
             <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
 
                 {/* Header */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="text-center md:text-left">
-                        <h2 className="text-xl font-bold text-slate-800">Ringkasan Keuangan</h2>
-                        <p className="text-sm text-slate-500">Halo, <b>{currentUser}</b></p>
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Ringkasan Keuangan</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Halo, <b>{currentUser}</b></p>
                     </div>
                     <input
                         type="month" value={filterBulan}
                         onChange={(e) => setFilterBulan(e.target.value)}
-                        className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-400 outline-none"
+                        className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-400 outline-none"
                     />
                 </div>
 
                 {isLoading ? (
                     <div className="animate-pulse grid md:grid-cols-2 gap-6">
-                        <div className="h-[400px] bg-slate-200 rounded-xl"></div>
-                        <div className="h-[400px] bg-slate-200 rounded-xl"></div>
-                        <div className="h-[300px] bg-slate-200 rounded-xl"></div>
-                        <div className="h-[300px] bg-slate-200 rounded-xl"></div>
+                        <div className="h-[400px] bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                        <div className="h-[400px] bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                        <div className="h-[300px] bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                        <div className="h-[300px] bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
                     </div>
                 ) : (
                     <div className="grid md:grid-cols-2 gap-6">
 
                         {/* Arus Kas */}
-                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                            <h3 className="flex items-center justify-center gap-2 font-bold text-slate-700 uppercase mb-4 pb-2 border-b">
+                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 dark:bg-slate-900 dark:border-slate-700">
+                            <h3 className="flex items-center justify-center gap-2 font-bold text-slate-700 dark:text-slate-100 uppercase mb-4 pb-2 border-b">
                                 <PieChart size={18} className="text-emerald-500" /> Arus Kas & Estimasi Budget
                             </h3>
                             <div className="space-y-2 text-sm">
@@ -244,28 +244,28 @@ export default function Dashboard() {
                                     <span className="font-bold text-sm tracking-wide">SISA KAS SAAT INI</span>
                                     <span className="font-bold text-lg">{formatRp(sisaKas)}</span>
                                 </div>
-                                <div className="text-center text-xs font-bold text-slate-400 uppercase tracking-wide mt-4 mb-2 bg-slate-50 py-1 rounded">Proyeksi Kas</div>
-                                <div className="flex justify-between text-orange-600 text-xs"><span>Rencana Masuk</span><span>+ {formatRp(summary.rencanaMasuk)}</span></div>
-                                <div className="flex justify-between text-orange-600 text-xs"><span>Rencana Keluar</span><span>- {formatRp(summary.rencanaKeluar)}</span></div>
-                                <div className="flex justify-between p-2 bg-orange-50 rounded text-orange-800 font-bold mt-1"><span>ESTIMASI KAS AKHIR</span><span>{formatRp(estimasiAkhir)}</span></div>
-                                <div className="text-center text-xs font-bold text-slate-400 uppercase tracking-wide mt-4 mb-2 bg-slate-50 py-1 rounded">Ringkasan Hari Ini</div>
+                                <div className="text-center text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mt-4 mb-2 bg-slate-50 dark:bg-slate-800 py-1 rounded">Proyeksi Kas</div>
+                                <div className="flex justify-between text-orange-600 dark:text-orange-400 text-xs"><span>Rencana Masuk</span><span>+ {formatRp(summary.rencanaMasuk)}</span></div>
+                                <div className="flex justify-between text-orange-600 dark:text-orange-400 text-xs"><span>Rencana Keluar</span><span>- {formatRp(summary.rencanaKeluar)}</span></div>
+                                <div className="flex justify-between p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-orange-800 dark:text-orange-200 font-bold mt-1"><span>ESTIMASI KAS AKHIR</span><span>{formatRp(estimasiAkhir)}</span></div>
+                                <div className="text-center text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mt-4 mb-2 bg-slate-50 dark:bg-slate-800 py-1 rounded">Ringkasan Hari Ini</div>
                                 <div className="flex justify-between text-xs"><span>Masuk Hari Ini</span><span className="font-bold text-emerald-600">+ {formatRp(summary.hariIniMasuk)}</span></div>
                                 <div className="flex justify-between text-xs"><span>Keluar Hari Ini</span><span className="font-bold text-red-600">- {formatRp(summary.hariIniKeluar)}</span></div>
                             </div>
                         </div>
 
                         {/* Grafik Pengeluaran */}
-                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
-                            <h3 className="font-bold text-slate-700 uppercase mb-4 pb-2 border-b w-full text-center">Sebaran Pengeluaran Riil</h3>
+                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center dark:bg-slate-900 dark:border-slate-700">
+                            <h3 className="font-bold text-slate-700 dark:text-slate-100 uppercase mb-4 pb-2 border-b w-full text-center">Sebaran Pengeluaran Riil</h3>
                             <div className="w-full h-56 flex justify-center">
                                 {Object.keys(dataChartPengeluaran).length > 0
                                     ? <Doughnut data={pengeluaranData} options={{ maintainAspectRatio: false }} />
-                                    : <p className="text-slate-400 mt-10">Belum ada data.</p>}
+                                    : <p className="text-slate-400 dark:text-slate-500 mt-10">Belum ada data.</p>}
                             </div>
                         </div>
 
                         {/* Net Worth */}
-                        <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200">
+                        <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200  dark:bg-slate-900 dark:border-slate-700">
                             <h3 className="flex items-center justify-center gap-2 font-bold text-blue-700 uppercase mb-4 pb-2 border-b border-blue-100">
                                 <Wallet size={18} /> Net Worth & Saldo Aset
                             </h3>
@@ -273,7 +273,7 @@ export default function Dashboard() {
                                 {Object.entries(portofolio).map(([aset, nilai]) => (
                                     nilai !== 0 && (
                                         <div key={aset} className="flex justify-between border-b border-slate-200/50 pb-1">
-                                            <span className="text-slate-600 truncate">{aset}</span>
+                                            <span className="text-slate-600 dark:text-slate-400 truncate">{aset}</span>
                                             <span className="font-bold">{formatRp(nilai)}</span>
                                         </div>
                                     )
@@ -286,16 +286,16 @@ export default function Dashboard() {
 
                             {/* Tambahkan ini di dalam kotak Net Worth, setelah total net worth */}
                             {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                <div className="mt-3 pt-3 border-t border-blue-100 space-y-1 text-xs">
-                                    <div className="flex justify-between text-slate-500">
+                                <div className="mt-3 pt-3 border-t border-blue-100 dark:border-blue-800 space-y-1 text-xs">
+                                    <div className="flex justify-between text-slate-500 dark:text-slate-400">
                                         <span>Kewajiban (Utang Aktif)</span>
-                                        <span className="font-bold text-red-500">- {formatRp(totalUtangAktif)}</span>
+                                        <span className="font-bold text-red-500 dark:text-red-400">- {formatRp(totalUtangAktif)}</span>
                                     </div>
-                                    <div className="flex justify-between text-slate-500">
+                                    <div className="flex justify-between text-slate-500 dark:text-slate-400">
                                         <span>Tagihan (Piutang Aktif)</span>
-                                        <span className="font-bold text-emerald-500">+ {formatRp(totalPiutangAktif)}</span>
+                                        <span className="font-bold text-emerald-500 dark:text-emerald-400">+ {formatRp(totalPiutangAktif)}</span>
                                     </div>
-                                    <div className="flex justify-between font-bold text-slate-700 pt-1 border-t border-blue-100">
+                                    <div className="flex justify-between font-bold text-slate-700 dark:text-slate-100 pt-1 border-t border-blue-100 dark:border-blue-800">
                                         <span>Net Worth Bersih</span>
                                         <span>{formatRp(summary.totalNetWorth + totalPiutangAktif - totalUtangAktif)}</span>
                                     </div>
@@ -304,12 +304,12 @@ export default function Dashboard() {
                         </div>
 
                         {/* Grafik Aset */}
-                        <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
+                        <div className="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center dark:bg-slate-900 dark:border-slate-700">
                             <h3 className="font-bold text-blue-700 uppercase mb-4 pb-2 border-b border-blue-100 w-full text-center">Asset Allocation</h3>
                             <div className="w-full h-56 flex justify-center">
                                 {asetLabels.length > 0
                                     ? <Pie data={asetData} options={{ maintainAspectRatio: false }} />
-                                    : <p className="text-slate-400 mt-10">Belum ada aset.</p>}
+                                    : <p className="text-slate-400 dark:text-slate-500 mt-10">Belum ada aset.</p>}
                             </div>
                         </div>
 
