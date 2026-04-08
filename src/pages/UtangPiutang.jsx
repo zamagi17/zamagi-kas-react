@@ -189,13 +189,15 @@ export default function UtangPiutang() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
-            <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
+            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
                 {/* Header */}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center gap-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg dark:shadow-xl p-6 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Utang Piutang</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Kelola utang & piutang kamu</p>
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-50 flex items-center gap-2">
+                            <span className="text-3xl">💳</span> Utang Piutang
+                        </h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola utang & piutang kamu dengan mudah</p>
                     </div>
                     <button
                         onClick={() => setShowModalTambah(true)}
