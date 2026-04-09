@@ -246,7 +246,7 @@ export default function Transaksi() {
 
                 {/* Header */}
                 <div className="relative overflow-hidden rounded-2xl shadow-lg dark:shadow-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 dark:from-blue-900 dark:via-blue-800 dark:to-indigo-900 p-8 text-white border border-blue-400/30 dark:border-blue-700/30">
-                    <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255,255,255) 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255,255,255) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                     <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
                             <p className="text-blue-100 text-sm font-medium mb-1">Kelola Transaksi Keuangan</p>
@@ -265,7 +265,7 @@ export default function Transaksi() {
                 {/* Banner Panduan Pengguna Baru */}
                 {showPanduan && (
                     <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/20 rounded-2xl border border-blue-200 dark:border-blue-700/50 p-6 shadow-lg">
-                        <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%)'}}></div>
+                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%)' }}></div>
                         {/* Tombol tutup */}
                         <button
                             onClick={() => setShowPanduan(false)}
@@ -345,7 +345,14 @@ export default function Transaksi() {
                     <form onSubmit={handleSimpan} className="grid md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Tanggal</label>
-                            <input type="date" name="tanggal" value={formData.tanggal} onChange={handleInputChange} required className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 transition" />
+                            <input
+                                type="date"
+                                name="tanggal"
+                                value={formData.tanggal}
+                                onChange={handleInputChange}
+                                required
+                                className="block w-full px-4 h-[50px] border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 transition"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jenis Arus Kas</label>
