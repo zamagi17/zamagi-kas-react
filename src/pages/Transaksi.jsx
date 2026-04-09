@@ -351,7 +351,7 @@ export default function Transaksi() {
                                 value={formData.tanggal}
                                 onChange={handleInputChange}
                                 required
-                                className="block w-full px-4 h-[50px] border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 transition"
+                                className="block w-full px-4 py-3 m-0 appearance-none min-h-[48px] md:min-h-[50px] border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 transition font-sans"
                             />
                         </div>
                         <div>

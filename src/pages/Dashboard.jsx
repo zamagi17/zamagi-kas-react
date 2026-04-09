@@ -189,24 +189,24 @@ export default function Dashboard() {
 
     if (!token) return null;
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 overflow-x-hidden">
+return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
-            <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 w-full">
+            <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
 
                 {/* Header */}
-                <div className="relative overflow-hidden rounded-2xl shadow-lg dark:shadow-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 dark:from-blue-900 dark:via-blue-800 dark:to-indigo-900 p-6 md:p-8 text-white border border-blue-400/30 dark:border-blue-700/30 w-full min-w-0">
-                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255,255,255) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                <div className="relative overflow-hidden rounded-2xl shadow-lg dark:shadow-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 dark:from-blue-900 dark:via-blue-800 dark:to-indigo-900 p-8 text-white border border-blue-400/30 dark:border-blue-700/30">
+                    <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255,255,255) 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
                     <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div className="w-full">
+                        <div>
                             <p className="text-blue-100 text-sm font-medium mb-1">Selamat datang kembali</p>
-                            <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-2 break-words">Ringkasan Keuangan Anda</h2>
+                            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-2">Ringkasan Keuangan Anda</h2>
                             <p className="text-blue-50 text-sm">Pantau performa finansial Anda secara real-time</p>
                         </div>
                         <input
                             type="month" value={filterBulan}
                             onChange={(e) => setFilterBulan(e.target.value)}
-                            className="w-full md:w-auto px-4 py-3 rounded-xl border border-blue-300/30 dark:border-blue-600/30 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-400 outline-none bg-white/10 dark:bg-white/5 text-white placeholder-blue-100 backdrop-blur-sm hover:bg-white/20 dark:hover:bg-white/10 transition"
+                            className="px-4 py-3 rounded-xl border border-blue-300/30 dark:border-blue-600/30 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-400 outline-none bg-white/10 dark:bg-white/5 text-white placeholder-blue-100 backdrop-blur-sm hover:bg-white/20 dark:hover:bg-white/10 transition"
                         />
                     </div>
                 </div>
