@@ -401,7 +401,7 @@ export default function Laporan() {
 
                             {/* Header Laporan */}
                             <div className="bg-linear-to-r from-blue-600 to-indigo-600 text-white px-8 py-6">
-                                <h1 className="text-2xl font-black tracking-tight">ZAMAGI KAS</h1>
+                                <h1 className="text-2xl font-black tracking-tight">ZonaKas</h1>
                                 <p className="text-blue-200 text-sm mt-0.5">Laporan Keuangan Pribadi</p>
                                 <div className="mt-4 flex flex-col md:flex-row justify-between text-sm">
                                     <p>Periode: <b>{namaBulan(filterBulan)}</b></p>
@@ -587,7 +587,7 @@ export default function Laporan() {
 
                                 {/* Footer */}
                                 <div className="text-center text-xs text-slate-400 dark:text-slate-500 pt-4 border-t">
-                                    Laporan ini digenerate otomatis oleh Zamagi Kas •{' '}
+                                    Laporan ini digenerate otomatis oleh ZonaKas •{' '}
                                     {new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
                                 </div>
                             </div>

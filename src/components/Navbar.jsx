@@ -22,7 +22,7 @@ export default function Navbar() {
                 {/* Logo */}
                 <div className="absolute left-6 flex items-center gap-2">
                     <span className="text-blue-500 font-black text-xl tracking-tight">
-                        Zamagi Kas
+                        ZonaKas
                     </span>
                     <span className="text-xs text-slate-400 dark:text-gray-500 font-medium">
                         — {currentUser}

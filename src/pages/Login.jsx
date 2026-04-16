@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -131,7 +132,7 @@ export default function Login() {
         {/* Header */}
         <div className="bg-blue-500 text-white pt-12 pb-6 px-6 text-center">
           <h2 className="text-[1.75rem] font-bold tracking-tight m-0">
-            {isLoginMode ? 'Masuk ke Zamagi Kas' : 'Buat Akun Baru'}
+            {isLoginMode ? 'Masuk ke ZonaKas' : 'Buat Akun Baru'}
           </h2>
         </div>
 
@@ -177,10 +178,10 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-4 text-gray-400 dark:text-slate-500 hover:text-blue-500 hover:scale-110 transition-all focus:outline-none text-lg select-none"
-                title="Tampilkan Password"
+                className="absolute right-4 top-4 text-gray-400 dark:text-slate-500 hover:text-blue-500 hover:scale-110 transition-all focus:outline-none select-none"
+                title={showPassword ? "Sembunyikan Password" : "Tampilkan Password"}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 

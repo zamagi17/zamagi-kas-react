@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    TrendingUp, Edit3, Trash2, Search, Plus,
+    TrendingUp, Edit, Trash, Search, Plus,
     Download, RefreshCw
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -547,12 +547,12 @@ export default function Transaksi() {
                                                         <div className="flex justify-end md:justify-center items-center gap-2">
                                                             {canEdit && (
                                                                 <button onClick={() => siapkanEdit(h)} className="flex items-center gap-1.5 p-2.5 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-800/30 rounded-lg transition-all duration-300 active:scale-95 border border-transparent hover:border-amber-200 dark:hover:border-amber-700" title="Edit Transaksi">
-                                                                    ✏️
+                                                                    <Edit size={16} />
                                                                 </button>
                                                             )}
                                                             {canDelete && (
                                                                 <button onClick={() => handleHapus(h.id)} className="flex items-center gap-1.5 p-2.5 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-800/30 rounded-lg transition-all duration-300 active:scale-95 border border-transparent hover:border-red-200 dark:hover:border-red-700" title="Hapus Transaksi">
-                                                                    🗑️
+                                                                    <Trash size={16} />
                                                                 </button>
                                                             )}
                                                         </div>
