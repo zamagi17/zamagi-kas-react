@@ -115,11 +115,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-5 text-gray-800 font-sans">
-      <div className={`w-full max-w-md bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-200 overflow-hidden relative transition-all duration-300 ${isLoading ? 'opacity-65 pointer-events-none' : ''}`}>
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 p-5 text-gray-800 dark:text-slate-100 font-sans">
+      <div className={`w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden relative transition-all duration-300 ${isLoading ? 'opacity-65 pointer-events-none' : ''}`}>
         
         {/* Server Status Badge */}
-        <div className="absolute top-3 left-4 inline-flex items-center gap-2 text-xs font-bold text-slate-700 bg-white/95 px-3 py-1.5 rounded-full shadow-sm z-10" title="Status Server">
+        <div className="absolute top-3 left-4 inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-100 bg-white/95 dark:bg-slate-900/95 px-3 py-1.5 rounded-full shadow-sm z-10" title="Status Server">
           <span className={`w-2.5 h-2.5 rounded-full 
             ${serverStatus.status === 'online' ? 'bg-emerald-400 shadow-[0_0_6px_#2ecc71]' : ''}
             ${serverStatus.status === 'offline' ? 'bg-red-500 shadow-[0_0_6px_#e74c3c]' : ''}
@@ -147,12 +147,12 @@ export default function Login() {
                 autoFocus // Fokus otomatis saat dimuat
                 value={username}
                 onChange={handleInputChange(setUsername)}
-                className="peer w-full px-4 pt-6 pb-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
+                className="peer w-full px-4 pt-6 pb-2 border border-gray-300 dark:border-slate-600 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
                 placeholder="Username"
                 autoComplete="username"
                 required
               />
-              <label htmlFor="username" className="absolute left-4 top-2 text-xs text-blue-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 pointer-events-none font-medium">
+              <label htmlFor="username" className="absolute left-4 top-2 text-xs text-blue-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-slate-500 peer-placeholder-shown:top-4 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 pointer-events-none font-medium">
                 Username
               </label>
             </div>
@@ -164,12 +164,12 @@ export default function Login() {
                 id="password"
                 value={password}
                 onChange={handleInputChange(setPassword)}
-                className="peer w-full pl-4 pr-12 pt-6 pb-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
+                className="peer w-full pl-4 pr-12 pt-6 pb-2 border border-gray-300 dark:border-slate-600 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
                 placeholder="Password"
                 autoComplete={isLoginMode ? "current-password" : "new-password"}
                 required
               />
-              <label htmlFor="password" className="absolute left-4 top-2 text-xs text-blue-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 pointer-events-none font-medium">
+              <label htmlFor="password" className="absolute left-4 top-2 text-xs text-blue-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-slate-500 peer-placeholder-shown:top-4 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 pointer-events-none font-medium">
                 Password
               </label>
               
@@ -177,7 +177,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-4 text-gray-400 hover:text-blue-500 hover:scale-110 transition-all focus:outline-none text-lg select-none"
+                className="absolute right-4 top-4 text-gray-400 dark:text-slate-500 hover:text-blue-500 hover:scale-110 transition-all focus:outline-none text-lg select-none"
                 title="Tampilkan Password"
               >
                 {showPassword ? '🙈' : '👁️'}
@@ -194,7 +194,7 @@ export default function Login() {
           </form>
 
           {/* Toggle Link */}
-          <div className="text-center mt-5 text-[0.95rem] text-gray-500">
+          <div className="text-center mt-5 text-[0.95rem] text-gray-500 dark:text-slate-400">
             {isLoginMode ? 'Belum punya akun? ' : 'Sudah punya akun? '}
             <button
               type="button"
@@ -213,7 +213,7 @@ export default function Login() {
           {/* Pesan Error / Sukses */}
           {pesan.show && (
             <div 
-              className={`mt-4 p-3 rounded-lg text-sm font-semibold text-center border ${pesan.isError ? 'bg-[#fadbd8] text-[#c0392b] border-[#e74c3c]' : 'bg-emerald-100 text-emerald-800 border-emerald-500'}`}
+              className={`mt-4 p-3 rounded-lg text-sm font-semibold text-center border ${pesan.isError ? 'bg-[#fadbd8] dark:bg-red-900 text-[#c0392b] dark:text-red-100 border-[#e74c3c] dark:border-red-700' : 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 border-emerald-500 dark:border-emerald-700'}`}
               // Menggunakan dangerouslySetInnerHTML agar tag <b> dari HTML sebelumnya bisa dirender
               dangerouslySetInnerHTML={{ __html: pesan.text }} 
             />

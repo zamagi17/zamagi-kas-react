@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Aktifkan dark mode berbasis class */
+@variant dark (&:where(.dark, .dark *));
+
 /* Sembunyikan ikon mata bawaan Microsoft Edge / Browser */
 input::-ms-reveal,
 input::-ms-clear {

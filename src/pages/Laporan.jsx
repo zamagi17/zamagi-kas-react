@@ -357,24 +357,24 @@ export default function Laporan() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-slate-100 font-sans text-slate-800 pb-24 md:pb-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
             <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
                 {/* Toolbar */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
                         <FileText size={22} className="text-blue-500" />
                         <div>
-                            <h2 className="text-lg font-bold text-slate-800">Laporan Keuangan</h2>
-                            <p className="text-xs text-slate-500">Preview & download laporan PDF</p>
+                            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Laporan Keuangan</h2>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Preview & download laporan PDF</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <input
                             type="month" value={filterBulan}
                             onChange={(e) => setFilterBulan(e.target.value)}
-                            className="px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                            className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
                         />
                         <button
                             onClick={handleDownloadPDF}
@@ -390,13 +390,13 @@ export default function Laporan() {
                 </div>
 
                 {isLoading ? (
-                    <div className="bg-white rounded-xl border border-slate-200 p-20 text-center text-slate-400 animate-pulse">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-20 text-center text-slate-400 dark:text-slate-500 animate-pulse">
                         <p>Memuat data...</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         {/* ===== AREA PREVIEW (yang akan di-screenshot) ===== */}
-                        <div ref={previewRef} className="bg-white rounded-xl shadow-sm overflow-hidden"
+                        <div ref={previewRef} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden"
                             style={{ fontFamily: 'sans-serif' }}>
 
                             {/* Header Laporan */}
@@ -414,42 +414,42 @@ export default function Laporan() {
 
                                 {/* Ringkasan Arus Kas */}
                                 <div>
-                                    <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
+                                    <h2 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 pb-1 border-b">
                                         Ringkasan Arus Kas
                                     </h2>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         {[
-                                            { label: 'Saldo Awal', value: summary.saldoAwal, warna: 'text-slate-700' },
-                                            { label: 'Total Masuk', value: summary.totalMasuk, warna: 'text-emerald-600' },
-                                            { label: 'Total Keluar', value: summary.totalKeluar, warna: 'text-red-600' },
-                                            { label: 'Sisa Kas', value: sisaKas, warna: sisaKas >= 0 ? 'text-blue-600' : 'text-red-600' },
+                                            { label: 'Saldo Awal', value: summary.saldoAwal, warna: 'text-slate-700 dark:text-slate-300' },
+                                            { label: 'Total Masuk', value: summary.totalMasuk, warna: 'text-emerald-600 dark:text-emerald-400' },
+                                            { label: 'Total Keluar', value: summary.totalKeluar, warna: 'text-red-600 dark:text-red-400' },
+                                            { label: 'Sisa Kas', value: sisaKas, warna: sisaKas >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400' },
                                         ].map(item => (
-                                            <div key={item.label} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-                                                <p className="text-xs text-slate-500 font-semibold">{item.label}</p>
+                                            <div key={item.label} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-100 dark:border-slate-700">
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">{item.label}</p>
                                                 <p className={`text-base font-black mt-1 ${item.warna}`}>{formatRp(item.value)}</p>
                                             </div>
                                         ))}
                                     </div>
 
                                     {/* Proyeksi */}
-                                    <div className="mt-3 bg-orange-50 rounded-lg p-3 border border-orange-100 flex flex-col md:flex-row justify-between gap-2 text-sm">
-                                        <div><span className="text-slate-500">Rencana Masuk:</span> <b className="text-orange-600">{formatRp(summary.rencanaMasuk)}</b></div>
-                                        <div><span className="text-slate-500">Rencana Keluar:</span> <b className="text-orange-600">{formatRp(summary.rencanaKeluar)}</b></div>
-                                        <div><span className="text-slate-500">Estimasi Akhir Bulan:</span> <b className="text-orange-700">{formatRp(estimasiAkhir)}</b></div>
+                                    <div className="mt-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-800 flex flex-col md:flex-row justify-between gap-2 text-sm">
+                                        <div><span className="text-slate-500 dark:text-slate-400">Rencana Masuk:</span> <b className="text-orange-600 dark:text-orange-400">{formatRp(summary.rencanaMasuk)}</b></div>
+                                        <div><span className="text-slate-500 dark:text-slate-400">Rencana Keluar:</span> <b className="text-orange-600 dark:text-orange-400">{formatRp(summary.rencanaKeluar)}</b></div>
+                                        <div><span className="text-slate-500 dark:text-slate-400">Estimasi Akhir Bulan:</span> <b className="text-orange-700 dark:text-orange-300">{formatRp(estimasiAkhir)}</b></div>
                                     </div>
                                 </div>
 
                                 {/* Net Worth & Portofolio */}
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
-                                        <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
+                                        <h2 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 pb-1 border-b">
                                             Saldo Per Aset
                                         </h2>
                                         <div className="space-y-1.5">
                                             {Object.entries(portofolio).filter(([, v]) => v !== 0).map(([aset, nilai]) => (
-                                                <div key={aset} className="flex justify-between text-sm py-1 border-b border-slate-100">
-                                                    <span className="text-slate-600">{aset}</span>
-                                                    <span className={`font-bold ${nilai >= 0 ? 'text-slate-800' : 'text-red-600'}`}>{formatRp(nilai)}</span>
+                                                <div key={aset} className="flex justify-between text-sm py-1 border-b border-slate-100 dark:border-slate-700">
+                                                    <span className="text-slate-600 dark:text-slate-300">{aset}</span>
+                                                    <span className={`font-bold ${nilai >= 0 ? 'text-slate-800 dark:text-slate-200' : 'text-red-600 dark:text-red-400'}`}>{formatRp(nilai)}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -462,14 +462,14 @@ export default function Laporan() {
                                             </div>
 
                                             {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                                <div className="mt-2 mb-2 bg-white border border-slate-200 rounded-lg overflow-hidden">
-                                                    <div className="flex justify-between text-xs px-3 py-2 border-b border-slate-100">
-                                                        <span className="text-slate-500">Kewajiban (Utang Aktif)</span>
-                                                        <span className="text-red-500 font-bold">- {formatRp(totalUtangAktif)}</span>
+                                                <div className="mt-2 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                                                    <div className="flex justify-between text-xs px-3 py-2 border-b border-slate-100 dark:border-slate-600">
+                                                        <span className="text-slate-500 dark:text-slate-400">Kewajiban (Utang Aktif)</span>
+                                                        <span className="text-red-500 dark:text-red-400 font-bold">- {formatRp(totalUtangAktif)}</span>
                                                     </div>
                                                     <div className="flex justify-between text-xs px-3 py-2">
-                                                        <span className="text-slate-500">Tagihan (Piutang Aktif)</span>
-                                                        <span className="text-emerald-500 font-bold">+ {formatRp(totalPiutangAktif)}</span>
+                                                        <span className="text-slate-500 dark:text-slate-400">Tagihan (Piutang Aktif)</span>
+                                                        <span className="text-emerald-500 dark:text-emerald-400 font-bold">+ {formatRp(totalPiutangAktif)}</span>
                                                     </div>
                                                 </div>
                                             )}
@@ -483,7 +483,7 @@ export default function Laporan() {
 
                                             {/* Tambahkan ini */}
                                             {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                                <p className="text-xs text-slate-400 mt-1 italic">
+                                                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">
                                                     *Utang/piutang aktif berdasarkan status saat ini
                                                 </p>
                                             )}
@@ -492,7 +492,7 @@ export default function Laporan() {
 
                                     {/* Chart Pengeluaran */}
                                     <div>
-                                        <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
+                                        <h2 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 pb-1 border-b">
                                             Sebaran Pengeluaran
                                         </h2>
                                         {Object.keys(dataChartPengeluaran).length > 0 ? (
@@ -516,23 +516,23 @@ export default function Laporan() {
                                                 />
                                             </div>
                                         ) : (
-                                            <p className="text-slate-400 text-sm">Belum ada data pengeluaran.</p>
+                                            <p className="text-slate-400 dark:text-slate-500 text-sm">Belum ada data pengeluaran.</p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Tabel Transaksi */}
                                 <div>
-                                    <h2 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 pb-1 border-b">
+                                    <h2 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 pb-1 border-b">
                                         Riwayat Transaksi — {namaBulan(filterBulan)} ({historyData.length} transaksi)
                                     </h2>
                                     {historyData.length === 0 ? (
-                                        <p className="text-slate-400 text-sm text-center py-6">Tidak ada transaksi bulan ini.</p>
+                                        <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-6">Tidak ada transaksi bulan ini.</p>
                                     ) : (
                                         <div className="overflow-x-auto">
                                             <table className="mx-auto text-xs border-collapse" style={{ minWidth: '800px' }}>
                                                 <thead>
-                                                    <tr className="bg-slate-700 text-white">
+                                                    <tr className="bg-slate-700 dark:bg-slate-800 text-white">
                                                         <th className="px-3 py-2 text-left font-semibold">Tanggal</th>
                                                         <th className="px-3 py-2 text-left font-semibold">Kategori</th>
                                                         <th className="px-3 py-2 text-left font-semibold">Keterangan</th>
@@ -545,20 +545,20 @@ export default function Laporan() {
                                                     {historyData.map((h, i) => {
                                                         const badge = getBadgeJenis(h.jenis);
                                                         return (
-                                                            <tr key={h.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                                                                <td className="px-3 py-2 whitespace-nowrap">{h.tglStr}</td>
-                                                                <td className="px-3 py-2">{h.kategori}</td>
-                                                                <td className="px-3 py-2 text-slate-500 max-w-45 whitespace-normal wrap-break-word">{h.keterangan}</td>
-                                                                <td className="px-3 py-2 whitespace-nowrap">{h.sumberDana}</td>
+                                                            <tr key={h.id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800'}>
+                                                                <td className="px-3 py-2 whitespace-nowrap text-slate-800 dark:text-slate-200">{h.tglStr}</td>
+                                                                <td className="px-3 py-2 text-slate-800 dark:text-slate-200">{h.kategori}</td>
+                                                                <td className="px-3 py-2 text-slate-500 dark:text-slate-400 max-w-45 whitespace-normal wrap-break-word">{h.keterangan}</td>
+                                                                <td className="px-3 py-2 whitespace-nowrap text-slate-800 dark:text-slate-200">{h.sumberDana}</td>
                                                                 <td className="px-3 py-2">
                                                                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.warna}`}>
                                                                         {badge.label}
                                                                     </span>
                                                                 </td>
                                                                 <td className={`px-3 py-2 text-right font-bold whitespace-nowrap
-                                                            ${h.jenis === 'Pemasukan' ? 'text-emerald-600' : ''}
-                                                            ${h.jenis === 'Pengeluaran' ? 'text-red-600' : ''}
-                                                            ${h.jenis.includes('Rencana') ? 'text-orange-600' : ''}
+                                                            ${h.jenis === 'Pemasukan' ? 'text-emerald-600 dark:text-emerald-400' : ''}
+                                                            ${h.jenis === 'Pengeluaran' ? 'text-red-600 dark:text-red-400' : ''}
+                                                            ${h.jenis.includes('Rencana') ? 'text-orange-600 dark:text-orange-400' : ''}
                                                         `}>
                                                                     {formatRp(h.nominal)}
                                                                 </td>
@@ -567,15 +567,15 @@ export default function Laporan() {
                                                     })}
                                                 </tbody>
                                                 <tfoot>
-                                                    <tr className="bg-slate-100 font-bold text-slate-700">
+                                                    <tr className="bg-slate-100 dark:bg-slate-700 font-bold text-slate-700 dark:text-slate-200">
                                                         <td colSpan="5" className="px-3 py-2 text-right">Total Masuk Riil:</td>
-                                                        <td className="px-3 py-2 text-right text-emerald-600">{formatRp(summary.totalMasuk)}</td>
+                                                        <td className="px-3 py-2 text-right text-emerald-600 dark:text-emerald-400">{formatRp(summary.totalMasuk)}</td>
                                                     </tr>
-                                                    <tr className="bg-slate-100 font-bold text-slate-700">
+                                                    <tr className="bg-slate-100 dark:bg-slate-700 font-bold text-slate-700 dark:text-slate-200">
                                                         <td colSpan="5" className="px-3 py-2 text-right">Total Keluar Riil:</td>
-                                                        <td className="px-3 py-2 text-right text-red-600">{formatRp(summary.totalKeluar)}</td>
+                                                        <td className="px-3 py-2 text-right text-red-600 dark:text-red-400">{formatRp(summary.totalKeluar)}</td>
                                                     </tr>
-                                                    <tr className="bg-slate-700 text-white font-bold">
+                                                    <tr className="bg-slate-700 dark:bg-slate-800 text-white font-bold">
                                                         <td colSpan="5" className="px-3 py-2 text-right">Sisa Kas:</td>
                                                         <td className="px-3 py-2 text-right">{formatRp(sisaKas)}</td>
                                                     </tr>
@@ -586,7 +586,7 @@ export default function Laporan() {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="text-center text-xs text-slate-400 pt-4 border-t">
+                                <div className="text-center text-xs text-slate-400 dark:text-slate-500 pt-4 border-t">
                                     Laporan ini digenerate otomatis oleh Zamagi Kas •{' '}
                                     {new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
                                 </div>
