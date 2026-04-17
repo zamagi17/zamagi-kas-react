@@ -83,6 +83,7 @@ export default function Login() {
         const data = await res.json();
         if (data.token) {
           localStorage.setItem('token', data.token);
+          if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
           localStorage.setItem('username', data.username || username.trim());
           showMessage('✅ Login berhasil! Mengalihkan...', false);
           setTimeout(() => {
