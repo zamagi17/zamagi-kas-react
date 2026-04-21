@@ -9,11 +9,6 @@ import useDarkMode from '../hooks/useDarkMode';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 
-const DAFTAR_ASET = [
-    'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
-    'e-Wallet (Gopay/OVO/Dana)', 'Bank RDN', 'Reksa Dana', 'Emas/Logam Mulia'
-];
-
 function decodeJwt(token) {
     try {
         const payload = token.split('.')[1];
@@ -580,21 +575,28 @@ export default function Settings() {
                         Tentukan aset yang sering digunakan agar mudah diakses saat mencatat transaksi.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                        {DAFTAR_ASET.map(aset => {
-                            const dipilih = dompetHarian.includes(aset);
-                            return (
-                                <button key={aset} onClick={() => toggleAset(aset)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium text-left transition-all
-                                        ${dipilih
-                                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-300'
-                                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-300'}`}>
-                                    <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 border transition-all ${dipilih ? 'bg-blue-500 border-blue-500' : 'border-slate-300 dark:border-slate-600'}`}>
-                                        {dipilih && <Check size={14} className="text-white" strokeWidth={3} />}
-                                    </div>
-                                    <span className="leading-tight">{aset}</span>
-                                </button>
-                            );
-                        })}
+                        {listAset.filter(a => a.isAktif).length === 0 ? (
+                            <p className="text-sm text-slate-500 italic col-span-2 text-center py-4">
+                                Belum ada aset yang aktif. Silakan tambah di Master Aset terlebih dahulu.
+                            </p>
+                        ) : (
+                            listAset.filter(a => a.isAktif).map(asetObj => {
+                                const namaAset = asetObj.nama;
+                                const dipilih = dompetHarian.includes(namaAset);
+                                return (
+                                    <button key={asetObj.id} onClick={() => toggleAset(namaAset)}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium text-left transition-all
+                                            ${dipilih
+                                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-300'
+                                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-300'}`}>
+                                        <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 border transition-all ${dipilih ? 'bg-blue-500 border-blue-500' : 'border-slate-300 dark:border-slate-600'}`}>
+                                            {dipilih && <Check size={14} className="text-white" strokeWidth={3} />}
+                                        </div>
+                                        <span className="leading-tight">{namaAset}</span>
+                                    </button>
+                                );
+                            })
+                        )}
                     </div>
 
                     <div className="pt-2">
