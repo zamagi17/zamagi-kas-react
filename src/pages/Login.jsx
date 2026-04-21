@@ -5,13 +5,20 @@ import { Eye, EyeOff } from 'lucide-react';
 export default function Login() {
   const navigate = useNavigate();
   const [isLoginMode, setIsLoginMode] = useState(true);
+  
+  // State dasar
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  
+  // State tambahan untuk registrasi
+  const [namaLengkap, setNamaLengkap] = useState('');
+  const [email, setEmail] = useState('');
+  
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [pesan, setPesan] = useState({ text: '', isError: false, show: false });
   
-  // State untuk indikator server: status bisa 'checking' (kuning), 'online' (hijau), 'offline' (merah)
+  // State untuk indikator server
   const [serverStatus, setServerStatus] = useState({ status: 'checking', text: 'Menyiapkan Server...' });
   const wasOffline = useRef(false);
 
@@ -21,7 +28,6 @@ export default function Login() {
 
   // --- FUNGSI CEK STATUS SERVER ---
   const cekStatusServer = async () => {
-    // Jika sebelumnya offline, tampilkan status sedang membangunkan
     if (wasOffline.current) {
       setServerStatus({ status: 'checking', text: 'Membangunkan Server...' });
     }
@@ -31,7 +37,6 @@ export default function Login() {
       if (response.ok) {
         setServerStatus({ status: 'online', text: 'Server Terhubung' });
         
-        // Jika baru saja bangun dari mati, reset state offline
         if (wasOffline.current) {
           console.log("Server baru saja aktif!");
           wasOffline.current = false;
@@ -47,28 +52,46 @@ export default function Login() {
 
   useEffect(() => {
     cekStatusServer();
-    // Cek ulang setiap 5 detik
     const intervalId = setInterval(cekStatusServer, 5000);
     return () => clearInterval(intervalId);
   }, []);
 
   // --- FUNGSI HANDLE AUTH ---
   const handleAuth = async (e) => {
-    e.preventDefault(); // Menggantikan deteksi tombol 'Enter', otomatis tertangani oleh form submit
+    e.preventDefault();
     setPesan({ text: '', isError: false, show: false });
 
+    // Validasi umum
     if (!username.trim()) return showMessage('Username tidak boleh kosong');
     if (!password) return showMessage('Password tidak boleh kosong');
     if (password.length < 6) return showMessage('Password minimal 6 karakter');
+
+    // Validasi khusus saat mendaftar
+    if (!isLoginMode) {
+      if (!namaLengkap.trim()) return showMessage('Nama Lengkap tidak boleh kosong');
+      if (!email.trim() || !email.includes('@')) return showMessage('Email tidak valid');
+    }
 
     setIsLoading(true);
 
     try {
       const endpoint = isLoginMode ? 'login' : 'register';
+      
+      // Siapkan data yang akan dikirim (payload)
+      // Jika login, kirim username & password saja. Jika register, kirim semuanya.
+      const payload = isLoginMode 
+        ? { username: username.trim(), password }
+        : { 
+            username: username.trim(), 
+            password, 
+            namaLengkap: namaLengkap.trim(), 
+            email: email.trim() 
+          };
+
       const res = await fetch(`${AUTH_URL}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), password }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -85,6 +108,10 @@ export default function Login() {
           localStorage.setItem('token', data.token);
           if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
           localStorage.setItem('username', data.username || username.trim());
+          
+          // Opsional: Simpan nama lengkap jika dikembalikan dari server
+          if (data.namaLengkap) localStorage.setItem('namaLengkap', data.namaLengkap);
+
           showMessage('✅ Login berhasil! Mengalihkan...', false);
           setTimeout(() => {
             navigate('/dashboard');
@@ -94,13 +121,16 @@ export default function Login() {
         const msg = await res.text();
         showMessage(`✅ ${msg || 'Pendaftaran berhasil! Silakan login.'}`, false);
         setTimeout(() => {
+          // Reset form dan pindah ke mode login
           setIsLoginMode(true);
           setPassword('');
+          setNamaLengkap('');
+          setEmail('');
         }, 1800);
       }
     } catch (err) {
       showMessage(err.message || 'Gagal terhubung ke server');
-      cekStatusServer(); // Cek server lagi jika gagal (sesuai logika HTML)
+      cekStatusServer(); 
     } finally {
       setIsLoading(false);
     }
@@ -110,10 +140,19 @@ export default function Login() {
     setPesan({ text, isError, show: true });
   };
 
-  // Bersihkan pesan error saat user mulai mengetik
   const handleInputChange = (setter) => (e) => {
     setter(e.target.value);
     if (pesan.show) setPesan({ show: false, text: '', isError: false });
+  };
+
+  // Fungsi untuk mengganti mode dan membersihkan input
+  const toggleMode = () => {
+    setIsLoginMode(!isLoginMode); 
+    setPesan({ show: false });
+    setUsername('');
+    setPassword('');
+    setNamaLengkap('');
+    setEmail('');
   };
 
   return (
@@ -141,12 +180,49 @@ export default function Login() {
         <div className="p-7 md:p-8">
           <form onSubmit={handleAuth} className="space-y-7">
             
+            {/* Input Tambahan: Hanya muncul saat mendaftar */}
+            {!isLoginMode && (
+              <>
+                {/* Input Nama Lengkap */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="namaLengkap"
+                    value={namaLengkap}
+                    onChange={handleInputChange(setNamaLengkap)}
+                    className="peer w-full px-4 pt-6 pb-2 border border-gray-300 dark:border-slate-600 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
+                    placeholder="Nama Lengkap"
+                    required={!isLoginMode}
+                  />
+                  <label htmlFor="namaLengkap" className="absolute left-4 top-2 text-xs text-blue-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-slate-500 peer-placeholder-shown:top-4 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 pointer-events-none font-medium">
+                    Nama Lengkap
+                  </label>
+                </div>
+
+                {/* Input Email */}
+                <div className="relative">
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={handleInputChange(setEmail)}
+                    className="peer w-full px-4 pt-6 pb-2 border border-gray-300 dark:border-slate-600 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
+                    placeholder="Email"
+                    required={!isLoginMode}
+                  />
+                  <label htmlFor="email" className="absolute left-4 top-2 text-xs text-blue-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-slate-500 peer-placeholder-shown:top-4 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 pointer-events-none font-medium">
+                    Email
+                  </label>
+                </div>
+              </>
+            )}
+
             {/* Input Username */}
             <div className="relative">
               <input
                 type="text"
                 id="username"
-                autoFocus // Fokus otomatis saat dimuat
+                autoFocus 
                 value={username}
                 onChange={handleInputChange(setUsername)}
                 className="peer w-full px-4 pt-6 pb-2 border border-gray-300 dark:border-slate-600 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-transparent"
@@ -200,12 +276,7 @@ export default function Login() {
             {isLoginMode ? 'Belum punya akun? ' : 'Sudah punya akun? '}
             <button
               type="button"
-              onClick={() => { 
-                setIsLoginMode(!isLoginMode); 
-                setPesan({ show: false });
-                setUsername('');
-                setPassword('');
-              }}
+              onClick={toggleMode}
               className="text-blue-500 font-semibold hover:underline focus:outline-none"
             >
               {isLoginMode ? 'Daftar sekarang' : 'Masuk'}
@@ -216,7 +287,6 @@ export default function Login() {
           {pesan.show && (
             <div 
               className={`mt-4 p-3 rounded-lg text-sm font-semibold text-center border ${pesan.isError ? 'bg-[#fadbd8] dark:bg-red-900 text-[#c0392b] dark:text-red-100 border-[#e74c3c] dark:border-red-700' : 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-100 border-emerald-500 dark:border-emerald-700'}`}
-              // Menggunakan dangerouslySetInnerHTML agar tag <b> dari HTML sebelumnya bisa dirender
               dangerouslySetInnerHTML={{ __html: pesan.text }} 
             />
           )}

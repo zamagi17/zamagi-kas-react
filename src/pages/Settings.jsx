@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
     Moon, Sun, LogOut, User, Shield, Info, Wallet,
-    Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3, Plus
+    Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3, Plus, Tags,
+    Mail, Smartphone // <-- ICON BARU DITAMBAHKAN
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
@@ -42,7 +43,6 @@ function cekKekuatan(pwd) {
     return { level: 4, label: 'Kuat', color: 'bg-emerald-500' };
 }
 
-// Komponen Reusable Modal (Bottom Sheet di Mobile, Center Popup di Desktop)
 const Modal = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
     return (
@@ -69,6 +69,13 @@ export default function Settings() {
     const currentUser = localStorage.getItem('username');
     const { isDark, toggle } = useDarkMode();
 
+    // ===== STATE PROFIL (BARU) =====
+    const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
+    const [showProfilModal, setShowProfilModal] = useState(false);
+    const [formProfil, setFormProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
+    const [isSavingProfil, setIsSavingProfil] = useState(false);
+    const [msgProfil, setMsgProfil] = useState(null);
+
     // State Modals
     const [showPwdModal, setShowPwdModal] = useState(false);
     const [showDompetModal, setShowDompetModal] = useState(false);
@@ -86,7 +93,7 @@ export default function Settings() {
     // State Master Aset
     const [listAset, setListAset] = useState([]);
     const [showAsetModal, setShowAsetModal] = useState(false);
-    const [editAset, setEditAset] = useState(null); // null = tambah baru, object = edit
+    const [editAset, setEditAset] = useState(null);
     const [inputAset, setInputAset] = useState('');
     const [msgAset, setMsgAset] = useState(null);
     const [isSavingAset, setIsSavingAset] = useState(false);
@@ -98,11 +105,13 @@ export default function Settings() {
     const [inputKategori, setInputKategori] = useState('');
     const [msgKategori, setMsgKategori] = useState(null);
     const [isSavingKategori, setIsSavingKategori] = useState(false);
+    const [showListKategoriModal, setShowListKategoriModal] = useState(false);
 
     useEffect(() => { if (!token) navigate('/'); }, [token, navigate]);
 
     useEffect(() => {
         if (!token) return;
+        fetchProfil(); // Panggil data profil saat load
         fetchAset();
         fetchKategori();
         fetch(`${baseUrl}/api/user/preferences`, { headers: { 'Authorization': 'Bearer ' + token } })
@@ -111,175 +120,113 @@ export default function Settings() {
             .catch(() => { });
     }, [token]);
 
-    const toggleAset = (aset) => setDompetHarian(prev =>
-        prev.includes(aset) ? prev.filter(a => a !== aset) : [...prev, aset]
-    );
+    // ===== FUNGSI API PROFIL (BARU) =====
+    const fetchProfil = async () => {
+        try {
+            const res = await fetch(`${baseUrl}/api/user/profile`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProfil({
+                    namaLengkap: data.namaLengkap || '',
+                    email: data.email || '',
+                    nomorHp: data.nomorHp || ''
+                });
+            }
+        } catch (e) { console.error('Gagal mengambil data profil', e); }
+    };
 
+    const handleBukaProfilModal = () => {
+        setFormProfil(profil); // Isi form dengan data saat ini
+        setShowProfilModal(true);
+        setMsgProfil(null);
+    };
+
+    const handleSimpanProfil = async (e) => {
+        e.preventDefault();
+        setIsSavingProfil(true);
+        setMsgProfil(null);
+        try {
+            const res = await fetch(`${baseUrl}/api/user/profile`, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(formProfil)
+            });
+            
+            if (res.ok) {
+                setProfil(formProfil); // Update tampilan langsung
+                setMsgProfil({ text: '✅ Profil berhasil diperbarui!', ok: true });
+                setTimeout(() => setShowProfilModal(false), 1500);
+            } else {
+                const text = await res.text();
+                setMsgProfil({ text: `❌ Gagal: ${text}`, ok: false });
+            }
+        } catch { 
+            setMsgProfil({ text: '❌ Gagal terhubung ke server', ok: false }); 
+        } finally { 
+            setIsSavingProfil(false); 
+        }
+    };
+
+    // ... [Semua fungsi lainnya seperti toggleAset, simpanAset, fetchKategori, dll tetap persis sama seperti kodemu] ...
+    const toggleAset = (aset) => setDompetHarian(prev => prev.includes(aset) ? prev.filter(a => a !== aset) : [...prev, aset]);
     const simpanDompetHarian = async () => {
         setIsSavingDompet(true); setMsgDompet(null);
         try {
             const res = await fetch(`${baseUrl}/api/user/preferences`, {
-                method: 'PUT',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dompetHarian })
+                method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ dompetHarian })
             });
             setMsgDompet({ text: res.ok ? '✅ Tersimpan!' : '❌ Gagal menyimpan', ok: res.ok });
             if (res.ok) setTimeout(() => { setShowDompetModal(false); setMsgDompet(null); }, 1500);
-        } catch { setMsgDompet({ text: '❌ Gagal terhubung ke server', ok: false }); }
-        finally { setIsSavingDompet(false); if (!msgDompet?.ok) setTimeout(() => setMsgDompet(null), 3000); }
+        } catch { setMsgDompet({ text: '❌ Gagal terhubung ke server', ok: false }); } finally { setIsSavingDompet(false); if (!msgDompet?.ok) setTimeout(() => setMsgDompet(null), 3000); }
     };
-
-    const handleClosePwdModal = () => {
-        setShowPwdModal(false);
-        setFormPwd({ passwordLama: '', passwordBaru: '', konfirmasi: '' });
-        setMsgPwd(null);
-    };
-
+    const handleClosePwdModal = () => { setShowPwdModal(false); setFormPwd({ passwordLama: '', passwordBaru: '', konfirmasi: '' }); setMsgPwd(null); };
     const handleGantiPassword = async (e) => {
         e.preventDefault();
-        if (formPwd.passwordBaru !== formPwd.konfirmasi)
-            return setMsgPwd({ text: '❌ Konfirmasi password tidak cocok', ok: false });
-        if (kekuatan.level < 2)
-            return setMsgPwd({ text: '❌ Password terlalu lemah', ok: false });
-
+        if (formPwd.passwordBaru !== formPwd.konfirmasi) return setMsgPwd({ text: '❌ Konfirmasi password tidak cocok', ok: false });
+        if (kekuatan.level < 2) return setMsgPwd({ text: '❌ Password terlalu lemah', ok: false });
         setIsSavingPwd(true); setMsgPwd(null);
         try {
             const res = await fetch(`${baseUrl}/api/user/password`, {
-                method: 'PUT',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify(formPwd)
+                method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(formPwd)
             });
-            const text = await res.text();
-            let data = null;
-            try { data = JSON.parse(text); } catch { data = null; }
-
+            const text = await res.text(); let data = null; try { data = JSON.parse(text); } catch { data = null; }
             if (res.ok && data?.token) {
-                localStorage.setItem('token', data.token);
-                if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-                setMsgPwd({ text: '✅ Password berhasil diubah!', ok: true });
-                setTimeout(() => handleClosePwdModal(), 2000);
-            } else {
-                setMsgPwd({ text: `❌ ${data?.message || text || 'Gagal mengubah password'}`, ok: false });
-            }
-        } catch { setMsgPwd({ text: '❌ Gagal terhubung ke server', ok: false }); }
-        finally { setIsSavingPwd(false); setTimeout(() => setMsgPwd(null), 4000); }
+                localStorage.setItem('token', data.token); if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+                setMsgPwd({ text: '✅ Password berhasil diubah!', ok: true }); setTimeout(() => handleClosePwdModal(), 2000);
+            } else { setMsgPwd({ text: `❌ ${data?.message || text || 'Gagal mengubah password'}`, ok: false }); }
+        } catch { setMsgPwd({ text: '❌ Gagal terhubung ke server', ok: false }); } finally { setIsSavingPwd(false); setTimeout(() => setMsgPwd(null), 4000); }
     };
-
     const handleLogout = () => { localStorage.clear(); navigate('/'); };
+    const fetchAset = async () => { try { const res = await fetch(`${baseUrl}/api/master/aset`, { headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) setListAset(await res.json()); } catch (e) { console.error(e); } };
+    const simpanAset = async () => {
+        if (!inputAset.trim()) return setMsgAset({ text: 'Nama aset wajib diisi', ok: false }); setIsSavingAset(true); setMsgAset(null);
+        try {
+            const res = await fetch(editAset ? `${baseUrl}/api/master/aset/${editAset.id}` : `${baseUrl}/api/master/aset`, {
+                method: editAset ? 'PUT' : 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ nama: inputAset.trim() })
+            });
+            const msg = await res.text();
+            if (res.ok) { setMsgAset({ text: editAset ? '✅ Aset diperbarui!' : '✅ Aset ditambahkan!', ok: true }); setInputAset(''); setEditAset(null); fetchAset(); setTimeout(() => setMsgAset(null), 2000); } else { setMsgAset({ text: `❌ ${msg}`, ok: false }); }
+        } catch { setMsgAset({ text: '❌ Gagal terhubung', ok: false }); } finally { setIsSavingAset(false); }
+    };
+    const hapusAset = async (id) => { if (!window.confirm('Yakin ingin menghapus aset ini?')) return; try { const res = await fetch(`${baseUrl}/api/master/aset/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { fetchAset(); } else { alert(await res.text()); } } catch { alert('Gagal menghapus aset'); } };
+    const toggleAktifAset = async (aset) => { try { await fetch(`${baseUrl}/api/master/aset/${aset.id}`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ isAktif: !aset.isAktif }) }); fetchAset(); } catch { alert('Gagal mengubah status aset'); } };
+    const fetchKategori = async () => { try { const res = await fetch(`${baseUrl}/api/master/kategori`, { headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) setListKategori(await res.json()); } catch (e) { console.error(e); } };
+    const simpanKategori = async () => {
+        if (!inputKategori.trim()) return setMsgKategori({ text: 'Nama kategori wajib diisi', ok: false }); setIsSavingKategori(true); setMsgKategori(null);
+        try {
+            const res = await fetch(editKategori ? `${baseUrl}/api/master/kategori/${editKategori.id}` : `${baseUrl}/api/master/kategori`, {
+                method: editKategori ? 'PUT' : 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ nama: inputKategori.trim() })
+            });
+            const msg = await res.text();
+            if (res.ok) { setMsgKategori({ text: editKategori ? '✅ Kategori diperbarui!' : '✅ Kategori ditambahkan!', ok: true }); setInputKategori(''); setEditKategori(null); fetchKategori(); setTimeout(() => setMsgKategori(null), 2000); } else { setMsgKategori({ text: `❌ ${msg}`, ok: false }); }
+        } catch { setMsgKategori({ text: '❌ Gagal terhubung', ok: false }); } finally { setIsSavingKategori(false); }
+    };
+    const hapusKategori = async (id) => { if (!window.confirm('Yakin ingin menghapus kategori ini?')) return; try { const res = await fetch(`${baseUrl}/api/master/kategori/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { fetchKategori(); } else { alert(await res.text()); } } catch { alert('Gagal menghapus kategori'); } };
 
     if (!token) return null;
-
-    const sisaAkses = formatSisaToken(token);
-    const sisaRefresh = formatSisaToken(refreshToken);
-
-    // ===== MASTER ASET =====
-    const fetchAset = async () => {
-        try {
-            const res = await fetch(`${baseUrl}/api/master/aset`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            if (res.ok) setListAset(await res.json());
-        } catch (e) { console.error(e); }
-    };
-
-    const simpanAset = async () => {
-        if (!inputAset.trim()) return setMsgAset({ text: 'Nama aset wajib diisi', ok: false });
-        setIsSavingAset(true); setMsgAset(null);
-        try {
-            const url = editAset
-                ? `${baseUrl}/api/master/aset/${editAset.id}`
-                : `${baseUrl}/api/master/aset`;
-            const method = editAset ? 'PUT' : 'POST';
-            const res = await fetch(url, {
-                method,
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nama: inputAset.trim() })
-            });
-            const msg = await res.text();
-            if (res.ok) {
-                setMsgAset({ text: editAset ? '✅ Aset diperbarui!' : '✅ Aset ditambahkan!', ok: true });
-                setInputAset(''); setEditAset(null);
-                fetchAset();
-                setTimeout(() => setMsgAset(null), 2000);
-            } else {
-                setMsgAset({ text: `❌ ${msg}`, ok: false });
-            }
-        } catch { setMsgAset({ text: '❌ Gagal terhubung', ok: false }); }
-        finally { setIsSavingAset(false); }
-    };
-
-    const hapusAset = async (id) => {
-        if (!window.confirm('Yakin ingin menghapus aset ini?')) return;
-        try {
-            const res = await fetch(`${baseUrl}/api/master/aset/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            const msg = await res.text();
-            if (res.ok) { fetchAset(); }
-            else { alert(msg); }
-        } catch { alert('Gagal menghapus aset'); }
-    };
-
-    const toggleAktifAset = async (aset) => {
-        try {
-            await fetch(`${baseUrl}/api/master/aset/${aset.id}`, {
-                method: 'PUT',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isAktif: !aset.isAktif })
-            });
-            fetchAset();
-        } catch { alert('Gagal mengubah status aset'); }
-    };
-
-    // ===== MASTER KATEGORI =====
-    const fetchKategori = async () => {
-        try {
-            const res = await fetch(`${baseUrl}/api/master/kategori`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            if (res.ok) setListKategori(await res.json());
-        } catch (e) { console.error(e); }
-    };
-
-    const simpanKategori = async () => {
-        if (!inputKategori.trim()) return setMsgKategori({ text: 'Nama kategori wajib diisi', ok: false });
-        setIsSavingKategori(true); setMsgKategori(null);
-        try {
-            const url = editKategori
-                ? `${baseUrl}/api/master/kategori/${editKategori.id}`
-                : `${baseUrl}/api/master/kategori`;
-            const method = editKategori ? 'PUT' : 'POST';
-            const res = await fetch(url, {
-                method,
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nama: inputKategori.trim() })
-            });
-            const msg = await res.text();
-            if (res.ok) {
-                setMsgKategori({ text: editKategori ? '✅ Kategori diperbarui!' : '✅ Kategori ditambahkan!', ok: true });
-                setInputKategori(''); setEditKategori(null);
-                fetchKategori();
-                setTimeout(() => setMsgKategori(null), 2000);
-            } else {
-                setMsgKategori({ text: `❌ ${msg}`, ok: false });
-            }
-        } catch { setMsgKategori({ text: '❌ Gagal terhubung', ok: false }); }
-        finally { setIsSavingKategori(false); }
-    };
-
-    const hapusKategori = async (id) => {
-        if (!window.confirm('Yakin ingin menghapus kategori ini?')) return;
-        try {
-            const res = await fetch(`${baseUrl}/api/master/kategori/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            const msg = await res.text();
-            if (res.ok) { fetchKategori(); }
-            else { alert(msg); }
-        } catch { alert('Gagal menghapus kategori'); }
-    };
+    const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
@@ -291,20 +238,42 @@ export default function Settings() {
                     <p className="text-sm text-slate-500 dark:text-slate-400">Kelola preferensi aplikasi kamu</p>
                 </div>
 
-                {/* Profil & Keamanan (Digabung dalam satu Card agar lebih rapi) */}
+                {/* ===== BLOK PROFIL & KEAMANAN (DIPERBARUI) ===== */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Profil & Keamanan</p>
+                        <button onClick={handleBukaProfilModal} className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
+                            <Edit3 size={14} /> Edit Profil
+                        </button>
                     </div>
 
-                    {/* Info Profil */}
+                    {/* Info Profil Utama */}
                     <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                            <User size={22} className="text-blue-500" />
+                        <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 border border-blue-200 dark:border-blue-800">
+                            <User size={26} className="text-blue-500" />
                         </div>
-                        <div className="flex-1">
-                            <p className="font-bold text-slate-800 dark:text-slate-100">{currentUser}</p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500">Pengguna aktif</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-lg text-slate-800 dark:text-slate-100 truncate">
+                                {profil.namaLengkap || currentUser}
+                            </p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">@{currentUser}</p>
+                            
+                            {/* Menampilkan Email & No HP ringkas jika ada */}
+                            <div className="flex flex-col gap-1 mt-2">
+                                {profil.email && (
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                        <Mail size={12} /> <span className="truncate">{profil.email}</span>
+                                    </div>
+                                )}
+                                {profil.nomorHp && (
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                        <Smartphone size={12} /> <span>{profil.nomorHp}</span>
+                                    </div>
+                                )}
+                                {(!profil.email || !profil.nomorHp) && (
+                                    <p className="text-xs text-amber-500 mt-1 italic">Lengkapi profil Anda</p>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -328,7 +297,8 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* Dompet Harian (Tampilan Hybrid) */}
+                {/* ===== (BLOK BAWAH TETAP SAMA) ===== */}
+                {/* Dompet Harian */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Dompet Harian</p>
@@ -338,8 +308,6 @@ export default function Settings() {
                     </div>
                     <div className="px-4 py-4 space-y-3">
                         <p className="text-sm text-slate-500 dark:text-slate-400">Aset yang sering digunakan untuk transaksi.</p>
-
-                        {/* Chips Tampilan Inline */}
                         {dompetHarian.length > 0 ? (
                             <div className="flex flex-wrap gap-2 pt-1">
                                 {dompetHarian.map(a => (
@@ -356,7 +324,7 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* ===== MASTER ASET ===== */}
+                {/* Master Aset */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Master Aset</p>
@@ -396,33 +364,27 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* ===== MASTER KATEGORI ===== */}
+                {/* Master Kategori */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Master Kategori</p>
-                        <button onClick={() => { setShowKategoriModal(true); setEditKategori(null); setInputKategori(''); setMsgKategori(null); }}
-                            className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
-                            <Plus size={14} /> Tambah
-                        </button>
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Data Master</p>
                     </div>
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {listKategori.length === 0 ? (
-                            <p className="px-4 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">Belum ada kategori. Tambahkan dulu.</p>
-                        ) : listKategori.map(kat => (
-                            <div key={kat.id} className="flex items-center justify-between px-4 py-3 gap-3">
-                                <span className="text-sm font-medium text-slate-800 dark:text-slate-100 flex-1 truncate">{kat.nama}</span>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <button onClick={() => { setEditKategori(kat); setInputKategori(kat.nama); setShowKategoriModal(true); setMsgKategori(null); }}
-                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition">
-                                        <Edit3 size={14} />
-                                    </button>
-                                    <button onClick={() => hapusKategori(kat.id)}
-                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
-                                        <X size={14} />
-                                    </button>
-                                </div>
+                    <div
+                        className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+                        onClick={() => setShowListKategoriModal(true)}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                <Tags size={16} className="text-slate-500" />
                             </div>
-                        ))}
+                            <div>
+                                <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Master Kategori</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500">{listKategori.length} kategori tersimpan</p>
+                            </div>
+                        </div>
+                        <button className="text-xs font-semibold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                            Kelola
+                        </button>
                     </div>
                 </div>
 
@@ -507,6 +469,55 @@ export default function Settings() {
                 </button>
 
             </div>
+
+            {/* ===== MODAL ===== */}
+
+            {/* MODAL: Edit Profil (BARU) */}
+            <Modal isOpen={showProfilModal} onClose={() => setShowProfilModal(false)} title="Edit Profil">
+                <form onSubmit={handleSimpanProfil} className="space-y-4">
+                    <div className="space-y-3">
+                        <div>
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Nama Lengkap</label>
+                            <input type="text" 
+                                value={formProfil.namaLengkap} 
+                                onChange={e => setFormProfil({...formProfil, namaLengkap: e.target.value})}
+                                className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Masukkan nama lengkap" required 
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Email</label>
+                            <input type="email" 
+                                value={formProfil.email} 
+                                onChange={e => setFormProfil({...formProfil, email: e.target.value})}
+                                className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="contoh@email.com" 
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Nomor Handphone</label>
+                            <input type="tel" 
+                                value={formProfil.nomorHp} 
+                                onChange={e => setFormProfil({...formProfil, nomorHp: e.target.value})}
+                                className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="081234567890" 
+                            />
+                        </div>
+                    </div>
+                    
+                    {msgProfil && (
+                        <p className={`text-sm font-medium text-center p-2 rounded-lg ${msgProfil.ok ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                            {msgProfil.text}
+                        </p>
+                    )}
+
+                    <div className="pt-2">
+                        <button type="submit" disabled={isSavingProfil} className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition-colors shadow-sm">
+                            {isSavingProfil ? 'Menyimpan...' : 'Simpan Profil'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             {/* MODAL: Ganti Password */}
             <Modal isOpen={showPwdModal} onClose={handleClosePwdModal} title="Ganti Password">
@@ -635,6 +646,41 @@ export default function Settings() {
                         className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition">
                         {isSavingAset ? 'Menyimpan...' : (editAset ? 'Simpan Perubahan' : 'Tambah Aset')}
                     </button>
+                </div>
+            </Modal>
+
+            {/* MODAL: List Semua Kategori */}
+            <Modal isOpen={showListKategoriModal} onClose={() => setShowListKategoriModal(false)} title="Kelola Kategori">
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Total: {listKategori.length} data</p>
+                        <button
+                            onClick={() => { setShowKategoriModal(true); setEditKategori(null); setInputKategori(''); setMsgKategori(null); }}
+                            className="flex items-center gap-1.5 text-sm font-semibold bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 transition"
+                        >
+                            <Plus size={16} /> Tambah Baru
+                        </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[50vh] overflow-y-auto pr-1">
+                        {listKategori.length === 0 ? (
+                            <p className="py-8 text-sm text-slate-400 dark:text-slate-500 text-center">Belum ada kategori yang ditambahkan.</p>
+                        ) : listKategori.map(kat => (
+                            <div key={kat.id} className="flex items-center justify-between py-3 gap-3">
+                                <span className="text-sm font-medium text-slate-800 dark:text-slate-100 flex-1 truncate">{kat.nama}</span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button onClick={() => { setEditKategori(kat); setInputKategori(kat.nama); setShowKategoriModal(true); setMsgKategori(null); }}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition">
+                                        <Edit3 size={14} />
+                                    </button>
+                                    <button onClick={() => hapusKategori(kat.id)}
+                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </Modal>
 
