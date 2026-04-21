@@ -20,6 +20,7 @@ export default function UtangPiutang() {
     const [filterJenis, setFilterJenis] = useState('Semua');
     const [filterStatus, setFilterStatus] = useState('Belum Lunas');
     const [expandedId, setExpandedId] = useState(null);
+    const [masterAset, setMasterAset] = useState([]);
 
     // Modal tambah baru
     const [showModalTambah, setShowModalTambah] = useState(false);
@@ -67,6 +68,13 @@ export default function UtangPiutang() {
             setIsLoading(false);
         }
     };
+    useEffect(() => {
+        if (!token) return;
+        fetch(`${baseUrl}/api/master/aset`, { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => setMasterAset(data.filter(a => a.isAktif)))
+            .catch(() => { });
+    }, [token]);
 
     useEffect(() => { if (!token) navigate('/'); }, [token, navigate]);
     useEffect(() => { fetchData(); }, [token]);
@@ -275,7 +283,7 @@ export default function UtangPiutang() {
                                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0
                                                     ${isLunas ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
                                                         : item.jenis === 'Piutang' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
+                                                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
                                                     {isLunas ? '✓ Lunas' : item.jenis}
                                                 </span>
                                                 <span className="font-bold text-slate-800 dark:text-slate-100 truncate">{item.namaPihak}</span>
@@ -392,7 +400,7 @@ export default function UtangPiutang() {
             {/* ===== MODAL TAMBAH BARU ===== */}
             {showModalTambah && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
-                <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center p-5 border-b">
                             <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Catat Utang / Piutang</h3>
                             <button onClick={() => setShowModalTambah(false)}><X size={20} /></button>
@@ -437,14 +445,12 @@ export default function UtangPiutang() {
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Aset Terkait</label>
-                                <input type="text" list="listAsetUP" required
-                                    placeholder="Dari/ke aset mana?"
-                                    value={formTambah.asetTerkait}
+                                <select required value={formTambah.asetTerkait}
                                     onChange={e => setFormTambah(p => ({ ...p, asetTerkait: e.target.value }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                                <datalist id="listAsetUP">
-                                    {LIST_ASET.map(a => <option key={a} value={a} />)}
-                                </datalist>
+                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+                                    <option value="">-- Pilih Aset --</option>
+                                    {masterAset.map(a => <option key={a.id} value={a.nama}>{a.nama}</option>)}
+                                </select>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">

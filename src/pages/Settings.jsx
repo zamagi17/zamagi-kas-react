@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
     Moon, Sun, LogOut, User, Shield, Info, Wallet,
-    Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3
+    Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3, Plus
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
@@ -88,14 +88,32 @@ export default function Settings() {
     const [msgPwd, setMsgPwd] = useState(null);
     const kekuatan = cekKekuatan(formPwd.passwordBaru);
 
+    // State Master Aset
+    const [listAset, setListAset] = useState([]);
+    const [showAsetModal, setShowAsetModal] = useState(false);
+    const [editAset, setEditAset] = useState(null); // null = tambah baru, object = edit
+    const [inputAset, setInputAset] = useState('');
+    const [msgAset, setMsgAset] = useState(null);
+    const [isSavingAset, setIsSavingAset] = useState(false);
+
+    // State Master Kategori
+    const [listKategori, setListKategori] = useState([]);
+    const [showKategoriModal, setShowKategoriModal] = useState(false);
+    const [editKategori, setEditKategori] = useState(null);
+    const [inputKategori, setInputKategori] = useState('');
+    const [msgKategori, setMsgKategori] = useState(null);
+    const [isSavingKategori, setIsSavingKategori] = useState(false);
+
     useEffect(() => { if (!token) navigate('/'); }, [token, navigate]);
 
     useEffect(() => {
         if (!token) return;
+        fetchAset();
+        fetchKategori();
         fetch(`${baseUrl}/api/user/preferences`, { headers: { 'Authorization': 'Bearer ' + token } })
             .then(res => res.ok ? res.json() : null)
             .then(data => { if (data?.dompetHarian) setDompetHarian(data.dompetHarian); })
-            .catch(() => {});
+            .catch(() => { });
     }, [token]);
 
     const toggleAset = (aset) => setDompetHarian(prev =>
@@ -159,6 +177,115 @@ export default function Settings() {
     const sisaAkses = formatSisaToken(token);
     const sisaRefresh = formatSisaToken(refreshToken);
 
+    // ===== MASTER ASET =====
+    const fetchAset = async () => {
+        try {
+            const res = await fetch(`${baseUrl}/api/master/aset`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) setListAset(await res.json());
+        } catch (e) { console.error(e); }
+    };
+
+    const simpanAset = async () => {
+        if (!inputAset.trim()) return setMsgAset({ text: 'Nama aset wajib diisi', ok: false });
+        setIsSavingAset(true); setMsgAset(null);
+        try {
+            const url = editAset
+                ? `${baseUrl}/api/master/aset/${editAset.id}`
+                : `${baseUrl}/api/master/aset`;
+            const method = editAset ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method,
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama: inputAset.trim() })
+            });
+            const msg = await res.text();
+            if (res.ok) {
+                setMsgAset({ text: editAset ? '✅ Aset diperbarui!' : '✅ Aset ditambahkan!', ok: true });
+                setInputAset(''); setEditAset(null);
+                fetchAset();
+                setTimeout(() => setMsgAset(null), 2000);
+            } else {
+                setMsgAset({ text: `❌ ${msg}`, ok: false });
+            }
+        } catch { setMsgAset({ text: '❌ Gagal terhubung', ok: false }); }
+        finally { setIsSavingAset(false); }
+    };
+
+    const hapusAset = async (id) => {
+        if (!window.confirm('Yakin ingin menghapus aset ini?')) return;
+        try {
+            const res = await fetch(`${baseUrl}/api/master/aset/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const msg = await res.text();
+            if (res.ok) { fetchAset(); }
+            else { alert(msg); }
+        } catch { alert('Gagal menghapus aset'); }
+    };
+
+    const toggleAktifAset = async (aset) => {
+        try {
+            await fetch(`${baseUrl}/api/master/aset/${aset.id}`, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isAktif: !aset.isAktif })
+            });
+            fetchAset();
+        } catch { alert('Gagal mengubah status aset'); }
+    };
+
+    // ===== MASTER KATEGORI =====
+    const fetchKategori = async () => {
+        try {
+            const res = await fetch(`${baseUrl}/api/master/kategori`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) setListKategori(await res.json());
+        } catch (e) { console.error(e); }
+    };
+
+    const simpanKategori = async () => {
+        if (!inputKategori.trim()) return setMsgKategori({ text: 'Nama kategori wajib diisi', ok: false });
+        setIsSavingKategori(true); setMsgKategori(null);
+        try {
+            const url = editKategori
+                ? `${baseUrl}/api/master/kategori/${editKategori.id}`
+                : `${baseUrl}/api/master/kategori`;
+            const method = editKategori ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method,
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama: inputKategori.trim() })
+            });
+            const msg = await res.text();
+            if (res.ok) {
+                setMsgKategori({ text: editKategori ? '✅ Kategori diperbarui!' : '✅ Kategori ditambahkan!', ok: true });
+                setInputKategori(''); setEditKategori(null);
+                fetchKategori();
+                setTimeout(() => setMsgKategori(null), 2000);
+            } else {
+                setMsgKategori({ text: `❌ ${msg}`, ok: false });
+            }
+        } catch { setMsgKategori({ text: '❌ Gagal terhubung', ok: false }); }
+        finally { setIsSavingKategori(false); }
+    };
+
+    const hapusKategori = async (id) => {
+        if (!window.confirm('Yakin ingin menghapus kategori ini?')) return;
+        try {
+            const res = await fetch(`${baseUrl}/api/master/kategori/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const msg = await res.text();
+            if (res.ok) { fetchKategori(); }
+            else { alert(msg); }
+        } catch { alert('Gagal menghapus kategori'); }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
             <Navbar />
@@ -174,7 +301,7 @@ export default function Settings() {
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Profil & Keamanan</p>
                     </div>
-                    
+
                     {/* Info Profil */}
                     <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
                         <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
@@ -187,7 +314,7 @@ export default function Settings() {
                     </div>
 
                     {/* Tombol Buka Modal Ganti Password */}
-                    <div 
+                    <div
                         className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
                         onClick={() => setShowPwdModal(true)}
                     >
@@ -216,7 +343,7 @@ export default function Settings() {
                     </div>
                     <div className="px-4 py-4 space-y-3">
                         <p className="text-sm text-slate-500 dark:text-slate-400">Aset yang sering digunakan untuk transaksi.</p>
-                        
+
                         {/* Chips Tampilan Inline */}
                         {dompetHarian.length > 0 ? (
                             <div className="flex flex-wrap gap-2 pt-1">
@@ -231,6 +358,76 @@ export default function Settings() {
                                 <p className="text-sm text-slate-500">Belum ada dompet yang dipilih.</p>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* ===== MASTER ASET ===== */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Master Aset</p>
+                        <button onClick={() => { setShowAsetModal(true); setEditAset(null); setInputAset(''); setMsgAset(null); }}
+                            className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
+                            <Plus size={14} /> Tambah
+                        </button>
+                    </div>
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {listAset.length === 0 ? (
+                            <p className="px-4 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">Belum ada aset. Tambahkan dulu.</p>
+                        ) : listAset.map(aset => (
+                            <div key={aset.id} className="flex items-center justify-between px-4 py-3 gap-3">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <Wallet size={16} className={aset.isAktif ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
+                                    <span className={`text-sm font-medium truncate ${aset.isAktif ? 'text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600 line-through'}`}>
+                                        {aset.nama}
+                                    </span>
+                                    {!aset.isAktif && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded shrink-0">Nonaktif</span>}
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button onClick={() => toggleAktifAset(aset)}
+                                        className={`text-xs px-2 py-1 rounded-lg font-semibold transition ${aset.isAktif ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100'}`}>
+                                        {aset.isAktif ? 'Nonaktifkan' : 'Aktifkan'}
+                                    </button>
+                                    <button onClick={() => { setEditAset(aset); setInputAset(aset.nama); setShowAsetModal(true); setMsgAset(null); }}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition">
+                                        <Edit3 size={14} />
+                                    </button>
+                                    <button onClick={() => hapusAset(aset.id)}
+                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ===== MASTER KATEGORI ===== */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Master Kategori</p>
+                        <button onClick={() => { setShowKategoriModal(true); setEditKategori(null); setInputKategori(''); setMsgKategori(null); }}
+                            className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
+                            <Plus size={14} /> Tambah
+                        </button>
+                    </div>
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {listKategori.length === 0 ? (
+                            <p className="px-4 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">Belum ada kategori. Tambahkan dulu.</p>
+                        ) : listKategori.map(kat => (
+                            <div key={kat.id} className="flex items-center justify-between px-4 py-3 gap-3">
+                                <span className="text-sm font-medium text-slate-800 dark:text-slate-100 flex-1 truncate">{kat.nama}</span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button onClick={() => { setEditKategori(kat); setInputKategori(kat.nama); setShowKategoriModal(true); setMsgKategori(null); }}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition">
+                                        <Edit3 size={14} />
+                                    </button>
+                                    <button onClick={() => hapusKategori(kat.id)}
+                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -399,7 +596,7 @@ export default function Settings() {
                             );
                         })}
                     </div>
-                    
+
                     <div className="pt-2">
                         <button onClick={simpanDompetHarian} disabled={isSavingDompet}
                             className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition-colors shadow-sm">
@@ -411,6 +608,56 @@ export default function Settings() {
                             {msgDompet.text}
                         </p>
                     )}
+                </div>
+            </Modal>
+
+            {/* MODAL: Tambah/Edit Aset */}
+            <Modal isOpen={showAsetModal} onClose={() => setShowAsetModal(false)}
+                title={editAset ? 'Edit Aset' : 'Tambah Aset Baru'}>
+                <div className="space-y-4">
+                    <input
+                        type="text"
+                        placeholder="Nama aset, misal: BCA, GoPay, Dompet Tunai"
+                        value={inputAset}
+                        onChange={e => setInputAset(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && simpanAset()}
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                    />
+                    {msgAset && (
+                        <p className={`text-sm font-medium text-center p-2 rounded-lg ${msgAset.ok ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-900/20'}`}>
+                            {msgAset.text}
+                        </p>
+                    )}
+                    <button onClick={simpanAset} disabled={isSavingAset}
+                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition">
+                        {isSavingAset ? 'Menyimpan...' : (editAset ? 'Simpan Perubahan' : 'Tambah Aset')}
+                    </button>
+                </div>
+            </Modal>
+
+            {/* MODAL: Tambah/Edit Kategori */}
+            <Modal isOpen={showKategoriModal} onClose={() => setShowKategoriModal(false)}
+                title={editKategori ? 'Edit Kategori' : 'Tambah Kategori Baru'}>
+                <div className="space-y-4">
+                    <input
+                        type="text"
+                        placeholder="Nama kategori, misal: Makan & Minum, Transportasi"
+                        value={inputKategori}
+                        onChange={e => setInputKategori(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && simpanKategori()}
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                    />
+                    {msgKategori && (
+                        <p className={`text-sm font-medium text-center p-2 rounded-lg ${msgKategori.ok ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-900/20'}`}>
+                            {msgKategori.text}
+                        </p>
+                    )}
+                    <button onClick={simpanKategori} disabled={isSavingKategori}
+                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition">
+                        {isSavingKategori ? 'Menyimpan...' : (editKategori ? 'Simpan Perubahan' : 'Tambah Kategori')}
+                    </button>
                 </div>
             </Modal>
 

@@ -25,6 +25,10 @@ export default function Transaksi() {
     const itemsPerPage = 10;
     const [showPanduan, setShowPanduan] = useState(false);
     const [showModalForm, setShowModalForm] = useState(false);
+    const [masterAset, setMasterAset] = useState([]);
+    const [masterKategori, setMasterKategori] = useState([]);
+    const [tambahKategoriBaru, setTambahKategoriBaru] = useState(false);
+    const [inputKategoriBaru, setInputKategoriBaru] = useState('');
 
     const [listAset, setListAset] = useState([
         'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
@@ -47,6 +51,22 @@ export default function Transaksi() {
     const formatRp = (angka) => new Intl.NumberFormat('id-ID', {
         style: 'currency', currency: 'IDR', minimumFractionDigits: 0
     }).format(angka || 0);
+
+    // Tambahkan fetch di useEffect awal
+    useEffect(() => {
+        if (!token) return;
+        // Fetch master aset
+        fetch(`${baseUrl}/api/master/aset`, { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => setMasterAset(data.filter(a => a.isAktif)))
+            .catch(() => { });
+
+        // Fetch master kategori
+        fetch(`${baseUrl}/api/master/kategori`, { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => setMasterKategori(data))
+            .catch(() => { });
+    }, [token]);
 
     useEffect(() => { if (!token) navigate('/'); }, [token, navigate]);
 
@@ -244,6 +264,31 @@ export default function Transaksi() {
         a.click();
     };
 
+    const simpanKategoriBaru = async () => {
+        if (!inputKategoriBaru.trim()) return;
+        try {
+            const res = await fetch(`${baseUrl}/api/master/kategori`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama: inputKategoriBaru.trim() })
+            });
+            if (res.ok) {
+                const kategoriBar = await res.json();
+                // Refresh list kategori
+                setMasterKategori(prev => [...prev, kategoriBar].sort((a, b) => a.nama.localeCompare(b.nama)));
+                // Langsung pilih kategori baru di form
+                setFormData(prev => ({ ...prev, kategori: kategoriBar.nama }));
+                setTambahKategoriBaru(false);
+                setInputKategoriBaru('');
+            } else {
+                const msg = await res.text();
+                alert(msg);
+            }
+        } catch {
+            alert('Gagal menambah kategori');
+        }
+    };
+
     if (!token) return null;
 
     return (
@@ -285,20 +330,20 @@ export default function Transaksi() {
                         <div className="relative flex gap-4">
                             <div className="flex-1">
                                 <h3 className="font-bold text-blue-900 dark:text-blue-100 text-lg mb-2">
-                                    Selamat datang! Yuk mulai catat keuangan kamu
+                                    Selamat datang! Yuk persiapkan dompet kamu 💳
                                 </h3>
                                 <p className="text-blue-800 dark:text-blue-200 text-sm mb-4">
-                                    Langkah pertama: Catat <b>saldo awal</b> di setiap aset (rekening, dompet tunai, e-wallet, dll).
+                                    Sebelum mencatat transaksi, pastikan kamu sudah mendaftarkan akun bank atau dompet kamu di menu <b>Setting</b>.
                                 </p>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                     {[
-                                        { step: '1', text: 'Isi Tanggal' },
-                                        { step: '2', text: 'Pilih Jenis → Pemasukan' },
-                                        { step: '3', text: 'Kategori → Saldo Awal' },
-                                        { step: '4', text: 'Sumber Dana (BCA, GoPay, dll)' },
-                                        { step: '5', text: 'Isi Nominal Saldo' },
-                                        { step: '6', text: 'Simpan & Ulangi per Aset' },
+                                        { step: '1', text: 'Pergi ke Menu Setting' },
+                                        { step: '2', text: 'Tambah Aset (BCA, GoPay, dll)' },
+                                        { step: '3', text: 'Catat Saldo Awal per Aset' },
+                                        { step: '4', text: 'Kembali ke halaman Transaksi' },
+                                        { step: '5', text: 'Pilih Dompet yang sudah dibuat' },
+                                        { step: '6', text: 'Mulai catat arus kas kamu!' },
                                     ].map(item => (
                                         <div key={item.step} className="flex items-center gap-2.5 text-sm bg-white/50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-700/30">
                                             <span className="bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
@@ -392,29 +437,113 @@ export default function Transaksi() {
                                             <option value="Rencana Pengeluaran">Rencana Pengeluaran</option>
                                         </select>
                                     </div>
+                                    {/* Ganti bagian kategori di Transaksi.jsx */}
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Kategori Transaksi</label>
-                                        <input
-                                            type="text" name="kategori" list="kategoriList"
-                                            value={formData.kategori} onChange={handleInputChange}
-                                            required placeholder="Pilih atau ketik kategori..."
-                                            autoComplete="off"
-                                            disabled={formData.jenis === 'Transfer'}
-                                            className={`w-full px-4 py-3 text-base md:text-sm border rounded-xl outline-none transition ${formData.jenis === 'Transfer'
-                                                ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 font-semibold cursor-not-allowed'
-                                                : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 focus:ring-2 focus:ring-blue-500'}`}
-                                        />
+                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
+                                            Kategori Transaksi
+                                        </label>
+                                        {formData.jenis === 'Transfer' ? (
+                                            <input type="text" value="Transfer Aset (Auto)" disabled
+                                                className="w-full px-4 py-3 text-base md:text-sm border border-blue-300 dark:border-blue-700 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold cursor-not-allowed" />
+                                        ) : tambahKategoriBaru ? (
+                                            // Mode input kategori baru
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    autoFocus
+                                                    placeholder="Nama kategori baru..."
+                                                    value={inputKategoriBaru}
+                                                    onChange={e => setInputKategoriBaru(e.target.value)}
+                                                    onKeyDown={async e => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            await simpanKategoriBaru();
+                                                        }
+                                                        if (e.key === 'Escape') {
+                                                            setTambahKategoriBaru(false);
+                                                            setInputKategoriBaru('');
+                                                        }
+                                                    }}
+                                                    className="flex-1 px-4 py-3 text-base md:text-sm border border-blue-300 dark:border-blue-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900"
+                                                />
+                                                <button type="button" onClick={simpanKategoriBaru}
+                                                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-bold transition">
+                                                    Simpan
+                                                </button>
+                                                <button type="button" onClick={() => { setTambahKategoriBaru(false); setInputKategoriBaru(''); }}
+                                                    className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-bold transition">
+                                                    Batal
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            // Mode select normal
+                                            <div className="flex gap-2">
+                                                <select name="kategori" value={formData.kategori} onChange={handleInputChange} required
+                                                    className="flex-1 px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition">
+                                                    <option value="">-- Pilih Kategori --</option>
+                                                    {masterKategori.map(k => <option key={k.id} value={k.nama}>{k.nama}</option>)}
+                                                </select>
+                                                <button type="button"
+                                                    onClick={() => setTambahKategoriBaru(true)}
+                                                    title="Tambah kategori baru"
+                                                    className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl text-sm font-bold transition border border-slate-200 dark:border-slate-700">
+                                                    + Baru
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
                                             {formData.jenis === 'Transfer' ? 'Dari Dompet (Asal)' : 'Sumber Dana / Lokasi Aset'}
                                         </label>
-                                        <input type="text" name="sumberDana" list="listSumberDana" value={formData.sumberDana} onChange={handleInputChange} required placeholder="Pilih atau ketik aset..." autoComplete="off" className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition" />
+                                        <select
+                                            name="sumberDana"
+                                            value={formData.sumberDana}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition"
+                                        >
+                                            {masterAset.length === 0 ? (
+                                                <option value="" disabled>❌ Belum ada aset. Tambah di Setting dulu.</option>
+                                            ) : (
+                                                <>
+                                                    <option value="">-- Pilih Aset --</option>
+                                                    {masterAset.map(a => <option key={a.id} value={a.nama}>{a.nama}</option>)}
+                                                </>
+                                            )}
+                                        </select>
+                                        {/* Hint kecil jika kosong */}
+                                        {masterAset.length === 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => navigate('/Settings')}
+                                                className="mt-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                            >
+                                                ⚙️ Pergi ke Setting untuk tambah aset
+                                            </button>
+                                        )}
                                     </div>
                                     {formData.jenis === 'Transfer' && (
                                         <div className="md:col-span-2 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-5 rounded-2xl border border-dashed border-blue-300 dark:border-blue-700/50 mt-1">
-                                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Ke Dompet / Aset (Tujuan)</label>
-                                            <input type="text" name="sumberDanaTujuan" list="listSumberDana" value={formData.sumberDanaTujuan} onChange={handleInputChange} required placeholder="Pilih atau ketik aset..." autoComplete="off" className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900" />
+                                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
+                                                Ke Dompet / Aset (Tujuan)
+                                            </label>
+                                            <select
+                                                name="sumberDanaTujuan"
+                                                value={formData.sumberDanaTujuan}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900"
+                                            >
+                                                {masterAset.length === 0 ? (
+                                                    <option value="" disabled>❌ Belum ada aset tujuan.</option>
+                                                ) : (
+                                                    <>
+                                                        <option value="">-- Pilih Aset Tujuan --</option>
+                                                        {masterAset.map(a => <option key={a.id} value={a.nama}>{a.nama}</option>)}
+                                                    </>
+                                                )}
+                                            </select>
                                         </div>
                                     )}
                                     <div>
