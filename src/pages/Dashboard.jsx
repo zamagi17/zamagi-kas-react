@@ -49,7 +49,7 @@ export default function Dashboard() {
             .then(data => {
                 if (data?.dompetHarian) setDompetHarian(data.dompetHarian);
             })
-            .catch(() => {});
+            .catch(() => { });
     }, [token]);
 
     const fetchDashboardData = async () => {
@@ -82,24 +82,33 @@ export default function Dashboard() {
                 let rMonth = rowDate.getMonth() + 1;
                 let nom = row.nominal || 0;
 
-                // Hitung portofolio all-time
-                if (row.sumberDana) {
-                    if (!portoAllTime[row.sumberDana]) portoAllTime[row.sumberDana] = 0;
-                    if (row.jenis === 'Pemasukan') portoAllTime[row.sumberDana] += nom;
-                    else if (row.jenis === 'Pengeluaran') portoAllTime[row.sumberDana] -= nom;
+                // Filter: Apakah transaksi ini terjadi SEBELUM atau PADA bulan yang difilter?
+                const isPastOrCurrentFilteredMonth = rYear < fYear || (rYear === fYear && rMonth <= fMonth);
+
+                // 1. HITUNG HISTORIS (TIME-TRAVEL) UNTUK NET WORTH & PORTOFOLIO
+                if (isPastOrCurrentFilteredMonth) {
+                    // Hitung Net Worth historis
+                    if (row.jenis === 'Pemasukan') netWorth += nom;
+                    else if (row.jenis === 'Pengeluaran') netWorth -= nom;
+
+                    // Hitung Portofolio historis
+                    if (row.sumberDana) {
+                        if (!portoAllTime[row.sumberDana]) portoAllTime[row.sumberDana] = 0;
+                        if (row.jenis === 'Pemasukan') portoAllTime[row.sumberDana] += nom;
+                        else if (row.jenis === 'Pengeluaran') portoAllTime[row.sumberDana] -= nom;
+                    }
                 }
 
-                // Hitung net worth
-                if (row.jenis === 'Pemasukan') netWorth += nom;
-                else if (row.jenis === 'Pengeluaran') netWorth -= nom;
-
+                // 2. HITUNG ARUS KAS BULANAN (SALDO AWAL & TRANSAKSI BULAN INI)
                 const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" &&
                     (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
 
                 if (rYear < fYear || (rYear === fYear && rMonth < fMonth)) {
+                    // Saldo Awal Bulan
                     if (row.jenis === 'Pemasukan') sAwal += nom;
                     else if (row.jenis === 'Pengeluaran') sAwal -= nom;
                 } else if (rYear === fYear && rMonth === fMonth) {
+                    // Transaksi di Bulan yang Difilter
                     if (row.jenis === 'Pemasukan' && !isTransferOrMutasi) tMasuk += nom;
                     else if (row.jenis === 'Pengeluaran') {
                         if (!isTransferOrMutasi) tKeluar += nom;
@@ -109,6 +118,7 @@ export default function Dashboard() {
                     else if (row.jenis === 'Rencana Pemasukan') rMasuk += nom;
                     else if (row.jenis === 'Rencana Pengeluaran') rKeluar += nom;
 
+                    // Transaksi Hari Ini (jika kebetulan bulan filternya adalah bulan ini)
                     if (row.tanggal === todayDateStr && row.kategori !== "Transfer Aset (Auto)") {
                         if (row.jenis === 'Pemasukan') hMasuk += nom;
                         else if (row.jenis === 'Pengeluaran') hKeluar += nom;

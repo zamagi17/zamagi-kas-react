@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, X, Wallet, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, X, Wallet, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
@@ -397,91 +397,140 @@ export default function UtangPiutang() {
                 )}
             </div>
 
-            {/* ===== MODAL TAMBAH BARU ===== */}
+            {/* ===== MODAL TAMBAH BARU (UTANG / PIUTANG) ===== */}
             {showModalTambah && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center p-5 border-b">
-                            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Catat Utang / Piutang</h3>
-                            <button onClick={() => setShowModalTambah(false)}><X size={20} /></button>
-                        </div>
-                        <form onSubmit={handleTambah} className="p-5 space-y-4">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm transition-all">
+                    {/* Container Modal */}
+                    <div className="w-full max-w-md max-h-[90vh] sm:max-h-[95vh] flex flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border border-slate-200/60 dark:border-slate-700/70 bg-white dark:bg-slate-950 shadow-2xl">
+
+                        {/* Header Modal - Sticky */}
+                        <div className="flex-shrink-0 flex items-center justify-between gap-4 px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur sticky top-0 z-10">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Jenis</label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Pencatatan Kewajiban & Hak</p>
+                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">Catat Utang / Piutang</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowModalTambah(false)}
+                                className="flex-shrink-0 rounded-full w-10 h-10 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-800 transition"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Form Body - Scrollable */}
+                        <form onSubmit={handleTambah} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+
+                            {/* Jenis Selection */}
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jenis Transaksi</label>
+                                <div className="grid grid-cols-2 gap-3">
                                     {['Utang', 'Piutang'].map(j => (
-                                        <button key={j} type="button"
+                                        <button
+                                            key={j}
+                                            type="button"
                                             onClick={() => setFormTambah(p => ({ ...p, jenis: j }))}
-                                            className={`py-2.5 rounded-lg font-bold text-sm border transition
-                                                ${formTambah.jenis === j
-                                                    ? j === 'Utang' ? 'bg-red-500 text-white border-red-500' : 'bg-blue-500 text-white border-blue-500'
-                                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-600'}`}>
-                                            {j === 'Utang' ? '🔴 Utang (saya ngutang)' : '🟢 Piutang (saya ngutangin)'}
+                                            className={`py-3 rounded-xl font-bold text-sm border transition-all flex flex-col items-center justify-center gap-1
+                                    ${formTambah.jenis === j
+                                                    ? j === 'Utang'
+                                                        ? 'bg-red-50 dark:bg-red-900/20 border-red-500 text-red-600 dark:text-red-400 ring-2 ring-red-500/20'
+                                                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-600 dark:text-blue-400 ring-2 ring-blue-500/20'
+                                                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'}`}
+                                        >
+                                            <span className="text-lg">{j === 'Utang' ? '🔴' : '🟢'}</span>
+                                            {j === 'Utang' ? 'Utang Saya' : 'Piutang Saya'}
                                         </button>
                                     ))}
                                 </div>
-                                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                <div className={`mt-2 p-3 rounded-lg text-xs border border-dashed transition-colors
+                        ${formTambah.jenis === 'Utang'
+                                        ? 'bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+                                        : 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'}`}>
                                     {formTambah.jenis === 'Utang'
-                                        ? 'Uang masuk ke aset kamu, harus dikembalikan nanti'
-                                        : 'Uang keluar dari aset kamu, akan kembali nanti'}
-                                </p>
+                                        ? '💡 Uang masuk ke aset kamu, tapi jadi beban yang harus dikembalikan.'
+                                        : '💡 Uang keluar dari aset kamu, tapi akan kembali (aset piutang).'}
+                                </div>
                             </div>
 
+                            {/* Input Nama Pihak */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Nama Pihak</label>
-                                <input type="text" required placeholder="Contoh: Budi, Mama, PT ABC"
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Nama Pihak Kedua</label>
+                                <input
+                                    type="text" required placeholder="Contoh: Budi, Mama, Bank Mandiri"
                                     value={formTambah.namaPihak}
                                     onChange={e => setFormTambah(p => ({ ...p, namaPihak: e.target.value }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition"
+                                />
                             </div>
 
+                            {/* Input Nominal */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Nominal (Rp)</label>
-                                <input type="text" required placeholder="Contoh: 500000"
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Nominal (Rp)</label>
+                                <input
+                                    type="text" required inputMode="numeric" placeholder="Masukkan jumlah uang"
                                     value={formatNumberInput(formTambah.nominalAwal)}
                                     onChange={e => setFormTambah(p => ({ ...p, nominalAwal: e.target.value.replace(/\D/g, '') }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 font-bold text-blue-600 dark:text-blue-400"
+                                />
                             </div>
 
+                            {/* Aset Terkait */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Aset Terkait</label>
-                                <select required value={formTambah.asetTerkait}
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Pilih Dompet / Aset</label>
+                                <select
+                                    required value={formTambah.asetTerkait}
                                     onChange={e => setFormTambah(p => ({ ...p, asetTerkait: e.target.value }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+                                    className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition"
+                                >
                                     <option value="">-- Pilih Aset --</option>
                                     {masterAset.map(a => <option key={a.id} value={a.nama}>{a.nama}</option>)}
                                 </select>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            {/* Dates */}
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Tanggal Mulai</label>
-                                    <input type="date" required
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Tanggal Mulai</label>
+                                    <input
+                                        type="date" required
                                         value={formTambah.tanggalMulai}
                                         onChange={e => setFormTambah(p => ({ ...p, tanggalMulai: e.target.value }))}
-                                        className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900"
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Jatuh Tempo <span className="text-slate-400 dark:text-slate-500 font-normal">(opsional)</span></label>
-                                    <input type="date"
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jatuh Tempo</label>
+                                    <input
+                                        type="date"
                                         value={formTambah.jatuhTempo}
                                         onChange={e => setFormTambah(p => ({ ...p, jatuhTempo: e.target.value }))}
-                                        className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900"
+                                    />
                                 </div>
                             </div>
 
+                            {/* Keterangan */}
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Keterangan <span className="text-slate-400 dark:text-slate-500 font-normal">(opsional)</span></label>
-                                <input type="text" placeholder="Contoh: Pinjam untuk beli HP"
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
+                                    Keterangan <span className="text-slate-400 font-normal">(opsional)</span>
+                                </label>
+                                <input
+                                    type="text" placeholder="Contoh: Pinjam untuk modal usaha"
                                     value={formTambah.keterangan}
                                     onChange={e => setFormTambah(p => ({ ...p, keterangan: e.target.value }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition"
+                                />
                             </div>
 
-                            <button type="submit" disabled={isSubmitting}
-                                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition disabled:opacity-50">
-                                {isSubmitting ? 'Menyimpan...' : 'Simpan'}
-                            </button>
+                            {/* Submit Button */}
+                            <div className="pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-2xl transition shadow-lg active:scale-[0.98] disabled:opacity-50"
+                                >
+                                    {isSubmitting ? 'Menyimpan...' : 'Simpan Catatan'}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -489,38 +538,59 @@ export default function UtangPiutang() {
 
             {/* ===== MODAL BAYAR CICILAN ===== */}
             {showModalBayar && selectedItem && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md">
-                        <div className="flex justify-between items-center p-5 border-b">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm transition-all">
+                    <div className="w-full max-w-md max-h-[90vh] sm:max-h-[95vh] flex flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border border-slate-200/60 dark:border-slate-700/70 bg-white dark:bg-slate-950 shadow-2xl">
+
+                        {/* Header Sticky */}
+                        <div className="flex-shrink-0 flex items-center justify-between gap-4 px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur sticky top-0 z-10">
                             <div>
-                                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Bayar Cicilan</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">{selectedItem.namaPihak} — Sisa {formatRp(selectedItem.sisaTagihan)}</p>
+                                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Pembayaran ke: {selectedItem.namaPihak}</p>
+                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">Bayar Cicilan</h3>
                             </div>
-                            <button onClick={() => setShowModalBayar(false)}><X size={20} /></button>
+                            <button onClick={() => setShowModalBayar(false)} className="flex-shrink-0 rounded-full w-10 h-10 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-800 transition">
+                                <X size={20} />
+                            </button>
                         </div>
-                        <form onSubmit={handleBayar} className="p-5 space-y-4">
+
+                        {/* Body Form */}
+                        <form onSubmit={handleBayar} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+                            {/* Info Sisa Tagihan */}
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/50 flex flex-col items-center sm:items-start text-center sm:text-left">
+                                <p className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-1">Sisa Tagihan Saat Ini</p>
+                                <p className="text-2xl font-black text-blue-700 dark:text-blue-300">{formatRp(selectedItem.sisaTagihan)}</p>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Nominal Bayar (Rp)</label>
-                                <input type="text" required placeholder="Masukkan nominal"
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Nominal Bayar (Rp)</label>
+                                <input type="text" required inputMode="numeric" placeholder="Masukkan nominal"
                                     value={formatNumberInput(formBayar.nominalBayar)}
                                     onChange={e => setFormBayar(p => ({ ...p, nominalBayar: e.target.value.replace(/\D/g, '') }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 font-bold text-slate-900 dark:text-white transition" />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Dari Aset</label>
-                                <input type="text" readOnly value={formBayar.asetBayar} className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-not-allowed" />
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Sumber Dana (Dari Aset)</label>
+                                <div className="relative">
+                                    <input type="text" readOnly value={formBayar.asetBayar}
+                                        className="w-full px-4 py-3 text-base md:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 cursor-not-allowed font-medium" />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded-md">Locked</span>
+                                </div>
                             </div>
+
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Keterangan <span className="text-slate-400 dark:text-slate-500 font-normal">(opsional)</span></label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Keterangan <span className="text-slate-400 font-normal">(opsional)</span></label>
                                 <input type="text" placeholder="Contoh: Cicilan ke-1"
                                     value={formBayar.keterangan}
                                     onChange={e => setFormBayar(p => ({ ...p, keterangan: e.target.value }))}
-                                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 transition" />
                             </div>
-                            <button type="submit" disabled={isSubmitting}
-                                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition disabled:opacity-50">
-                                {isSubmitting ? 'Memproses...' : 'Simpan Pembayaran'}
-                            </button>
+
+                            <div className="pt-4">
+                                <button type="submit" disabled={isSubmitting}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-blue-500/30 active:scale-[0.98] disabled:opacity-50">
+                                    {isSubmitting ? 'Memproses...' : 'Simpan Pembayaran'}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -528,25 +598,59 @@ export default function UtangPiutang() {
 
             {/* ===== MODAL TANDAI LUNAS ===== */}
             {showModalLunas && selectedItem && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md">
-                        <div className="flex justify-between items-center p-5 border-b">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm transition-all">
+                    {/* Container Modal */}
+                    <div className="w-full max-w-md flex flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border border-slate-200/60 dark:border-slate-700/70 bg-white dark:bg-slate-950 shadow-2xl">
+
+                        {/* Header Modal */}
+                        <div className="flex-shrink-0 flex items-center justify-between gap-4 px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-200 dark:border-slate-800">
                             <div>
-                                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Tandai Lunas</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Sisa tagihan: {formatRp(selectedItem.sisaTagihan)}</p>
+                                <p className="text-xs sm:text-sm text-emerald-500 font-bold uppercase tracking-widest mb-0.5">Konfirmasi Akhir</p>
+                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">Tandai Lunas</h3>
                             </div>
-                            <button onClick={() => setShowModalLunas(false)}><X size={20} /></button>
+                            <button
+                                onClick={() => setShowModalLunas(false)}
+                                className="flex-shrink-0 rounded-full w-10 h-10 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-800 transition"
+                            >
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="p-5 space-y-4">
-                            <p className="text-sm text-slate-600 dark:text-slate-100">
-                                Sisa tagihan sebesar <b>{formatRp(selectedItem.sisaTagihan)}</b> akan otomatis dicatat sebagai transaksi pelunasan.
-                            </p>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1">Dari Aset</label>
-                                <input type="text" readOnly value={asetLunas} className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-not-allowed" />
+
+                        {/* Body Modal */}
+                        <div className="p-5 sm:p-6 space-y-6 text-center sm:text-left">
+
+                            {/* Visual Icon Area */}
+                            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto sm:mx-0 ring-8 ring-emerald-50 dark:ring-emerald-900/10 mb-2">
+                                <Check size={32} />
                             </div>
-                            <button onClick={handleLunas} disabled={isSubmitting}
-                                className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition disabled:opacity-50">
+
+                            {/* Teks Konfirmasi */}
+                            <div className="space-y-3">
+                                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Sisa tagihan sebesar <span className="font-bold text-slate-900 dark:text-white px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 rounded text-lg">{formatRp(selectedItem.sisaTagihan)}</span> akan otomatis dicatat sebagai transaksi pelunasan.
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    💡 Aksi ini akan mengubah status tagihan menjadi lunas dan tidak dapat dibatalkan secara otomatis.
+                                </p>
+                            </div>
+
+                            {/* Info Aset Terkunci (Read-Only) */}
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-left">Menggunakan Aset</label>
+                                <div className="flex items-center justify-between">
+                                    <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                        💳 {asetLunas}
+                                    </p>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded-md">Locked</span>
+                                </div>
+                            </div>
+
+                            {/* Tombol Action */}
+                            <button
+                                onClick={handleLunas}
+                                disabled={isSubmitting}
+                                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
                                 {isSubmitting ? 'Memproses...' : '✓ Konfirmasi Lunas'}
                             </button>
                         </div>
