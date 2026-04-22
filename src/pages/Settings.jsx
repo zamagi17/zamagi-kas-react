@@ -445,7 +445,7 @@ export default function Settings() {
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Komunitas</p>
                     </div>
                     <a
-                        href="https://whatsapp.com/channel/0029VbCu01OEquiMCHUWgi0N"
+                        href="https://chat.whatsapp.com/LMDRdWKeLOO2B8xtN2DuEO"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors block"
