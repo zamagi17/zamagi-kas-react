@@ -438,14 +438,42 @@ export default function Dashboard() {
                             </div>
                             {/* Summary net worth */}
                             <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 space-y-2">
+                                {/* 1. Total Aset */}
                                 <div className="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
-                                    <span className="text-emerald-900 dark:text-emerald-200 font-semibold text-sm">Total Aset</span>
+                                    <span className="text-emerald-900 dark:text-emerald-200 font-semibold text-sm">Total Aset (Dompet)</span>
                                     <span className="text-lg font-bold text-emerald-700 dark:text-emerald-300">{formatRp(summary.totalNetWorth)}</span>
                                 </div>
+
+                                {/* 2. Piutang Aktif (Uang kita di luar) */}
+                                {totalPiutangAktif > 0 && (
+                                    <div className="flex justify-between items-center px-3 py-2 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-800/30">
+                                        <span className="text-blue-800 dark:text-blue-300 font-medium text-sm flex items-center gap-1.5">
+                                            <span>🟢</span> Piutang (Uang Masuk Nanti)
+                                        </span>
+                                        <span className="font-bold text-blue-600 dark:text-blue-400">+ {formatRp(totalPiutangAktif)}</span>
+                                    </div>
+                                )}
+
+                                {/* 3. Utang Aktif (Uang yang harus dibayar) */}
+                                {totalUtangAktif > 0 && (
+                                    <div className="flex justify-between items-center px-3 py-2 bg-rose-50/50 dark:bg-rose-900/10 rounded-lg border border-rose-100 dark:border-rose-800/30">
+                                        <span className="text-rose-800 dark:text-rose-300 font-medium text-sm flex items-center gap-1.5">
+                                            <span>🔴</span> Utang (Harus Dibayar)
+                                        </span>
+                                        <span className="font-bold text-rose-600 dark:text-rose-400">- {formatRp(totalUtangAktif)}</span>
+                                    </div>
+                                )}
+
+                                {/* 4. Net Bersih (Hanya muncul jika punya utang/piutang) */}
                                 {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
-                                    <div className="flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800/30">
-                                        <span className="text-indigo-900 dark:text-indigo-200 font-semibold text-sm">Net Bersih</span>
-                                        <span className="text-lg font-bold text-indigo-700 dark:text-indigo-300">{formatRp(summary.totalNetWorth + totalPiutangAktif - totalUtangAktif)}</span>
+                                    <div className="flex justify-between items-center bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/30 dark:to-violet-900/30 p-3 rounded-lg border border-indigo-200 dark:border-indigo-700/50 mt-1 shadow-sm">
+                                        <div className="flex flex-col">
+                                            <span className="text-indigo-900 dark:text-indigo-200 font-bold text-sm">Kekayaan Bersih</span>
+                                            <span className="text-[10px] text-indigo-500 dark:text-indigo-400">Aset + Piutang - Utang</span>
+                                        </div>
+                                        <span className="text-xl font-black text-indigo-700 dark:text-indigo-300">
+                                            {formatRp(summary.totalNetWorth + totalPiutangAktif - totalUtangAktif)}
+                                        </span>
                                     </div>
                                 )}
                             </div>
