@@ -104,6 +104,13 @@ export default function Transaksi() {
                 let rYear = rowDate.getFullYear().toString();
                 let rMonth = (rowDate.getMonth() + 1).toString().padStart(2, '0');
 
+                // --- TAMBAHKAN FORMAT JAM ---
+                let timeStr = "";
+                if (row.createdAt) {
+                    const createdDate = new Date(row.createdAt);
+                    timeStr = createdDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                }
+
                 if (row.sumberDana) asetSet.add(row.sumberDana);
                 if (row.kategori) kategoriSet.add(row.kategori);
 
@@ -112,6 +119,7 @@ export default function Transaksi() {
                         id: row.id,
                         tanggalAsli: row.tanggal,
                         tglStr: rowDate.toLocaleDateString('id-ID'),
+                        timeStr: timeStr, // <-- Masukkan ke array
                         kategori: row.kategori,
                         keterangan: row.keterangan,
                         sumberDana: row.sumberDana || 'Lain-lain',
@@ -257,7 +265,7 @@ export default function Transaksi() {
     const exportCSV = () => {
         if (filteredHistory.length === 0) return alert("Tidak ada data untuk diunduh.");
         let csv = ['"ID","Tanggal","Kategori","Keterangan","Dompet / Aset","Jenis Arus Kas","Nominal Murni"'];
-        filteredHistory.forEach(h => csv.push(`"${h.id}","${h.tglStr}","${h.kategori}","${h.keterangan}","${h.sumberDana}","${h.jenis}","${h.nominal}"`));
+        filteredHistory.forEach(h => csv.push(`"${h.id}","${h.tglStr}","${h.timeStr}","${h.kategori}","${h.keterangan}","${h.sumberDana}","${h.jenis}","${h.nominal}"`));
         const a = document.createElement("a");
         a.href = window.URL.createObjectURL(new Blob([csv.join("\n")], { type: "text/csv" }));
         a.download = `Laporan_${currentUser}_${filterBulan}.csv`;
@@ -658,7 +666,14 @@ export default function Transaksi() {
                                                 <tr key={h.id} className={`flex flex-col md:table-row mb-4 md:mb-0 border border-slate-200 md:border-0 md:border-b md:border-slate-100 rounded-xl md:rounded-none shadow-sm md:shadow-none overflow-hidden transition-colors ${rowBg}`}>
                                                     <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 whitespace-nowrap">
                                                         <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase">Tanggal</span>
-                                                        <span className="text-slate-700 dark:text-slate-100 font-medium">{h.tglStr}</span>
+                                                        <div>
+                                                            <span className="text-slate-700 dark:text-slate-100 font-medium block">{h.tglStr}</span>
+                                                            {h.timeStr && (
+                                                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
+                                                                    🕒 {h.timeStr}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="flex flex-col md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
                                                         <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase mb-1">Info Transaksi</span>

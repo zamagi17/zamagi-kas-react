@@ -1,11 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, HandCoins, FileText, Settings, Sun, Moon } from 'lucide-react';
-import useDarkMode from '../hooks/useDarkMode';
+import { LayoutDashboard, ArrowLeftRight, HandCoins, FileText, Settings, Target } from 'lucide-react';
 
 const menus = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/transaksi', label: 'Transaksi', icon: ArrowLeftRight },
     { path: '/utang-piutang', label: 'Utang Piutang', icon: HandCoins },
+    { path: '/budget', label: 'Budget', icon: Target },
     { path: '/laporan', label: 'Laporan', icon: FileText },
     { path: '/settings', label: 'Settings', icon: Settings },
 ];
@@ -46,7 +46,6 @@ export default function Navbar() {
                         </button>
                     ))}
                 </div>
-
             </nav>
 
             {/* BOTTOM BAR — Mobile */}
@@ -56,13 +55,13 @@ export default function Navbar() {
                         <button
                             key={path}
                             onClick={() => navigate(path)}
-                            className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-semibold transition
+                            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-semibold transition
                                 ${location.pathname === path
                                     ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900'
                                     : 'text-slate-400 dark:text-gray-400 hover:text-slate-600 dark:hover:text-gray-300'
                                 }`}
                         >
-                            <Icon size={20} />
+                            <Icon size={18} />
                             {label}
                         </button>
                     ))}

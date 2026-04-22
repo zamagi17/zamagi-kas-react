@@ -5,16 +5,16 @@ import Dashboard from './pages/Dashboard';
 import Transaksi from './pages/Transaksi';
 import UtangPiutang from './pages/UtangPiutang';
 import Laporan from './pages/Laporan';
+import Budget from './pages/Budget';
 import Settings from './pages/Settings';
 import useDarkMode from './hooks/useDarkMode';
 import useAuth from './hooks/useAuth';
 
 const HEALTH_URL = `${import.meta.env.VITE_API_URL}/api/health`;
 
-// Komponen inner agar useAuth bisa pakai useNavigate (butuh Router context)
 function AppInner() {
     useDarkMode();
-    useAuth(); // <-- auto-refresh token aktif di seluruh app
+    useAuth();
 
     useEffect(() => {
         fetch(HEALTH_URL).catch(() => {});
@@ -30,6 +30,7 @@ function AppInner() {
             <Route path="/dashboard"     element={<Dashboard />} />
             <Route path="/transaksi"     element={<Transaksi />} />
             <Route path="/utang-piutang" element={<UtangPiutang />} />
+            <Route path="/budget"        element={<Budget />} />
             <Route path="/laporan"       element={<Laporan />} />
             <Route path="/settings"      element={<Settings />} />
         </Routes>

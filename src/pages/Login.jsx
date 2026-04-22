@@ -64,7 +64,7 @@ export default function Login() {
     // Validasi umum
     if (!username.trim()) return showMessage('Username tidak boleh kosong');
     if (!password) return showMessage('Password tidak boleh kosong');
-    if (password.length < 6) return showMessage('Password minimal 6 karakter');
+    if (password.length < 6) return showMessage('Password minimal 8 karakter');
 
     // Validasi khusus saat mendaftar
     if (!isLoginMode) {
