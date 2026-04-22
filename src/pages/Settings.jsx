@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
     Moon, Sun, LogOut, User, Shield, Info, Wallet,
     Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3, Plus, Tags,
-    Mail, Smartphone // <-- ICON BARU DITAMBAHKAN
+    Mail, Smartphone, MessageCircle
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
@@ -153,7 +153,7 @@ export default function Settings() {
                 headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                 body: JSON.stringify(formProfil)
             });
-            
+
             if (res.ok) {
                 setProfil(formProfil); // Update tampilan langsung
                 setMsgProfil({ text: '✅ Profil berhasil diperbarui!', ok: true });
@@ -162,10 +162,10 @@ export default function Settings() {
                 const text = await res.text();
                 setMsgProfil({ text: `❌ Gagal: ${text}`, ok: false });
             }
-        } catch { 
-            setMsgProfil({ text: '❌ Gagal terhubung ke server', ok: false }); 
-        } finally { 
-            setIsSavingProfil(false); 
+        } catch {
+            setMsgProfil({ text: '❌ Gagal terhubung ke server', ok: false });
+        } finally {
+            setIsSavingProfil(false);
         }
     };
 
@@ -257,7 +257,7 @@ export default function Settings() {
                                 {profil.namaLengkap || currentUser}
                             </p>
                             <p className="text-sm text-slate-500 dark:text-slate-400 truncate">@{currentUser}</p>
-                            
+
                             {/* Menampilkan Email & No HP ringkas jika ada */}
                             <div className="flex flex-col gap-1 mt-2">
                                 {profil.email && (
@@ -439,6 +439,32 @@ export default function Settings() {
                     </div>
                 </div>
 
+                {/* Komunitas */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Komunitas</p>
+                    </div>
+                    <a
+                        href="https://whatsapp.com/channel/0029VbCu01OEquiMCHUWgi0N"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors block"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                                <MessageCircle size={16} className="text-emerald-500" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Channel WhatsApp</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500">Update terbaru & sharing</p>
+                            </div>
+                        </div>
+                        <div className="text-xs font-bold px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg shrink-0 transition-colors">
+                            Gabung
+                        </div>
+                    </a>
+                </div>
+
                 {/* Tentang */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
@@ -478,33 +504,33 @@ export default function Settings() {
                     <div className="space-y-3">
                         <div>
                             <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Nama Lengkap</label>
-                            <input type="text" 
-                                value={formProfil.namaLengkap} 
-                                onChange={e => setFormProfil({...formProfil, namaLengkap: e.target.value})}
+                            <input type="text"
+                                value={formProfil.namaLengkap}
+                                onChange={e => setFormProfil({ ...formProfil, namaLengkap: e.target.value })}
                                 className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="Masukkan nama lengkap" required 
+                                placeholder="Masukkan nama lengkap" required
                             />
                         </div>
                         <div>
                             <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Email</label>
-                            <input type="email" 
-                                value={formProfil.email} 
-                                onChange={e => setFormProfil({...formProfil, email: e.target.value})}
+                            <input type="email"
+                                value={formProfil.email}
+                                onChange={e => setFormProfil({ ...formProfil, email: e.target.value })}
                                 className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="contoh@email.com" 
+                                placeholder="contoh@email.com"
                             />
                         </div>
                         <div>
                             <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Nomor Handphone</label>
-                            <input type="tel" 
-                                value={formProfil.nomorHp} 
-                                onChange={e => setFormProfil({...formProfil, nomorHp: e.target.value})}
+                            <input type="tel"
+                                value={formProfil.nomorHp}
+                                onChange={e => setFormProfil({ ...formProfil, nomorHp: e.target.value })}
                                 className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="081234567890" 
+                                placeholder="081234567890"
                             />
                         </div>
                     </div>
-                    
+
                     {msgProfil && (
                         <p className={`text-sm font-medium text-center p-2 rounded-lg ${msgProfil.ok ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                             {msgProfil.text}
