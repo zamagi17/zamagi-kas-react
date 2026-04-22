@@ -262,46 +262,54 @@ export default function Dashboard() {
                                 </div>
 
                                 {/* Total gabungan — highlight utama */}
-                                <div className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 dark:from-blue-600 dark:via-blue-700 dark:to-cyan-600 rounded-xl p-4 mb-4 text-white">
+                                <div className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 dark:from-blue-600 dark:via-blue-700 dark:to-cyan-600 rounded-xl p-4 md:p-6 mb-4 text-white shadow-inner">
                                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, white 0%, transparent 60%)' }}></div>
-                                    <p className="text-blue-100 text-xs font-semibold uppercase tracking-wide mb-1">💼 Total Dompet Harian</p>
-                                    <p className="text-2xl md:text-3xl font-black tracking-tight">{formatRp(totalDompetHarian)}</p>
-                                    <p className="text-blue-200 text-xs mt-1">{dompetHarian.length} dompet aktif</p>
+                                    <p className="text-blue-100 text-xs font-semibold uppercase tracking-wide mb-1">
+                                        {dompetHarianData.length === 1
+                                            ? `💳 Dompet Utama (${dompetHarianData[0].nama})`
+                                            : '💼 Total Dompet Harian'}
+                                    </p>
+                                    <p className="text-3xl md:text-4xl font-black tracking-tight">{formatRp(totalDompetHarian)}</p>
+                                    {dompetHarianData.length > 1 && (
+                                        <p className="text-blue-200 text-xs mt-1 font-medium">{dompetHarian.length} dompet aktif tergabung</p>
+                                    )}
                                 </div>
 
-                                {/* Rincian per dompet */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {dompetHarianData.map((d, i) => {
-                                        const warna = WARNA_DOMPET[i % WARNA_DOMPET.length];
-                                        const persen = totalDompetHarian > 0
-                                            ? Math.round((d.saldo / totalDompetHarian) * 100)
-                                            : 0;
-                                        return (
-                                            <div key={d.nama} className={`${warna.bg} ${warna.border} border rounded-xl p-3.5`}>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${warna.dot}`}></div>
-                                                    <p className={`text-xs font-bold truncate ${warna.text}`}>{d.nama}</p>
-                                                </div>
-                                                <p className={`text-base font-black ${d.saldo >= 0 ? warna.text : 'text-red-500 dark:text-red-400'}`}>
-                                                    {formatRp(d.saldo)}
-                                                </p>
-                                                {totalDompetHarian > 0 && (
-                                                    <div className="mt-2">
-                                                        <div className="flex justify-between items-center mb-1">
-                                                            <span className="text-xs text-slate-400 dark:text-slate-500">{persen}% dari total</span>
-                                                        </div>
-                                                        <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                            <div
-                                                                className={`h-full rounded-full ${warna.dot}`}
-                                                                style={{ width: `${Math.max(persen, 2)}%`, transition: 'width 0.6s ease' }}
-                                                            ></div>
-                                                        </div>
+                                {/* Rincian per dompet (HANYA MUNCUL JIKA LEBIH DARI 1 DOMPET) */}
+                                {dompetHarianData.length > 1 && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {dompetHarianData.map((d, i) => {
+                                            const warna = WARNA_DOMPET[i % WARNA_DOMPET.length];
+                                            const persen = totalDompetHarian > 0
+                                                ? Math.round((d.saldo / totalDompetHarian) * 100)
+                                                : 0;
+                                            return (
+                                                <div key={d.nama} className={`${warna.bg} ${warna.border} border rounded-xl p-3.5 transition hover:shadow-sm`}>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${warna.dot}`}></div>
+                                                        <p className={`text-xs font-bold truncate ${warna.text}`}>{d.nama}</p>
                                                     </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                                    <p className={`text-base font-black ${d.saldo >= 0 ? warna.text : 'text-red-500 dark:text-red-400'}`}>
+                                                        {formatRp(d.saldo)}
+                                                    </p>
+                                                    {totalDompetHarian > 0 && (
+                                                        <div className="mt-2">
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <span className="text-xs text-slate-400 dark:text-slate-500">{persen}% dari total</span>
+                                                            </div>
+                                                            <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className={`h-full rounded-full ${warna.dot}`}
+                                                                    style={{ width: `${Math.max(persen, 2)}%`, transition: 'width 0.6s ease' }}
+                                                                ></div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             /* Jika belum setup dompet harian */
