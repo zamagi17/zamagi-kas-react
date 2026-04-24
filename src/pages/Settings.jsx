@@ -733,31 +733,6 @@ export default function Settings() {
                 </div>
             </Modal>
 
-            {/* MODAL: Tambah/Edit Aset */}
-            <Modal isOpen={showAsetModal} onClose={() => setShowAsetModal(false)}
-                title={editAset ? 'Edit Aset' : 'Tambah Aset Baru'}>
-                <div className="space-y-4">
-                    <input
-                        type="text"
-                        placeholder="Nama aset, misal: BCA, GoPay, Dompet Tunai"
-                        value={inputAset}
-                        onChange={e => setInputAset(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && simpanAset()}
-                        className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        autoFocus
-                    />
-                    {msgAset && (
-                        <p className={`text-sm font-medium text-center p-2 rounded-lg ${msgAset.ok ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-900/20'}`}>
-                            {msgAset.text}
-                        </p>
-                    )}
-                    <button onClick={simpanAset} disabled={isSavingAset}
-                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition">
-                        {isSavingAset ? 'Menyimpan...' : (editAset ? 'Simpan Perubahan' : 'Tambah Aset')}
-                    </button>
-                </div>
-            </Modal>
-
             {/* MODAL: List Semua Aset */}
             <Modal isOpen={showListAsetModal} onClose={() => setShowListAsetModal(false)} title="Kelola Aset">
                 <div className="space-y-4">
@@ -835,6 +810,31 @@ export default function Settings() {
                             </div>
                         ))}
                     </div>
+                </div>
+            </Modal>
+
+            {/* MODAL: Tambah/Edit Aset */}
+            <Modal isOpen={showAsetModal} onClose={() => setShowAsetModal(false)}
+                title={editAset ? 'Edit Aset' : 'Tambah Aset Baru'}>
+                <div className="space-y-4">
+                    <input
+                        type="text"
+                        placeholder="Nama aset, misal: BCA, GoPay, Dompet Tunai"
+                        value={inputAset}
+                        onChange={e => setInputAset(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && simpanAset()}
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                    />
+                    {msgAset && (
+                        <p className={`text-sm font-medium text-center p-2 rounded-lg ${msgAset.ok ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-900/20'}`}>
+                            {msgAset.text}
+                        </p>
+                    )}
+                    <button onClick={simpanAset} disabled={isSavingAset}
+                        className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition">
+                        {isSavingAset ? 'Menyimpan...' : (editAset ? 'Simpan Perubahan' : 'Tambah Aset')}
+                    </button>
                 </div>
             </Modal>
 

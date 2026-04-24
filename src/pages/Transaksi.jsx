@@ -81,23 +81,22 @@ export default function Transaksi() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // 1. Tambahkan parameter query string ?bulan=YYYY-MM ke URL
             const res = await fetch(`${API_URL}?bulan=${filterBulan}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
 
             if (res.status === 401) { localStorage.clear(); navigate('/'); return; }
 
-            const data = await res.json();
+            const responseJson = await res.json();
+            
+            const data = responseJson.data || [];
+
             let historyTemp = [];
+            const asetSet = new Set([...listAset]);
+            const kategoriSet = new Set([...listKategori]);
 
-            const asetSet = new Set([...listAset]); // Pertahankan list bawaan
-            const kategoriSet = new Set([...listKategori]); // Pertahankan list bawaan
-
-            // 2. Langsung proses data, tidak perlu if (rYear === fYear ...) lagi
             data.forEach(row => {
                 let rowDate = new Date(row.tanggal);
-
                 let timeStr = "";
                 if (row.createdAt) {
                     const createdDate = new Date(row.createdAt);
@@ -123,7 +122,6 @@ export default function Transaksi() {
             setListAset(Array.from(asetSet));
             setListKategori(Array.from(kategoriSet));
 
-            // Sorting tetap dilakukan untuk memastikan urutan jika ada waktu yang sama
             setHistoryData(historyTemp.sort((a, b) => {
                 const timeA = new Date(a.tanggalAsli).getTime();
                 const timeB = new Date(b.tanggalAsli).getTime();
@@ -131,7 +129,9 @@ export default function Transaksi() {
                 return b.id - a.id;
             }));
 
-            setShowPanduan(data.length <= 10);
+            // Use the flag explicitly provided by the backend!
+            setShowPanduan(responseJson.showGuide === true);
+
             setCurrentPage(1);
         } catch (err) {
             console.error("Error:", err);
