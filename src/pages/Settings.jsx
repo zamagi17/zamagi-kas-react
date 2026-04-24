@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
     Moon, Sun, LogOut, User, Shield, Info, Wallet,
     Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3, Plus, Tags,
-    Mail, Smartphone, MessageCircle
+    Mail, Smartphone, MessageCircle, Coffee
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
@@ -474,6 +474,31 @@ export default function Settings() {
                         <button onClick={toggle} className={`relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none ${isDark ? 'bg-blue-500' : 'bg-slate-300'}`}>
                             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${isDark ? 'translate-x-6' : 'translate-x-0'}`} />
                         </button>
+                    </div>
+                </div>
+
+                {/* Dukung Developer / Donasi */}
+                <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/10 rounded-xl border border-rose-200 dark:border-rose-800/50 overflow-hidden relative">
+                    {/* Dekorasi background blur */}
+                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-rose-500/10 dark:bg-rose-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div className="px-4 py-3 border-b border-rose-200/50 dark:border-rose-800/50">
+                        <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <Coffee size={14} /> Support Developer
+                        </p>
+                    </div>
+                    <div className="p-4 flex flex-col gap-4 relative z-10">
+                        <p className="text-sm text-rose-900 dark:text-rose-200 leading-relaxed font-medium">
+                            Terbantu dengan ZonaKas? Dukung pengembangan aplikasi ini agar tetap gratis dan bebas iklan dengan mentraktir kopi developer! ☕
+                        </p>
+                        <a
+                            href="https://sociabuzz.com/zamagi/tribe"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-sm transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
+                        >
+                            Traktir Kopi (SociaBuzz)
+                        </a>
                     </div>
                 </div>
 
