@@ -29,6 +29,7 @@ export default function Transaksi() {
     const [masterKategori, setMasterKategori] = useState([]);
     const [tambahKategoriBaru, setTambahKategoriBaru] = useState(false);
     const [inputKategoriBaru, setInputKategoriBaru] = useState('');
+    const [isSavingKategoriBaru, setIsSavingKategoriBaru] = useState(false);
 
     const [listAset, setListAset] = useState([
         'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
@@ -266,7 +267,11 @@ export default function Transaksi() {
     };
 
     const simpanKategoriBaru = async () => {
-        if (!inputKategoriBaru.trim()) return;
+        // Cegah eksekusi jika input kosong ATAU sedang dalam proses menyimpan
+        if (!inputKategoriBaru.trim() || isSavingKategoriBaru) return;
+
+        setIsSavingKategoriBaru(true); // Kunci proses
+
         try {
             const res = await fetch(`${baseUrl}/api/master/kategori`, {
                 method: 'POST',
@@ -287,6 +292,8 @@ export default function Transaksi() {
             }
         } catch {
             alert('Gagal menambah kategori');
+        } finally {
+            setIsSavingKategoriBaru(false); // Buka kembali kuncinya (berhasil maupun gagal)
         }
     };
 
@@ -455,6 +462,7 @@ export default function Transaksi() {
                                                     placeholder="Nama kategori baru..."
                                                     value={inputKategoriBaru}
                                                     onChange={e => setInputKategoriBaru(e.target.value)}
+                                                    disabled={isSavingKategoriBaru} // Kunci Input
                                                     onKeyDown={async e => {
                                                         if (e.key === 'Enter') {
                                                             e.preventDefault();
@@ -465,14 +473,22 @@ export default function Transaksi() {
                                                             setInputKategoriBaru('');
                                                         }
                                                     }}
-                                                    className="flex-1 px-4 py-3 text-base md:text-sm border border-blue-300 dark:border-blue-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900"
+                                                    className="flex-1 px-4 py-3 text-base md:text-sm border border-blue-300 dark:border-blue-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900 disabled:opacity-50"
                                                 />
-                                                <button type="button" onClick={simpanKategoriBaru}
-                                                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-bold transition">
-                                                    Simpan
+                                                <button
+                                                    type="button"
+                                                    onClick={simpanKategoriBaru}
+                                                    disabled={isSavingKategoriBaru} // Kunci Tombol Simpan
+                                                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-xl text-sm font-bold transition min-w-[70px]"
+                                                >
+                                                    {isSavingKategoriBaru ? '...' : 'Simpan'}
                                                 </button>
-                                                <button type="button" onClick={() => { setTambahKategoriBaru(false); setInputKategoriBaru(''); }}
-                                                    className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-bold transition">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setTambahKategoriBaru(false); setInputKategoriBaru(''); }}
+                                                    disabled={isSavingKategoriBaru} // Kunci Tombol Batal
+                                                    className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-bold transition disabled:opacity-50"
+                                                >
                                                     Batal
                                                 </button>
                                             </div>
