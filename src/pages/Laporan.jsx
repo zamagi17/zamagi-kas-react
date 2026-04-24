@@ -4,8 +4,6 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { Download, FileText, Loader } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -52,92 +50,21 @@ export default function Laporan() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`${baseUrl}/api/transaksi`, {
+            // Panggil endpoint khusus laporan yang baru dibuat
+            const res = await fetch(`${baseUrl}/api/transaksi/ringkasan?bulan=${filterBulan}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             if (res.status === 401) { localStorage.clear(); navigate('/'); return; }
 
             const data = await res.json();
-            let [fYear, fMonth] = filterBulan.split('-');
-            let sAwal = 0, tMasuk = 0, tKeluar = 0, rMasuk = 0, rKeluar = 0, netWorth = 0;
-            let portoAllTime = {};
-            let chartPengeluaran = {};
-            let historyTemp = [];
 
-            data.forEach(row => {
-                let rowDate = new Date(row.tanggal);
-                let rYear = rowDate.getFullYear().toString();
-                let rMonth = (rowDate.getMonth() + 1).toString().padStart(2, '0');
-                let nom = row.nominal || 0;
-                let sumber = row.sumberDana || 'Lain-lain';
+            // React langsung menelan data mentah-mentah dari Backend
+            setSummary(data.summary);
+            setPortofolio(data.portofolio);
+            setDataChartPengeluaran(data.chartPengeluaran);
+            setHistoryData(data.historyData); // Backend sudah mengurutkannya
 
-                // Portofolio & Net Worth — hanya hitung sampai akhir bulan yang dipilih
-                const sudahLewat = rYear < fYear || (rYear === fYear && rMonth <= fMonth);
-
-                if (sudahLewat) {
-                    if (row.jenis === 'Pemasukan') {
-                        if (!portoAllTime[sumber]) portoAllTime[sumber] = 0;
-                        portoAllTime[sumber] += nom;
-                        netWorth += nom;
-                    } else if (row.jenis === 'Pengeluaran') {
-                        if (!portoAllTime[sumber]) portoAllTime[sumber] = 0;
-                        portoAllTime[sumber] -= nom;
-                        netWorth -= nom;
-                    } else if (row.jenis === 'Utang Masuk') {
-                        if (!portoAllTime[sumber]) portoAllTime[sumber] = 0;
-                        portoAllTime[sumber] += nom;
-                    } else if (row.jenis === 'Piutang Keluar') {
-                        if (!portoAllTime[sumber]) portoAllTime[sumber] = 0;
-                        portoAllTime[sumber] -= nom;
-                    } else if (row.jenis === 'Bayar Utang') {
-                        if (!portoAllTime[sumber]) portoAllTime[sumber] = 0;
-                        portoAllTime[sumber] -= nom;
-                    } else if (row.jenis === 'Terima Piutang') {
-                        if (!portoAllTime[sumber]) portoAllTime[sumber] = 0;
-                        portoAllTime[sumber] += nom;
-                    }
-                }
-
-                const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" &&
-                    (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
-
-                if (rYear < fYear || (rYear === fYear && rMonth < fMonth)) {
-                    if (row.jenis === 'Pemasukan') sAwal += nom;
-                    else if (row.jenis === 'Pengeluaran') sAwal -= nom;
-                } else if (rYear === fYear && rMonth === fMonth) {
-                    if (row.jenis === 'Pemasukan' && !isTransferOrMutasi) tMasuk += nom;
-                    else if (row.jenis === 'Pengeluaran') {
-                        if (!isTransferOrMutasi) tKeluar += nom;
-                        if (row.kategori !== "Transfer Aset (Auto)")
-                            chartPengeluaran[row.kategori] = (chartPengeluaran[row.kategori] || 0) + nom;
-                    }
-                    else if (row.jenis === 'Rencana Pemasukan') rMasuk += nom;
-                    else if (row.jenis === 'Rencana Pengeluaran') rKeluar += nom;
-
-                    historyTemp.push({
-                        id: row.id,
-                        tglStr: rowDate.toLocaleDateString('id-ID'),
-                        tanggalAsli: row.tanggal,
-                        kategori: row.kategori,
-                        keterangan: row.keterangan,
-                        sumberDana: sumber,
-                        jenis: row.jenis,
-                        nominal: nom
-                    });
-                }
-            });
-
-            setSummary({ saldoAwal: sAwal, totalMasuk: tMasuk, totalKeluar: tKeluar, rencanaMasuk: rMasuk, rencanaKeluar: rKeluar, totalNetWorth: netWorth });
-            setPortofolio(portoAllTime);
-            setDataChartPengeluaran(chartPengeluaran);
-            setHistoryData(historyTemp.sort((a, b) => {
-                const timeA = new Date(a.tanggalAsli).getTime();
-                const timeB = new Date(b.tanggalAsli).getTime();
-                if (timeB !== timeA) return timeB - timeA;
-                return b.id - a.id;
-            }));
-
-            // Fetch utang piutang
+            // Panggil API Utang Piutang tetap seperti biasa
             try {
                 const resUP = await fetch(`${baseUrl}/api/utang-piutang`, {
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -171,175 +98,45 @@ export default function Laporan() {
         }]
     };
 
-    // Generate PDF
+    // Generate PDF via Backend
     const handleDownloadPDF = async () => {
-        if (!previewRef.current) return;
         setIsGenerating(true);
 
-        // Paksa lebar desktop sementara untuk screenshot
-        const originalWidth = previewRef.current.style.minWidth;
-        previewRef.current.style.minWidth = '900px';
-
-        // Tunggu sebentar agar browser re-render dulu
-        await new Promise(resolve => setTimeout(resolve, 300));
-
         try {
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = { top: 8, bottom: 10, left: 0, right: 0 };
-            const contentHeight = pageHeight - margin.top - margin.bottom;
-
-            // Screenshot seluruh preview
-            const fullCanvas = await html2canvas(previewRef.current, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                onclone: (clonedDoc) => {
-                    const allElements = clonedDoc.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        const computed = window.getComputedStyle(el);
-                        if (computed.backgroundColor?.includes('oklch')) el.style.backgroundColor = '#ffffff';
-                        if (computed.color?.includes('oklch')) el.style.color = '#1e293b';
-                        if (computed.borderColor?.includes('oklch')) el.style.borderColor = '#e2e8f0';
-                        if (computed.backgroundImage?.includes('oklch')) {
-                            el.style.backgroundImage = 'none';
-                            el.style.backgroundColor = '#ffffff';
-                        }
-                        if (computed.boxShadow?.includes('oklch')) el.style.boxShadow = 'none';
-                    });
-                    const styleTag = clonedDoc.createElement('style');
-                    styleTag.innerHTML = `
-                    .bg-blue-600, .from-blue-600 { background-color: #2563eb !important; }
-                    .bg-indigo-600 { background-color: #4f46e5 !important; }
-                    .bg-slate-700 { background-color: #334155 !important; }
-                    .bg-slate-50 { background-color: #f8fafc !important; }
-                    .bg-slate-100 { background-color: #f1f5f9 !important; }
-                    .bg-orange-50 { background-color: #fff7ed !important; }
-                    .bg-white { background-color: #ffffff !important; }
-                    .text-emerald-600 { color: #059669 !important; }
-                    .text-red-600 { color: #dc2626 !important; }
-                    .text-blue-600 { color: #2563eb !important; }
-                    .text-orange-600 { color: #ea580c !important; }
-                    .text-purple-700 { color: #7c3aed !important; }
-                    .text-slate-500 { color: #64748b !important; }
-                    .text-slate-600 { color: #475569 !important; }
-                    .text-slate-700 { color: #334155 !important; }
-                    .text-slate-800 { color: #1e293b !important; }
-                    .text-white { color: #ffffff !important; }
-                    .text-red-500 { color: #ef4444 !important; }
-                    .text-emerald-500 { color: #10b981 !important; }
-                    .border-slate-100 { border-color: #f1f5f9 !important; }
-                    .border-slate-200 { border-color: #e2e8f0 !important; }
-                `;
-                    clonedDoc.head.appendChild(styleTag);
+            // Panggil API Backend yang baru dibuat
+            const response = await fetch(`${baseUrl}/api/transaksi/download-laporan?bulan=${filterBulan}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
                 }
             });
 
-            // Ukuran dalam pixel per halaman PDF
-            const pxPerMm = fullCanvas.width / pageWidth;
-            const pageHeightPx = Math.floor(contentHeight * pxPerMm);
-            const marginTopPx = Math.floor(margin.top * pxPerMm);
-            const marginBottomPx = Math.floor(margin.bottom * pxPerMm);
-
-            // Deteksi posisi baris tabel agar tidak terpotong
-            const tableRows = previewRef.current.querySelectorAll('tbody tr, tfoot tr');
-            const previewRect = previewRef.current.getBoundingClientRect();
-            const scale = fullCanvas.width / previewRect.width;
-
-            // Kumpulkan posisi Y setiap baris dalam pixel canvas
-            const rowBreakPoints = new Set();
-            tableRows.forEach(row => {
-                const rowRect = row.getBoundingClientRect();
-                const rowTopPx = Math.floor((rowRect.top - previewRect.top) * scale);
-                rowBreakPoints.add(rowTopPx);
-            });
-
-            // Bagi canvas menjadi halaman, hindari memotong di tengah baris
-            const pages = [];
-            let startY = 0;
-
-            while (startY < fullCanvas.height) {
-                let endY = startY + pageHeightPx;
-
-                if (endY < fullCanvas.height) {
-                    // Cari baris terdekat sebelum endY agar tidak terpotong
-                    let bestBreak = endY;
-                    for (const breakPt of rowBreakPoints) {
-                        if (breakPt > startY && breakPt <= endY) {
-                            bestBreak = breakPt;
-                        }
-                    }
-                    endY = bestBreak;
-                } else {
-                    endY = fullCanvas.height;
-                }
-
-                pages.push({ startY, endY });
-                startY = endY;
+            if (!response.ok) {
+                throw new Error("Gagal mengunduh laporan dari server.");
             }
 
-            const totalPages = pages.length;
+            // Ubah response menjadi Blob (tipe data file)
+            const blob = await response.blob();
 
-            // Render setiap halaman
-            for (let i = 0; i < totalPages; i++) {
-                if (i > 0) pdf.addPage();
+            // Buat URL sementara untuk file PDF tersebut
+            const url = window.URL.createObjectURL(blob);
 
-                const { startY, endY } = pages[i];
-                const sliceHeight = endY - startY;
+            // Buat elemen <a> fiktif untuk memicu trigger download di browser
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Laporan_${currentUser}_${filterBulan}.pdf`;
+            document.body.appendChild(a);
+            a.click();
 
-                // Canvas seukuran konten asli (tidak dipaksa seukuran halaman penuh)
-                const pageCanvas = document.createElement('canvas');
-                pageCanvas.width = fullCanvas.width;
-                pageCanvas.height = sliceHeight; // ← pakai tinggi asli, bukan tinggi halaman penuh
+            // Bersihkan elemen dan memory setelah download selesai
+            a.remove();
+            window.URL.revokeObjectURL(url);
 
-                const ctx = pageCanvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-
-                ctx.drawImage(
-                    fullCanvas,
-                    0, startY,
-                    fullCanvas.width, sliceHeight,
-                    0, 0,
-                    fullCanvas.width, sliceHeight
-                );
-
-                const imgData = pageCanvas.toDataURL('image/png');
-
-                // Hitung tinggi gambar dalam mm sesuai proporsi asli
-                const imgHeightMm = (sliceHeight / pxPerMm);
-
-                // Gambar konten mulai dari margin.top, tinggi sesuai konten (tidak di-stretch)
-                pdf.addImage(imgData, 'PNG', 0, margin.top, pageWidth, imgHeightMm);
-
-                // Garis footer
-                pdf.setDrawColor(220, 220, 220);
-                pdf.line(10, pageHeight - margin.bottom + 1, pageWidth - 10, pageHeight - margin.bottom + 1);
-
-                // Nomor halaman
-                pdf.setFontSize(9);
-                pdf.setTextColor(160, 160, 160);
-                pdf.text(
-                    `Halaman ${i + 1} dari ${totalPages}`,
-                    pageWidth / 2,
-                    pageHeight - 3,
-                    { align: 'center' }
-                );
-            }
-
-            pdf.save(`Laporan_${currentUser}_${filterBulan}.pdf`);
         } catch (err) {
             console.error(err);
-            alert("Gagal generate PDF: " + err.message);
+            alert("Terjadi kesalahan: " + err.message);
         } finally {
-            previewRef.current.style.minWidth = originalWidth;
             setIsGenerating(false);
-            // Trigger resize agar chart re-render sesuai ukuran layar
-            setTimeout(() => {
-                setChartKey(prev => prev + 1);
-            }, 150);
         }
     };
 

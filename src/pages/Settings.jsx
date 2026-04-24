@@ -73,6 +73,7 @@ export default function Settings() {
     const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
     const [showProfilModal, setShowProfilModal] = useState(false);
     const [formProfil, setFormProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
+    const [terimaLaporan, setTerimaLaporan] = useState(false);
     const [isSavingProfil, setIsSavingProfil] = useState(false);
     const [msgProfil, setMsgProfil] = useState(null);
 
@@ -133,6 +134,7 @@ export default function Settings() {
                     email: data.email || '',
                     nomorHp: data.nomorHp || ''
                 });
+                setTerimaLaporan(data.terimaLaporanBulanan === 'true');
             }
         } catch (e) { console.error('Gagal mengambil data profil', e); }
     };
@@ -148,10 +150,14 @@ export default function Settings() {
         setIsSavingProfil(true);
         setMsgProfil(null);
         try {
+            const payload = {
+                ...formProfil,
+                terimaLaporanBulanan: terimaLaporan.toString()
+            };
             const res = await fetch(`${baseUrl}/api/user/profile`, {
                 method: 'PUT',
                 headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify(formProfil)
+                body: JSON.stringify(payload)
             });
 
             if (res.ok) {
@@ -228,6 +234,38 @@ export default function Settings() {
     if (!token) return null;
     const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
 
+
+    // --------------------------------------------------------------------------
+    const [isSendingEmail, setIsSendingEmail] = useState(false);
+    const [msgEmail, setMsgEmail] = useState(null);
+
+    const kirimEmailTest = async () => {
+        setIsSendingEmail(true);
+        setMsgEmail(null);
+
+        try {
+            const res = await fetch(`${baseUrl}/test/send-email`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                setMsgEmail({ text: '✅ Email berhasil dikirim!', ok: true });
+            } else {
+                setMsgEmail({ text: `❌ Gagal: ${text}`, ok: false });
+            }
+        } catch (e) {
+            setMsgEmail({ text: '❌ Gagal koneksi ke server', ok: false });
+        } finally {
+            setIsSendingEmail(false);
+            setTimeout(() => setMsgEmail(null), 4000);
+        }
+    };
+    // --------------------------------------------------------------------------
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
             <Navbar />
@@ -488,6 +526,29 @@ export default function Settings() {
                     </div>
                 </div>
 
+                {/* TEST EMAIL (DEV ONLY) */}
+                {/* <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-amber-300 dark:border-amber-700 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-xs font-bold text-amber-500 uppercase tracking-widest">Dev Testing</p>
+                    </div>
+
+                    <div className="px-4 py-4 space-y-3">
+                        <button
+                            onClick={kirimEmailTest}
+                            disabled={isSendingEmail}
+                            className="text-xs px-3 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-semibold rounded-lg"
+                        >
+                            {isSendingEmail ? 'Mengirim...' : 'Test Kirim Email 📧'}
+                        </button>
+
+                        {msgEmail && (
+                            <p className={`text-xs font-medium ${msgEmail.ok ? 'text-emerald-500' : 'text-red-500'}`}>
+                                {msgEmail.text}
+                            </p>
+                        )}
+                    </div>
+                </div> */}
+
                 {/* Logout */}
                 <button onClick={handleLogout}
                     className="w-full flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-slate-900 text-red-500 font-bold rounded-xl border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition shadow-sm">
@@ -519,6 +580,21 @@ export default function Settings() {
                                 className="w-full mt-1 px-4 py-3 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="contoh@email.com"
                             />
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                            <div>
+                                <h4 className="font-medium text-slate-800 dark:text-slate-100">Laporan Bulanan</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Kirim ringkasan transaksi ke email setiap awal bulan.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={terimaLaporan}
+                                    onChange={(e) => setTerimaLaporan(e.target.checked)}
+                                />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
+                            </label>
                         </div>
                         <div>
                             <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Nomor Handphone</label>

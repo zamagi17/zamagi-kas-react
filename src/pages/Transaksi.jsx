@@ -80,31 +80,23 @@ export default function Transaksi() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(API_URL, {
+            // 1. Tambahkan parameter query string ?bulan=YYYY-MM ke URL
+            const res = await fetch(`${API_URL}?bulan=${filterBulan}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
+
             if (res.status === 401) { localStorage.clear(); navigate('/'); return; }
 
             const data = await res.json();
-            let [fYear, fMonth] = filterBulan.split('-');
             let historyTemp = [];
 
-            const asetSet = new Set([
-                'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
-                'e-Wallet (Gopay/OVO/Dana)', 'Bank RDN', 'Reksa Dana', 'Emas/Logam Mulia'
-            ]);
-            const kategoriSet = new Set([
-                'Transfer Aset (Auto)', 'Gaji & Pendapatan', 'Makan & Minum',
-                'Transportasi / Bensin', 'Tanggungan Orang Tua', 'Pembelian Aset / Investasi',
-                'Tagihan (Listrik / Internet)', 'Hiburan / Jajan'
-            ]);
+            const asetSet = new Set([...listAset]); // Pertahankan list bawaan
+            const kategoriSet = new Set([...listKategori]); // Pertahankan list bawaan
 
+            // 2. Langsung proses data, tidak perlu if (rYear === fYear ...) lagi
             data.forEach(row => {
                 let rowDate = new Date(row.tanggal);
-                let rYear = rowDate.getFullYear().toString();
-                let rMonth = (rowDate.getMonth() + 1).toString().padStart(2, '0');
 
-                // --- TAMBAHKAN FORMAT JAM ---
                 let timeStr = "";
                 if (row.createdAt) {
                     const createdDate = new Date(row.createdAt);
@@ -114,29 +106,30 @@ export default function Transaksi() {
                 if (row.sumberDana) asetSet.add(row.sumberDana);
                 if (row.kategori) kategoriSet.add(row.kategori);
 
-                if (rYear === fYear && rMonth === fMonth) {
-                    historyTemp.push({
-                        id: row.id,
-                        tanggalAsli: row.tanggal,
-                        tglStr: rowDate.toLocaleDateString('id-ID'),
-                        timeStr: timeStr, // <-- Masukkan ke array
-                        kategori: row.kategori,
-                        keterangan: row.keterangan,
-                        sumberDana: row.sumberDana || 'Lain-lain',
-                        jenis: row.jenis,
-                        nominal: row.nominal || 0
-                    });
-                }
+                historyTemp.push({
+                    id: row.id,
+                    tanggalAsli: row.tanggal,
+                    tglStr: rowDate.toLocaleDateString('id-ID'),
+                    timeStr: timeStr,
+                    kategori: row.kategori,
+                    keterangan: row.keterangan,
+                    sumberDana: row.sumberDana || 'Lain-lain',
+                    jenis: row.jenis,
+                    nominal: row.nominal || 0
+                });
             });
 
             setListAset(Array.from(asetSet));
             setListKategori(Array.from(kategoriSet));
+
+            // Sorting tetap dilakukan untuk memastikan urutan jika ada waktu yang sama
             setHistoryData(historyTemp.sort((a, b) => {
                 const timeA = new Date(a.tanggalAsli).getTime();
                 const timeB = new Date(b.tanggalAsli).getTime();
                 if (timeB !== timeA) return timeB - timeA;
                 return b.id - a.id;
             }));
+
             setShowPanduan(data.length <= 10);
             setCurrentPage(1);
         } catch (err) {

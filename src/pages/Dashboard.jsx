@@ -55,9 +55,11 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(API_URL, {
+            // Panggil endpoint agregasi yang sama dengan halaman Laporan
+            const res = await fetch(`${baseUrl}/api/transaksi/ringkasan?bulan=${filterBulan}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
+
             if (res.status === 401) {
                 localStorage.clear();
                 navigate('/');
@@ -65,88 +67,18 @@ export default function Dashboard() {
             }
 
             const data = await res.json();
-            let [fYear, fMonth] = filterBulan.split('-').map(Number);
 
-            let sAwal = 0, tMasuk = 0, tKeluar = 0, rMasuk = 0, rKeluar = 0;
-            let hMasuk = 0, hKeluar = 0;
-            let netWorth = 0;
-            let portoAllTime = {};
-            let chartPengeluaranBulanan = {};
+            // Set semua state langsung dari data yang sudah dikalkulasi Backend
+            setSummary(data.summary);
+            setPortofolio(data.portofolio);
+            setDataChartPengeluaran(data.chartPengeluaran);
 
-            const today = new Date();
-            const todayDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-            data.forEach(row => {
-                let rowDate = new Date(row.tanggal);
-                let rYear = rowDate.getFullYear();
-                let rMonth = rowDate.getMonth() + 1;
-                let nom = row.nominal || 0;
-
-                // Filter: Apakah transaksi ini terjadi SEBELUM atau PADA bulan yang difilter?
-                const isPastOrCurrentFilteredMonth = rYear < fYear || (rYear === fYear && rMonth <= fMonth);
-
-                // 1. HITUNG HISTORIS (TIME-TRAVEL) UNTUK NET WORTH & PORTOFOLIO
-                if (isPastOrCurrentFilteredMonth) {
-                    // Hitung Net Worth historis
-                    if (row.jenis === 'Pemasukan') netWorth += nom;
-                    else if (row.jenis === 'Pengeluaran') netWorth -= nom;
-
-                    // Hitung Portofolio historis
-                    if (row.sumberDana) {
-                        if (!portoAllTime[row.sumberDana]) portoAllTime[row.sumberDana] = 0;
-                        if (row.jenis === 'Pemasukan') portoAllTime[row.sumberDana] += nom;
-                        else if (row.jenis === 'Pengeluaran') portoAllTime[row.sumberDana] -= nom;
-                    }
-                }
-
-                // 2. HITUNG ARUS KAS BULANAN (SALDO AWAL & TRANSAKSI BULAN INI)
-                const isTransferOrMutasi = row.kategori === "Transfer Aset (Auto)" &&
-                    (row.keterangan && (row.keterangan.includes("Mutasi Masuk") || row.keterangan.includes("Mutasi Keluar")));
-
-                if (rYear < fYear || (rYear === fYear && rMonth < fMonth)) {
-                    // Saldo Awal Bulan
-                    if (row.jenis === 'Pemasukan') sAwal += nom;
-                    else if (row.jenis === 'Pengeluaran') sAwal -= nom;
-                } else if (rYear === fYear && rMonth === fMonth) {
-                    // Transaksi di Bulan yang Difilter
-                    if (row.jenis === 'Pemasukan' && !isTransferOrMutasi) tMasuk += nom;
-                    else if (row.jenis === 'Pengeluaran') {
-                        if (!isTransferOrMutasi) tKeluar += nom;
-                        if (row.kategori !== "Transfer Aset (Auto)")
-                            chartPengeluaranBulanan[row.kategori] = (chartPengeluaranBulanan[row.kategori] || 0) + nom;
-                    }
-                    else if (row.jenis === 'Rencana Pemasukan') rMasuk += nom;
-                    else if (row.jenis === 'Rencana Pengeluaran') rKeluar += nom;
-
-                    // Transaksi Hari Ini (jika kebetulan bulan filternya adalah bulan ini)
-                    if (row.tanggal === todayDateStr && row.kategori !== "Transfer Aset (Auto)") {
-                        if (row.jenis === 'Pemasukan') hMasuk += nom;
-                        else if (row.jenis === 'Pengeluaran') hKeluar += nom;
-                    }
-                }
-            });
-
-            setSummary({
-                saldoAwal: sAwal, totalMasuk: tMasuk, totalKeluar: tKeluar,
-                rencanaMasuk: rMasuk, rencanaKeluar: rKeluar, totalNetWorth: netWorth,
-                hariIniMasuk: hMasuk, hariIniKeluar: hKeluar
-            });
-            setPortofolio(portoAllTime);
-            setDataChartPengeluaran(chartPengeluaranBulanan);
-
+            // Fetch utang piutang (tetap dipertahankan karena pakai endpoint terpisah)
             try {
                 const resUP = await fetch(`${baseUrl}/api/utang-piutang`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (resUP.status === 401) {
-                    localStorage.clear();
-                    navigate('/');
-                    return;
-                }
-                if (!resUP.ok) {
-                    setTotalUtangAktif(0);
-                    setTotalPiutangAktif(0);
-                } else {
+                if (resUP.ok) {
                     const dataUP = await resUP.json();
                     const utangAktif = dataUP
                         .filter(d => d.jenis === 'Utang' && d.status === 'Belum Lunas')
@@ -163,7 +95,7 @@ export default function Dashboard() {
             }
 
         } catch (err) {
-            console.error("Error:", err);
+            console.error("Error fetching dashboard:", err);
         } finally {
             setIsLoading(false);
         }
