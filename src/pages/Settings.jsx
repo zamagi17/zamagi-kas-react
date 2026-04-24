@@ -94,6 +94,7 @@ export default function Settings() {
     // State Master Aset
     const [listAset, setListAset] = useState([]);
     const [showAsetModal, setShowAsetModal] = useState(false);
+    const [showListAsetModal, setShowListAsetModal] = useState(false);
     const [editAset, setEditAset] = useState(null);
     const [inputAset, setInputAset] = useState('');
     const [msgAset, setMsgAset] = useState(null);
@@ -362,51 +363,32 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* Master Aset */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Master Aset</p>
-                        <button onClick={() => { setShowAsetModal(true); setEditAset(null); setInputAset(''); setMsgAset(null); }}
-                            className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
-                            <Plus size={14} /> Tambah
-                        </button>
-                    </div>
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {listAset.length === 0 ? (
-                            <p className="px-4 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">Belum ada aset. Tambahkan dulu.</p>
-                        ) : listAset.map(aset => (
-                            <div key={aset.id} className="flex items-center justify-between px-4 py-3 gap-3">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <Wallet size={16} className={aset.isAktif ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
-                                    <span className={`text-sm font-medium truncate ${aset.isAktif ? 'text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600 line-through'}`}>
-                                        {aset.nama}
-                                    </span>
-                                    {!aset.isAktif && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded shrink-0">Nonaktif</span>}
-                                </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <button onClick={() => toggleAktifAset(aset)}
-                                        className={`text-xs px-2 py-1 rounded-lg font-semibold transition ${aset.isAktif ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100'}`}>
-                                        {aset.isAktif ? 'Nonaktifkan' : 'Aktifkan'}
-                                    </button>
-                                    <button onClick={() => { setEditAset(aset); setInputAset(aset.nama); setShowAsetModal(true); setMsgAset(null); }}
-                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition">
-                                        <Edit3 size={14} />
-                                    </button>
-                                    <button onClick={() => hapusAset(aset.id)}
-                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Master Kategori */}
+                {/* ===== BLOK DATA MASTER (ASET & KATEGORI) ===== */}
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Data Master</p>
                     </div>
+
+                    {/* Tombol Buka List Master Aset */}
+                    <div
+                        className="flex items-center justify-between px-4 py-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+                        onClick={() => setShowListAsetModal(true)}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                <Wallet size={16} className="text-slate-500" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Master Aset</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500">{listAset.length} aset tersimpan</p>
+                            </div>
+                        </div>
+                        <button className="text-xs font-semibold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                            Kelola
+                        </button>
+                    </div>
+
+                    {/* Tombol Buka List Master Kategori */}
                     <div
                         className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
                         onClick={() => setShowListKategoriModal(true)}
@@ -773,6 +755,51 @@ export default function Settings() {
                         className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition">
                         {isSavingAset ? 'Menyimpan...' : (editAset ? 'Simpan Perubahan' : 'Tambah Aset')}
                     </button>
+                </div>
+            </Modal>
+
+            {/* MODAL: List Semua Aset */}
+            <Modal isOpen={showListAsetModal} onClose={() => setShowListAsetModal(false)} title="Kelola Aset">
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Total: {listAset.length} data</p>
+                        <button
+                            onClick={() => { setShowAsetModal(true); setEditAset(null); setInputAset(''); setMsgAset(null); }}
+                            className="flex items-center gap-1.5 text-sm font-semibold bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 transition"
+                        >
+                            <Plus size={16} /> Tambah Baru
+                        </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[50vh] overflow-y-auto pr-1">
+                        {listAset.length === 0 ? (
+                            <p className="py-8 text-sm text-slate-400 dark:text-slate-500 text-center">Belum ada aset. Tambahkan dulu.</p>
+                        ) : listAset.map(aset => (
+                            <div key={aset.id} className="flex items-center justify-between py-3 gap-3">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <Wallet size={16} className={aset.isAktif ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
+                                    <span className={`text-sm font-medium truncate ${aset.isAktif ? 'text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600 line-through'}`}>
+                                        {aset.nama}
+                                    </span>
+                                    {!aset.isAktif && <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded shrink-0">Nonaktif</span>}
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button onClick={() => toggleAktifAset(aset)}
+                                        className={`text-xs px-2 py-1 rounded-lg font-semibold transition ${aset.isAktif ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100'}`}>
+                                        {aset.isAktif ? 'Nonaktifkan' : 'Aktifkan'}
+                                    </button>
+                                    <button onClick={() => { setEditAset(aset); setInputAset(aset.nama); setShowAsetModal(true); setMsgAset(null); }}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition">
+                                        <Edit3 size={14} />
+                                    </button>
+                                    <button onClick={() => hapusAset(aset.id)}
+                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </Modal>
 
