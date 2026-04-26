@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    TrendingUp, Edit, Trash, Search, Plus,
-    Download, RefreshCw
+    Edit, Trash, Search, Plus,
+    Download, RefreshCw, ArrowLeftRight
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
@@ -129,9 +129,7 @@ export default function Transaksi() {
                 return b.id - a.id;
             }));
 
-            // Use the flag explicitly provided by the backend!
             setShowPanduan(responseJson.showGuide === true);
-
             setCurrentPage(1);
         } catch (err) {
             console.error("Error:", err);
@@ -168,7 +166,6 @@ export default function Transaksi() {
                     body: JSON.stringify(payload)
                 });
             } else if (formData.jenis === 'Transfer') {
-                // Menggunakan Endpoint khusus Transfer (Lebih aman, di-handle @Transactional Backend)
                 const payloadTransfer = {
                     tanggal: formData.tanggal,
                     sumberDana: formData.sumberDana,
@@ -279,10 +276,8 @@ export default function Transaksi() {
     };
 
     const simpanKategoriBaru = async () => {
-        // Cegah eksekusi jika input kosong ATAU sedang dalam proses menyimpan
         if (!inputKategoriBaru.trim() || isSavingKategoriBaru) return;
-
-        setIsSavingKategoriBaru(true); // Kunci proses
+        setIsSavingKategoriBaru(true);
 
         try {
             const res = await fetch(`${baseUrl}/api/master/kategori`, {
@@ -292,9 +287,7 @@ export default function Transaksi() {
             });
             if (res.ok) {
                 const kategoriBar = await res.json();
-                // Refresh list kategori
                 setMasterKategori(prev => [...prev, kategoriBar].sort((a, b) => a.nama.localeCompare(b.nama)));
-                // Langsung pilih kategori baru di form
                 setFormData(prev => ({ ...prev, kategori: kategoriBar.nama }));
                 setTambahKategoriBaru(false);
                 setInputKategoriBaru('');
@@ -305,11 +298,10 @@ export default function Transaksi() {
         } catch {
             alert('Gagal menambah kategori');
         } finally {
-            setIsSavingKategoriBaru(false); // Buka kembali kuncinya (berhasil maupun gagal)
+            setIsSavingKategoriBaru(false);
         }
     };
 
-    // Helper function untuk UX label yang dinamis
     const getLabelSumberDana = (jenis) => {
         switch (jenis) {
             case 'Pemasukan':
@@ -330,33 +322,41 @@ export default function Transaksi() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
-            <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+            <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
 
-                {/* Header */}
-                <div className="relative overflow-hidden rounded-2xl shadow-lg dark:shadow-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 dark:from-blue-900 dark:via-blue-800 dark:to-indigo-900 p-8 text-white border border-blue-400/30 dark:border-blue-700/30">
-                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(255,255,255) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                    <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div>
-                            <p className="text-blue-100 text-sm font-medium mb-1">Kelola Transaksi Keuangan</p>
-                            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-2">Riwayat Transaksi</h2>
-                            <p className="text-blue-50 text-sm">Catat, kelola, dan analisis setiap transaksi Anda dengan mudah</p>
+                {/* Header Baru (Sama seperti Budget & Dashboard) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg text-white shadow-sm">
+                            <ArrowLeftRight size={22} />
                         </div>
+                        <div>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Data Transaksi</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Catat dan kelola arus kas Anda</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         <input
                             type="month"
                             value={filterBulan}
                             onChange={(e) => setFilterBulan(e.target.value)}
-                            className="px-4 py-3 rounded-xl border border-blue-300/30 dark:border-blue-600/30 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-400 outline-none bg-white/10 dark:bg-white/5 text-white placeholder-blue-100 backdrop-blur-sm hover:bg-white/20 dark:hover:bg-white/10 transition"
+                            className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        <button
+                            onClick={handleTambahBaru}
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm"
+                        >
+                            <Plus size={16} /> Tambah
+                        </button>
                     </div>
                 </div>
 
                 {/* Banner Panduan Pengguna Baru */}
                 {showPanduan && (
-                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/20 rounded-2xl border border-blue-200 dark:border-blue-700/50 p-6 shadow-lg">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-700/50 p-6 shadow-sm">
                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%)' }}></div>
-                        {/* Tombol tutup */}
                         <button
                             onClick={() => setShowPanduan(false)}
                             className="absolute top-4 right-4 p-2 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition"
@@ -413,25 +413,11 @@ export default function Transaksi() {
                     {listAset.map(aset => <option key={aset} value={aset} />)}
                 </datalist>
 
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-lg dark:shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300">
-                    <div className="flex flex-col lg:flex-row justify-between gap-6">
-                        <div>
-                            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Input Transaksi</p>
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Tambahkan transaksi baru</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Buka formulir transaksi</p>
-                        </div>
-                        <button type="button" onClick={handleTambahBaru} className="inline-flex items-center gap-2 self-start rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-5 py-3 font-semibold shadow-lg hover:brightness-110 transition">
-                            <Plus size={18} /> Tambah Transaksi
-                        </button>
-                    </div>
-                </div>
-
+                {/* Modal Tambah/Edit Transaksi */}
                 {showModalForm && (
                     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm transition-all">
-                        {/* Container Modal: Di mobile nempel bawah (bottom sheet), di desktop ke tengah. Ada max-h-[90vh] agar tidak jebol layar */}
                         <div className="w-full max-w-4xl max-h-[90vh] sm:max-h-[95vh] flex flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border border-slate-200/60 dark:border-slate-700/70 bg-white dark:bg-slate-950 shadow-2xl">
 
-                            {/* Header Modal: Dibuat STICKY agar tidak ikut ter-scroll, tombol 'X' selalu terlihat */}
                             <div className="flex-shrink-0 flex items-center justify-between gap-4 px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur sticky top-0 z-10">
                                 <div>
                                     <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
@@ -450,12 +436,10 @@ export default function Transaksi() {
                                 </button>
                             </div>
 
-                            {/* Form & Body Modal: Dibuat OVERFLOW-Y-AUTO agar form bisa di-scroll di dalam modal */}
                             <form onSubmit={handleSimpan} className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 sm:py-6">
                                 <div className="grid md:grid-cols-2 gap-5 sm:gap-6">
                                     <div>
                                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Tanggal</label>
-                                        {/* Tambahan text-base md:text-sm untuk mencegah auto-zoom di iOS */}
                                         <input
                                             type="date"
                                             name="tanggal"
@@ -475,7 +459,6 @@ export default function Transaksi() {
                                             <option value="Rencana Pengeluaran">Rencana Pengeluaran</option>
                                         </select>
                                     </div>
-                                    {/* Ganti bagian kategori di Transaksi.jsx */}
                                     <div>
                                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
                                             Kategori Transaksi
@@ -484,7 +467,6 @@ export default function Transaksi() {
                                             <input type="text" value="Transfer Aset (Auto)" disabled
                                                 className="w-full px-4 py-3 text-base md:text-sm border border-blue-300 dark:border-blue-700 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold cursor-not-allowed" />
                                         ) : tambahKategoriBaru ? (
-                                            // Mode input kategori baru
                                             <div className="flex gap-2">
                                                 <input
                                                     type="text"
@@ -492,7 +474,7 @@ export default function Transaksi() {
                                                     placeholder="Nama kategori baru..."
                                                     value={inputKategoriBaru}
                                                     onChange={e => setInputKategoriBaru(e.target.value)}
-                                                    disabled={isSavingKategoriBaru} // Kunci Input
+                                                    disabled={isSavingKategoriBaru}
                                                     onKeyDown={async e => {
                                                         if (e.key === 'Enter') {
                                                             e.preventDefault();
@@ -508,7 +490,7 @@ export default function Transaksi() {
                                                 <button
                                                     type="button"
                                                     onClick={simpanKategoriBaru}
-                                                    disabled={isSavingKategoriBaru} // Kunci Tombol Simpan
+                                                    disabled={isSavingKategoriBaru}
                                                     className="px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-xl text-sm font-bold transition min-w-[70px]"
                                                 >
                                                     {isSavingKategoriBaru ? '...' : 'Simpan'}
@@ -516,14 +498,13 @@ export default function Transaksi() {
                                                 <button
                                                     type="button"
                                                     onClick={() => { setTambahKategoriBaru(false); setInputKategoriBaru(''); }}
-                                                    disabled={isSavingKategoriBaru} // Kunci Tombol Batal
+                                                    disabled={isSavingKategoriBaru}
                                                     className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-bold transition disabled:opacity-50"
                                                 >
                                                     Batal
                                                 </button>
                                             </div>
                                         ) : (
-                                            // Mode select normal
                                             <div className="flex gap-2">
                                                 <select name="kategori" value={formData.kategori} onChange={handleInputChange} required
                                                     className="flex-1 px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition">
@@ -559,7 +540,6 @@ export default function Transaksi() {
                                                 </>
                                             )}
                                         </select>
-                                        {/* Hint kecil jika kosong */}
                                         {masterAset.length === 0 && (
                                             <button
                                                 type="button"
@@ -612,9 +592,8 @@ export default function Transaksi() {
                                     </div>
                                 </div>
 
-                                {/* Area Action Buttons di bawah form */}
                                 <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-5 border-t border-slate-100 dark:border-slate-800/50">
-                                    <button type="submit" disabled={isSubmitting} className="flex-1 w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3.5 sm:py-3 rounded-2xl transition shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
+                                    <button type="submit" disabled={isSubmitting} className="flex-1 w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3.5 sm:py-3 rounded-2xl transition shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
                                         {isSubmitting ? 'Memproses...' : (editId ? 'Simpan Perubahan' : 'Simpan Transaksi')}
                                     </button>
                                     {editId && (
@@ -629,51 +608,45 @@ export default function Transaksi() {
                 )}
 
                 {/* Tabel Riwayat */}
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-lg dark:shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300">
-                    <h3 className="flex items-center gap-3 text-xl font-bold text-slate-800 dark:text-slate-50 mb-7 pb-4 border-b border-slate-200 dark:border-slate-700/50">
-                        <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg text-white">
-                            <TrendingUp size={20} />
-                        </div>
-                        Riwayat Transaksi
-                    </h3>
+                <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
                         <div className="relative flex-1 flex items-center">
                             <Search size={18} className="absolute left-4 text-slate-400 dark:text-slate-500" />
                             <input
-                                type="text" placeholder="🔍 Cari kategori, keterangan, dompet..."
+                                type="text" placeholder="Cari kategori, keterangan, dompet..."
                                 value={searchQuery}
                                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                                className="w-full pl-12 pr-10 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 transition"
+                                className="w-full pl-11 pr-10 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition"
                             />
                             {searchQuery && (
-                                <button onClick={() => { setSearchQuery(''); setCurrentPage(1); }} className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-600">×</button>
+                                <button onClick={() => { setSearchQuery(''); setCurrentPage(1); }} className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-600">✕</button>
                             )}
                         </div>
-                        <div className="flex gap-3 w-full md:w-auto">
-                            <button onClick={fetchData} className="flex items-center justify-center gap-2 flex-1 md:flex-none px-5 py-2.5 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg dark:shadow-lg dark:hover:shadow-xl transition-all duration-300 active:scale-95">
-                                {window.innerWidth < 768 ? 'Refresh' : 'Refresh'}
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <button onClick={fetchData} disabled={isLoading} className="flex items-center justify-center gap-2 flex-1 md:flex-none px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-semibold transition border border-slate-200 dark:border-slate-700 disabled:opacity-50">
+                                <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} /> <span className="hidden sm:inline">Refresh</span>
                             </button>
-                            <button onClick={exportCSV} className="flex items-center justify-center gap-2 flex-1 md:flex-none px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg dark:shadow-lg dark:hover:shadow-xl transition-all duration-300 active:scale-95">
-                                {window.innerWidth < 768 ? 'CSV' : 'Unduh CSV'}
+                            <button onClick={exportCSV} className="flex items-center justify-center gap-2 flex-1 md:flex-none px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-semibold transition shadow-sm">
+                                <Download size={16} /> <span className="hidden sm:inline">Unduh CSV</span>
                             </button>
                         </div>
                     </div>
 
                     {isLoading ? (
                         <div className="animate-pulse space-y-3">
-                            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg" />)}
+                            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-slate-100 dark:bg-slate-800 rounded-lg" />)}
                         </div>
                     ) : (
                         <>
                             <div className="md:overflow-x-auto md:rounded-xl md:border border-slate-200 dark:border-slate-700/50">
                                 <table className="w-full text-sm text-left border-collapse">
-                                    <thead className="hidden md:table-header-group bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 text-white text-center">
+                                    <thead className="hidden md:table-header-group bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-center">
                                         <tr>
-                                            <th className="px-4 py-4 font-bold text-sm">Tanggal</th>
-                                            <th className="px-4 py-4 font-bold text-sm">Kategori & Keterangan</th>
-                                            <th className="px-4 py-4 font-bold text-sm">Dompet / Aset</th>
-                                            <th className="px-4 py-4 font-bold text-sm">Nominal</th>
-                                            <th className="px-4 py-4 font-bold text-sm text-center">Aksi</th>
+                                            <th className="px-4 py-3 font-semibold text-sm border-b border-slate-200 dark:border-slate-700">Tanggal</th>
+                                            <th className="px-4 py-3 font-semibold text-sm border-b border-slate-200 dark:border-slate-700">Kategori & Keterangan</th>
+                                            <th className="px-4 py-3 font-semibold text-sm border-b border-slate-200 dark:border-slate-700">Dompet / Rekening</th>
+                                            <th className="px-4 py-3 font-semibold text-sm border-b border-slate-200 dark:border-slate-700">Nominal</th>
+                                            <th className="px-4 py-3 font-semibold text-sm text-center border-b border-slate-200 dark:border-slate-700">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody className="block md:table-row-group">
@@ -682,16 +655,16 @@ export default function Transaksi() {
                                                 <td colSpan="5" className="block md:table-cell px-4 py-8 text-center text-slate-500 dark:text-slate-400">Data tidak ditemukan.</td>
                                             </tr>
                                         ) : dataTampil.map(h => {
-                                            let rowBg = 'bg-white hover:bg-slate-50 dark:bg-slate-950 dark:hover:bg-slate-900';
+                                            let rowBg = 'bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/50';
                                             let badge = null;
                                             let textStyle = 'font-bold text-slate-800';
 
-                                            if (h.jenis.includes('Rencana')) { rowBg = 'bg-orange-50/80 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-800/30'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">PROYEKSI</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
-                                            else if (h.jenis === 'Transfer') { rowBg = 'bg-blue-50/80 hover:bg-blue-100/80 dark:bg-blue-900/20 dark:hover:bg-blue-800/30'; badge = <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">TRANSFER</span>; }
-                                            else if (h.jenis === 'Utang Masuk') { rowBg = 'bg-purple-50/80 hover:bg-purple-100/80 dark:bg-purple-900/20 dark:hover:bg-purple-800/30'; badge = <span className="bg-purple-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">UTANG</span>; textStyle = 'font-bold text-purple-600 dark:text-purple-400'; }
-                                            else if (h.jenis === 'Piutang Keluar') { rowBg = 'bg-purple-50/80 hover:bg-purple-100/80 dark:bg-purple-900/20 dark:hover:bg-purple-800/30'; badge = <span className="bg-purple-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">PIUTANG</span>; textStyle = 'font-bold text-purple-600 dark:text-purple-400'; }
-                                            else if (h.jenis === 'Bayar Utang') { rowBg = 'bg-orange-50/80 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-800/30'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">BAYAR UTANG</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
-                                            else if (h.jenis === 'Terima Piutang') { rowBg = 'bg-orange-50/80 dark:bg-orange-900/20 hover:bg-orange-100/80 dark:hover:bg-orange-800/30'; badge = <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded mr-2">TERIMA PIUTANG</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
+                                            if (h.jenis.includes('Rencana')) { rowBg = 'bg-orange-50/50 dark:bg-orange-900/10 hover:bg-orange-50 dark:hover:bg-orange-900/20'; badge = <span className="bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400 font-bold text-[10px] px-1.5 py-0.5 rounded mr-2">PROYEKSI</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
+                                            else if (h.jenis === 'Transfer') { rowBg = 'bg-blue-50/30 hover:bg-blue-50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'; badge = <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400 font-bold text-[10px] px-1.5 py-0.5 rounded mr-2">TRANSFER</span>; }
+                                            else if (h.jenis === 'Utang Masuk') { rowBg = 'bg-purple-50/50 hover:bg-purple-50 dark:bg-purple-900/10 dark:hover:bg-purple-900/20'; badge = <span className="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400 font-bold text-[10px] px-1.5 py-0.5 rounded mr-2">UTANG</span>; textStyle = 'font-bold text-purple-600 dark:text-purple-400'; }
+                                            else if (h.jenis === 'Piutang Keluar') { rowBg = 'bg-purple-50/50 hover:bg-purple-50 dark:bg-purple-900/10 dark:hover:bg-purple-900/20'; badge = <span className="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400 font-bold text-[10px] px-1.5 py-0.5 rounded mr-2">PIUTANG</span>; textStyle = 'font-bold text-purple-600 dark:text-purple-400'; }
+                                            else if (h.jenis === 'Bayar Utang') { rowBg = 'bg-orange-50/50 dark:bg-orange-900/10 hover:bg-orange-50 dark:hover:bg-orange-900/20'; badge = <span className="bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400 font-bold text-[10px] px-1.5 py-0.5 rounded mr-2">BAYAR UTANG</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
+                                            else if (h.jenis === 'Terima Piutang') { rowBg = 'bg-orange-50/50 dark:bg-orange-900/10 hover:bg-orange-50 dark:hover:bg-orange-900/20'; badge = <span className="bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400 font-bold text-[10px] px-1.5 py-0.5 rounded mr-2">TERIMA PIUTANG</span>; textStyle = 'font-bold text-orange-600 dark:text-orange-400'; }
                                             else if (h.jenis === 'Pemasukan') { textStyle = 'font-bold text-emerald-600 dark:text-emerald-400'; }
                                             else if (h.jenis === 'Pengeluaran') { textStyle = 'font-bold text-red-600 dark:text-red-400'; }
 
@@ -702,11 +675,11 @@ export default function Transaksi() {
                                             const canDelete = !['Utang Masuk', 'Piutang Keluar'].includes(h.jenis) && (h.jenis !== 'Transfer' ? true : isTransferMutasi || h.kategori !== 'Transfer Aset (Auto)');
 
                                             return (
-                                                <tr key={h.id} className={`flex flex-col md:table-row mb-4 md:mb-0 border border-slate-200 md:border-0 md:border-b md:border-slate-100 rounded-xl md:rounded-none shadow-sm md:shadow-none overflow-hidden transition-colors ${rowBg}`}>
-                                                    <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 whitespace-nowrap">
+                                                <tr key={h.id} className={`flex flex-col md:table-row mb-4 md:mb-0 border border-slate-200 md:border-0 md:border-b md:border-slate-100 dark:md:border-slate-700 rounded-xl md:rounded-none shadow-sm md:shadow-none overflow-hidden transition-colors ${rowBg}`}>
+                                                    <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 dark:border-slate-800 md:border-0 whitespace-nowrap">
                                                         <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase">Tanggal</span>
                                                         <div>
-                                                            <span className="text-slate-700 dark:text-slate-100 font-medium block">{h.tglStr}</span>
+                                                            <span className="text-slate-700 dark:text-slate-200 font-medium block">{h.tglStr}</span>
                                                             {h.timeStr && (
                                                                 <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
                                                                     🕒 {h.timeStr}
@@ -714,27 +687,27 @@ export default function Transaksi() {
                                                             )}
                                                         </div>
                                                     </td>
-                                                    <td className="flex flex-col md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
+                                                    <td className="flex flex-col md:table-cell px-4 py-3 border-b border-slate-100 dark:border-slate-800 md:border-0">
                                                         <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase mb-1">Info Transaksi</span>
-                                                        <div>{badge}<span className="font-bold text-slate-800 dark:text-slate-100">{h.kategori}</span><span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">{h.keterangan}</span></div>
+                                                        <div>{badge}<span className="font-bold text-slate-800 dark:text-slate-200">{h.kategori}</span><span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">{h.keterangan}</span></div>
                                                     </td>
-                                                    <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0">
-                                                        <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase">Sumber Dana</span>
-                                                        <span className="text-slate-700 dark:text-slate-100 font-medium bg-slate-100 dark:bg-slate-800 px-2 md:px-0 py-0.5 rounded text-sm">{h.sumberDana}</span>
+                                                    <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 dark:border-slate-800 md:border-0">
+                                                        <span className="md:hidden font-bold text-xs text-slate-400 dark:text-slate-500 uppercase">Dompet / Rek</span>
+                                                        <span className="text-slate-700 dark:text-slate-300 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-xs">{h.sumberDana}</span>
                                                     </td>
-                                                    <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 md:border-0 md:text-right">
+                                                    <td className="flex justify-between md:table-cell px-4 py-3 border-b border-slate-100 dark:border-slate-800 md:border-0 md:text-right">
                                                         <span className="md:hidden font-bold text-xs text-slate-400 uppercase">Nominal</span>
                                                         <span className={`text-lg md:text-sm ${textStyle}`}>{formatRp(h.nominal)}</span>
                                                     </td>
                                                     <td className="px-4 py-3 align-middle">
                                                         <div className="flex justify-end md:justify-center items-center gap-2">
                                                             {canEdit && (
-                                                                <button onClick={() => siapkanEdit(h)} className="flex items-center gap-1.5 p-2.5 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-800/30 rounded-lg transition-all duration-300 active:scale-95 border border-transparent hover:border-amber-200 dark:hover:border-amber-700" title="Edit Transaksi">
+                                                                <button onClick={() => siapkanEdit(h)} className="flex items-center gap-1.5 p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition" title="Edit Transaksi">
                                                                     <Edit size={16} />
                                                                 </button>
                                                             )}
                                                             {canDelete && (
-                                                                <button onClick={() => handleHapus(h.id)} className="flex items-center gap-1.5 p-2.5 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-800/30 rounded-lg transition-all duration-300 active:scale-95 border border-transparent hover:border-red-200 dark:hover:border-red-700" title="Hapus Transaksi">
+                                                                <button onClick={() => handleHapus(h.id)} className="flex items-center gap-1.5 p-2 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition" title="Hapus Transaksi">
                                                                     <Trash size={16} />
                                                                 </button>
                                                             )}
@@ -747,9 +720,9 @@ export default function Transaksi() {
                                 </table>
                             </div>
                             {totalPages > 1 && (
-                                <div className="flex justify-center gap-2 mt-8 flex-wrap pt-6 border-t border-slate-200 dark:border-slate-700/50">
+                                <div className="flex justify-center gap-1.5 mt-6 flex-wrap pt-4 border-t border-slate-200 dark:border-slate-700">
                                     {[...Array(totalPages)].map((_, i) => (
-                                        <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${currentPage === i + 1 ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg dark:shadow-xl scale-105' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
+                                        <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-8 h-8 rounded-lg text-xs font-bold transition ${currentPage === i + 1 ? 'bg-blue-500 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>
                                             {i + 1}
                                         </button>
                                     ))}

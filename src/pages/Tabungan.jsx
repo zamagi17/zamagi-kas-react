@@ -154,25 +154,32 @@ export default function Tabungan() {
     const totalTerkumpul = tabunganList.reduce((acc, t) => acc + t.terkumpul, 0);
     const totalTercapai = tabunganList.filter(t => t.terkumpul >= t.targetNominal).length;
 
+    if (!token) return null;
+
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
             <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
 
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-50 flex items-center gap-2">
-                            <Landmark className="text-pink-500" /> Target Tabungan
-                        </h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Pantau progress mimpimu di sini.</p>
+                {/* Header Baru (Sama seperti Dashboard & Transaksi) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg text-white shadow-sm">
+                            <Landmark size={22} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Target Tabungan</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Pantau progress mimpimu di sini.</p>
+                        </div>
                     </div>
-                    <button
-                        onClick={() => { resetForm(); setShowModal(true); }}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm"
-                    >
-                        <Plus size={16} /> Tambah Target
-                    </button>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                            onClick={() => { resetForm(); setShowModal(true); }}
+                            className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm"
+                        >
+                            <Plus size={16} /> Tambah Target
+                        </button>
+                    </div>
                 </div>
 
                 {/* Summary Cards */}
@@ -335,13 +342,13 @@ export default function Tabungan() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Target Selesai (Deadline)</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-1.5">Target Selesai (Deadline)</label>
                                 <input
                                     type="date"
                                     required
                                     value={formData.deadline}
                                     onChange={e => setFormData(p => ({ ...p, deadline: e.target.value }))}
-                                    className="w-full px-4 py-3 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                                    className="block w-full px-4 py-3 text-base md:text-sm appearance-none min-h-[48px] border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-sans"
                                 />
                             </div>
 

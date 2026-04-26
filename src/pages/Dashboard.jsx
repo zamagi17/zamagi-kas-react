@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut, Pie } from 'react-chartjs-2';
-import { Wallet, PieChart, Settings } from 'lucide-react';
+import { Wallet, PieChart, Settings, LayoutDashboard } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -147,20 +147,27 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
             <Navbar />
-            <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+            <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
 
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-50">Dashboard</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Selamat datang, {currentUser} 👋</p>
+                {/* Header Baru (Sama seperti Transaksi & Budget) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg text-white shadow-sm">
+                            <LayoutDashboard size={22} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Dashboard</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Selamat datang, {currentUser} 👋</p>
+                        </div>
                     </div>
-                    <input
-                        type="month"
-                        value={filterBulan}
-                        onChange={e => setFilterBulan(e.target.value)}
-                        className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <input
+                            type="month"
+                            value={filterBulan}
+                            onChange={e => setFilterBulan(e.target.value)}
+                            className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
                 </div>
 
                 {isLoading ? (

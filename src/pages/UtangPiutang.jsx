@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, X, Wallet, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { Plus, X, Wallet, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Check, HandCoins, Trash } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 const API_URL = `${baseUrl}/api/utang-piutang`;
-
-const LIST_ASET = [
-    'BCA', 'SeaBank', 'Bank Jago', 'Bank BRI', 'Dompet Tunai',
-    'e-Wallet (Gopay/OVO/Dana)', 'Bank RDN', 'Reksa Dana', 'Emas/Logam Mulia'
-];
 
 export default function UtangPiutang() {
     const navigate = useNavigate();
@@ -26,7 +21,8 @@ export default function UtangPiutang() {
     const [showModalTambah, setShowModalTambah] = useState(false);
     const [formTambah, setFormTambah] = useState({
         jenis: 'Utang', namaPihak: '', nominalAwal: '',
-        asetTerkait: '', tanggalMulai: new Date().toISOString().split('T')[0],
+        asetTerkait: '', 
+        tanggalMulai: new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })).toISOString().split('T')[0],
         jatuhTempo: '', keterangan: ''
     });
 
@@ -68,6 +64,7 @@ export default function UtangPiutang() {
             setIsLoading(false);
         }
     };
+    
     useEffect(() => {
         if (!token) return;
         fetch(`${baseUrl}/api/master/aset`, { headers: { 'Authorization': 'Bearer ' + token } })
@@ -124,7 +121,7 @@ export default function UtangPiutang() {
             setShowModalTambah(false);
             setFormTambah({
                 jenis: 'Utang', namaPihak: '', nominalAwal: '',
-                asetTerkait: '', tanggalMulai: new Date().toISOString().split('T')[0],
+                asetTerkait: '', tanggalMulai: new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })).toISOString().split('T')[0],
                 jatuhTempo: '', keterangan: ''
             });
             fetchData();
@@ -199,20 +196,25 @@ export default function UtangPiutang() {
             <Navbar />
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
-                {/* Header */}
-                <div className="flex justify-between items-center gap-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg dark:shadow-xl p-6 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300">
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-50 flex items-center gap-2">
-                            <span className="text-3xl">💳</span> Utang Piutang
-                        </h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola utang & piutang kamu dengan mudah</p>
+                {/* Header Baru */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg text-white shadow-sm">
+                            <HandCoins size={22} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Utang Piutang</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Kelola utang & piutang kamu dengan mudah</p>
+                        </div>
                     </div>
-                    <button
-                        onClick={() => setShowModalTambah(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition shadow-sm"
-                    >
-                        <Plus size={18} /> Catat Baru
-                    </button>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                            onClick={() => setShowModalTambah(true)}
+                            className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm"
+                        >
+                            <Plus size={16} /> Catat Baru
+                        </button>
+                    </div>
                 </div>
 
                 {/* Summary Cards */}
@@ -238,7 +240,7 @@ export default function UtangPiutang() {
                             {j}
                         </button>
                     ))}
-                    <div className="w-px bg-slate-200 mx-1" />
+                    <div className="w-px bg-slate-200 dark:bg-slate-700 mx-1" />
                     {['Belum Lunas', 'Lunas', 'Semua'].map(s => (
                         <button key={s} onClick={() => setFilterStatus(s)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition
@@ -256,7 +258,7 @@ export default function UtangPiutang() {
                         ))}
                     </div>
                 ) : dataFiltered.length === 0 ? (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-10 text-center text-slate-400 dark:text-slate-500">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-10 text-center text-slate-400 dark:text-slate-500">
                         <p className="text-3xl mb-2">📭</p>
                         <p className="font-semibold">Belum ada data</p>
                         <p className="text-sm mt-1">Klik "Catat Baru" untuk menambahkan</p>
@@ -321,7 +323,7 @@ export default function UtangPiutang() {
 
                                     {/* Detail (expanded) */}
                                     {isExpanded && (
-                                        <div className="border-t border-slate-100 px-4 py-3 space-y-2 text-sm bg-slate-50 dark:bg-slate-950">
+                                        <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-3 space-y-2 text-sm bg-slate-50 dark:bg-slate-950">
                                             <div className="flex justify-between">
                                                 <span className="text-slate-500 dark:text-slate-400">Aset Terkait</span>
                                                 <span className="font-medium dark:text-slate-100">{item.asetTerkait}</span>
@@ -374,8 +376,8 @@ export default function UtangPiutang() {
                                                     </button>
                                                     <button
                                                         onClick={() => handleHapus(item.id)}
-                                                        className="px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900 dark:hover:bg-red-800 text-red-500 dark:text-red-400 text-xs font-bold rounded-lg transition">
-                                                        Hapus
+                                                        className="px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-500 dark:text-red-400 text-xs font-bold rounded-lg transition border border-red-200 dark:border-red-800">
+                                                        <Trash size={14} className="mx-auto" />
                                                     </button>
                                                 </div>
                                             )}
@@ -383,8 +385,8 @@ export default function UtangPiutang() {
                                                 <div className="flex justify-end pt-2">
                                                     <button
                                                         onClick={() => handleHapus(item.id)}
-                                                        className="px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900 dark:hover:bg-red-800 text-red-500 dark:text-red-400 text-xs font-bold rounded-lg transition">
-                                                        Hapus
+                                                        className="px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-500 dark:text-red-400 text-xs font-bold rounded-lg transition border border-red-200 dark:border-red-800">
+                                                        Hapus Data
                                                     </button>
                                                 </div>
                                             )}
@@ -494,16 +496,16 @@ export default function UtangPiutang() {
                                         type="date" required
                                         value={formTambah.tanggalMulai}
                                         onChange={e => setFormTambah(p => ({ ...p, tanggalMulai: e.target.value }))}
-                                        className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900"
+                                        className="block w-full px-4 py-3 text-base md:text-sm appearance-none min-h-[48px] border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition font-sans"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jatuh Tempo</label>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jatuh Tempo <span className="text-slate-400 font-normal">(opsional)</span></label>
                                     <input
                                         type="date"
                                         value={formTambah.jatuhTempo}
                                         onChange={e => setFormTambah(p => ({ ...p, jatuhTempo: e.target.value }))}
-                                        className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900"
+                                        className="block w-full px-4 py-3 text-base md:text-sm appearance-none min-h-[48px] border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition font-sans"
                                     />
                                 </div>
                             </div>
@@ -522,13 +524,13 @@ export default function UtangPiutang() {
                             </div>
 
                             {/* Submit Button */}
-                            <div className="pt-4">
+                            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-6">
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-2xl transition shadow-lg active:scale-[0.98] disabled:opacity-50"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-blue-500/30 active:scale-[0.98] disabled:opacity-50"
                                 >
-                                    {isSubmitting ? 'Menyimpan...' : 'Simpan Catatan'}
+                                    {isSubmitting ? 'Memproses...' : 'Simpan Catatan'}
                                 </button>
                             </div>
                         </form>

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
     Moon, Sun, LogOut, User, Shield, Info, Wallet,
     Check, X, Eye, EyeOff, Lock, AlertTriangle, Edit3, Plus, Tags,
-    Mail, Smartphone, MessageCircle, Coffee
+    Mail, Smartphone, MessageCircle, Coffee, Settings as SettingsIcon
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
@@ -69,7 +69,7 @@ export default function Settings() {
     const currentUser = localStorage.getItem('username');
     const { isDark, toggle } = useDarkMode();
 
-    // ===== STATE PROFIL (BARU) =====
+    // ===== STATE PROFIL =====
     const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
     const [showProfilModal, setShowProfilModal] = useState(false);
     const [formProfil, setFormProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
@@ -113,7 +113,7 @@ export default function Settings() {
 
     useEffect(() => {
         if (!token) return;
-        fetchProfil(); // Panggil data profil saat load
+        fetchProfil();
         fetchAset();
         fetchKategori();
         fetch(`${baseUrl}/api/user/preferences`, { headers: { 'Authorization': 'Bearer ' + token } })
@@ -122,7 +122,6 @@ export default function Settings() {
             .catch(() => { });
     }, [token]);
 
-    // ===== FUNGSI API PROFIL (BARU) =====
     const fetchProfil = async () => {
         try {
             const res = await fetch(`${baseUrl}/api/user/profile`, {
@@ -141,7 +140,7 @@ export default function Settings() {
     };
 
     const handleBukaProfilModal = () => {
-        setFormProfil(profil); // Isi form dengan data saat ini
+        setFormProfil(profil);
         setShowProfilModal(true);
         setMsgProfil(null);
     };
@@ -162,7 +161,7 @@ export default function Settings() {
             });
 
             if (res.ok) {
-                setProfil(formProfil); // Update tampilan langsung
+                setProfil(formProfil);
                 setMsgProfil({ text: '✅ Profil berhasil diperbarui!', ok: true });
                 setTimeout(() => setShowProfilModal(false), 1500);
             } else {
@@ -176,7 +175,6 @@ export default function Settings() {
         }
     };
 
-    // ... [Semua fungsi lainnya seperti toggleAset, simpanAset, fetchKategori, dll tetap persis sama seperti kodemu] ...
     const toggleAset = (aset) => setDompetHarian(prev => prev.includes(aset) ? prev.filter(a => a !== aset) : [...prev, aset]);
     const simpanDompetHarian = async () => {
         setIsSavingDompet(true); setMsgDompet(null);
@@ -188,6 +186,7 @@ export default function Settings() {
             if (res.ok) setTimeout(() => { setShowDompetModal(false); setMsgDompet(null); }, 1500);
         } catch { setMsgDompet({ text: '❌ Gagal terhubung ke server', ok: false }); } finally { setIsSavingDompet(false); if (!msgDompet?.ok) setTimeout(() => setMsgDompet(null), 3000); }
     };
+
     const handleClosePwdModal = () => { setShowPwdModal(false); setFormPwd({ passwordLama: '', passwordBaru: '', konfirmasi: '' }); setMsgPwd(null); };
     const handleGantiPassword = async (e) => {
         e.preventDefault();
@@ -205,6 +204,7 @@ export default function Settings() {
             } else { setMsgPwd({ text: `❌ ${data?.message || text || 'Gagal mengubah password'}`, ok: false }); }
         } catch { setMsgPwd({ text: '❌ Gagal terhubung ke server', ok: false }); } finally { setIsSavingPwd(false); setTimeout(() => setMsgPwd(null), 4000); }
     };
+
     const handleLogout = () => { localStorage.clear(); navigate('/'); };
     const fetchAset = async () => { try { const res = await fetch(`${baseUrl}/api/master/aset`, { headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) setListAset(await res.json()); } catch (e) { console.error(e); } };
     const simpanAset = async () => {
@@ -235,50 +235,26 @@ export default function Settings() {
     if (!token) return null;
     const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
 
-
-    // --------------------------------------------------------------------------
-    const [isSendingEmail, setIsSendingEmail] = useState(false);
-    const [msgEmail, setMsgEmail] = useState(null);
-
-    const kirimEmailTest = async () => {
-        setIsSendingEmail(true);
-        setMsgEmail(null);
-
-        try {
-            const res = await fetch(`${baseUrl}/test/send-email`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            const text = await res.text();
-
-            if (res.ok) {
-                setMsgEmail({ text: '✅ Email berhasil dikirim!', ok: true });
-            } else {
-                setMsgEmail({ text: `❌ Gagal: ${text}`, ok: false });
-            }
-        } catch (e) {
-            setMsgEmail({ text: '❌ Gagal koneksi ke server', ok: false });
-        } finally {
-            setIsSendingEmail(false);
-            setTimeout(() => setMsgEmail(null), 4000);
-        }
-    };
-    // --------------------------------------------------------------------------
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
             <Navbar />
-            <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+            <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
 
-                <div>
-                    <h2 className="text-xl font-bold">Pengaturan</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Kelola preferensi aplikasi kamu</p>
+                {/* Header Baru (Sama seperti halaman lainnya) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-slate-600 to-slate-800 rounded-lg text-white shadow-sm">
+                            <SettingsIcon size={22} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Pengaturan</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Kelola preferensi akun & aplikasi</p>
+                        </div>
+                    </div>
                 </div>
 
-                {/* ===== BLOK PROFIL & KEAMANAN (DIPERBARUI) ===== */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                {/* ===== BLOK PROFIL & KEAMANAN ===== */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Profil & Keamanan</p>
                         <button onClick={handleBukaProfilModal} className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
@@ -297,7 +273,6 @@ export default function Settings() {
                             </p>
                             <p className="text-sm text-slate-500 dark:text-slate-400 truncate">@{currentUser}</p>
 
-                            {/* Menampilkan Email & No HP ringkas jika ada */}
                             <div className="flex flex-col gap-1 mt-2">
                                 {profil.email && (
                                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
@@ -336,9 +311,8 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* ===== (BLOK BAWAH TETAP SAMA) ===== */}
                 {/* Dompet Harian */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Dompet Harian</p>
                         <button onClick={() => setShowDompetModal(true)} className="text-blue-500 hover:text-blue-600 flex items-center gap-1 text-xs font-semibold">
@@ -364,7 +338,7 @@ export default function Settings() {
                 </div>
 
                 {/* ===== BLOK DATA MASTER (ASET & KATEGORI) ===== */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Data Master</p>
                     </div>
@@ -409,7 +383,7 @@ export default function Settings() {
                 </div>
 
                 {/* Status Sesi */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status Sesi</p>
                     </div>
@@ -441,7 +415,7 @@ export default function Settings() {
                 </div>
 
                 {/* Tampilan */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tampilan</p>
                     </div>
@@ -460,10 +434,8 @@ export default function Settings() {
                 </div>
 
                 {/* Dukung Developer / Donasi */}
-                <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/10 rounded-xl border border-rose-200 dark:border-rose-800/50 overflow-hidden relative">
-                    {/* Dekorasi background blur */}
+                <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/10 rounded-xl border border-rose-200 dark:border-rose-800/50 overflow-hidden relative shadow-sm">
                     <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-rose-500/10 dark:bg-rose-500/20 rounded-full blur-2xl pointer-events-none"></div>
-
                     <div className="px-4 py-3 border-b border-rose-200/50 dark:border-rose-800/50">
                         <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
                             <Coffee size={14} /> Support Developer
@@ -485,7 +457,7 @@ export default function Settings() {
                 </div>
 
                 {/* Komunitas */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Komunitas</p>
                     </div>
@@ -511,7 +483,7 @@ export default function Settings() {
                 </div>
 
                 {/* Tentang */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tentang</p>
                     </div>
@@ -533,40 +505,17 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* TEST EMAIL (DEV ONLY) */}
-                {/* <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-amber-300 dark:border-amber-700 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                        <p className="text-xs font-bold text-amber-500 uppercase tracking-widest">Dev Testing</p>
-                    </div>
-
-                    <div className="px-4 py-4 space-y-3">
-                        <button
-                            onClick={kirimEmailTest}
-                            disabled={isSendingEmail}
-                            className="text-xs px-3 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-semibold rounded-lg"
-                        >
-                            {isSendingEmail ? 'Mengirim...' : 'Test Kirim Email 📧'}
-                        </button>
-
-                        {msgEmail && (
-                            <p className={`text-xs font-medium ${msgEmail.ok ? 'text-emerald-500' : 'text-red-500'}`}>
-                                {msgEmail.text}
-                            </p>
-                        )}
-                    </div>
-                </div> */}
-
                 {/* Logout */}
                 <button onClick={handleLogout}
                     className="w-full flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-slate-900 text-red-500 font-bold rounded-xl border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition shadow-sm">
-                    <LogOut size={18} /> Logout
+                    <LogOut size={18} /> Logout Akun
                 </button>
 
             </div>
 
             {/* ===== MODAL ===== */}
 
-            {/* MODAL: Edit Profil (BARU) */}
+            {/* MODAL: Edit Profil */}
             <Modal isOpen={showProfilModal} onClose={() => setShowProfilModal(false)} title="Edit Profil">
                 <form onSubmit={handleSimpanProfil} className="space-y-4">
                     <div className="space-y-3">

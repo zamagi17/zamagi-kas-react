@@ -140,29 +140,31 @@ export default function Laporan() {
             <Navbar />
             <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
-                {/* Toolbar */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                {/* Header Baru (Sama seperti Dashboard & Transaksi) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
                     <div className="flex items-center gap-3">
-                        <FileText size={22} className="text-blue-500" />
+                        <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg text-white shadow-sm">
+                            <FileText size={22} />
+                        </div>
                         <div>
-                            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Laporan Keuangan</h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Preview & download laporan PDF</p>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Laporan Keuangan</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Preview & download laporan PDF</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         <input
                             type="month" value={filterBulan}
                             onChange={(e) => setFilterBulan(e.target.value)}
-                            className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                            className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <button
                             onClick={handleDownloadPDF}
                             disabled={isGenerating || isLoading}
-                            className="flex items-center gap-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition shadow-sm disabled:opacity-50"
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm disabled:opacity-50"
                         >
                             {isGenerating
-                                ? <><Loader size={16} className="animate-spin" /> Generating...</>
-                                : <><Download size={16} /> Download PDF</>
+                                ? <><Loader size={16} className="animate-spin" /> <span className="hidden sm:inline">Generating...</span></>
+                                : <><Download size={16} /> <span className="hidden sm:inline">Download</span></>
                             }
                         </button>
                     </div>

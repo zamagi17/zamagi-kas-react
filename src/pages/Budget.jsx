@@ -48,14 +48,11 @@ export default function Budget() {
             .catch(() => { });
     }, [token]);
 
-    // Gunakan AbortSignal untuk mencegah memory leak saat unmount/re-render cepat
     const fetchAll = async (abortSignal) => {
         setIsLoading(true);
         try {
             const headers = { 'Authorization': 'Bearer ' + token };
 
-            // BEST PRACTICE: Parallel Fetching menggunakan Promise.all
-            // Bug Fix: Menambahkan parameter ?bulan= pada fetch transaksi
             const [resBudget, resTrx] = await Promise.all([
                 fetch(`${baseUrl}/api/budget?bulan=${filterBulan}`, { headers, signal: abortSignal }),
                 fetch(`${baseUrl}/api/transaksi?bulan=${filterBulan}`, { headers, signal: abortSignal })
@@ -72,14 +69,9 @@ export default function Budget() {
 
             if (resTrx.ok) {
                 const trxResponse = await resTrx.json();
-
-                // Bug Fix: Ambil array dari key "data" sesuai struktur Backend baru
-                // Defensive programming: pastikan fallback ke array kosong jika null/undefined
                 const trxList = Array.isArray(trxResponse.data) ? trxResponse.data : [];
                 const realisasiMap = {};
 
-                // Karena backend sudah memfilter by 'bulan', kita tidak perlu lagi memotong tanggal manual.
-                // Cukup validasi jenis transaksinya saja untuk memangkas Cyclomatic Complexity.
                 trxList.forEach(row => {
                     if (row.jenis === 'Pengeluaran' && row.nominal > 0) {
                         const kat = row.kategori || 'Lain-lain';
@@ -90,7 +82,6 @@ export default function Budget() {
                 setRealisasi(realisasiMap);
             }
         } catch (err) {
-            // Abaikan error jika itu disebabkan oleh AbortController (komponen unmount)
             if (err.name !== 'AbortError') {
                 console.error("Gagal memuat data budget atau transaksi:", err);
             }
@@ -103,11 +94,8 @@ export default function Budget() {
 
     useEffect(() => {
         if (!token) return;
-
-        // BEST PRACTICE: Cleanup network request
         const controller = new AbortController();
         fetchAll(controller.signal);
-
         return () => controller.abort();
     }, [filterBulan, token]);
 
@@ -116,7 +104,6 @@ export default function Budget() {
         setIsSubmitting(true);
         const payload = {
             kategori: formData.kategori,
-            // BEST PRACTICE: Selalu gunakan radix 10 pada parseInt
             limitBulan: parseInt(formData.limitBulan.replace(/\D/g, ''), 10) || 0,
             bulan: filterBulan,
             catatan: formData.catatan
@@ -137,7 +124,6 @@ export default function Budget() {
             if (res.ok) {
                 setShowModal(false);
                 resetForm();
-                // Panggil fetch tanpa argument signal khusus untuk refresh data
                 fetchAll();
             } else {
                 alert(await res.text());
@@ -176,7 +162,6 @@ export default function Budget() {
         setShowModal(true);
     };
 
-    // Hitung summary
     const totalLimit = budgets.reduce((acc, b) => acc + b.limitBulan, 0);
     const totalRealisasi = budgets.reduce((acc, b) => acc + (realisasi[b.kategori] || 0), 0);
     const overCount = budgets.filter(b => (realisasi[b.kategori] || 0) > b.limitBulan).length;
@@ -193,22 +178,27 @@ export default function Budget() {
             <Navbar />
             <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
 
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-50">Budget & Anggaran</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Atur batas pengeluaran per kategori</p>
+                {/* Header dengan Styling Baru & Icon Target */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg text-white shadow-sm">
+                            <Target size={22} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-50">Budget & Anggaran</h2>
+                            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Atur batas pengeluaran per kategori</p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         <input
                             type="month"
                             value={filterBulan}
                             onChange={e => setFilterBulan(e.target.value)}
-                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <button
                             onClick={() => { resetForm(); setShowModal(true); }}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-sm transition shadow-sm"
                         >
                             <Plus size={16} /> Tambah
                         </button>
@@ -255,8 +245,11 @@ export default function Budget() {
                     </div>
                 ) : budgets.length === 0 ? (
                     <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-10 text-center">
-                        <Target size={36} className="text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                        <p className="font-semibold text-slate-500 dark:text-slate-400">Belum ada budget</p>
+                        {/* Icon pada Empty State diganti menjadi Target */}
+                        <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                            <Target size={32} className="text-slate-400 dark:text-slate-500" />
+                        </div>
+                        <p className="font-semibold text-slate-600 dark:text-slate-300">Belum ada budget</p>
                         <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Klik "Tambah" untuk membuat anggaran kategori</p>
                     </div>
                 ) : (
