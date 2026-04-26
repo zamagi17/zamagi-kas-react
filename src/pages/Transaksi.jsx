@@ -88,7 +88,7 @@ export default function Transaksi() {
             if (res.status === 401) { localStorage.clear(); navigate('/'); return; }
 
             const responseJson = await res.json();
-            
+
             const data = responseJson.data || [];
 
             let historyTemp = [];
@@ -258,7 +258,7 @@ export default function Transaksi() {
 
     const exportCSV = () => {
         if (filteredHistory.length === 0) return alert("Tidak ada data untuk diunduh.");
-        let csv = ['"ID","Tanggal","Kategori","Keterangan","Dompet / Aset","Jenis Arus Kas","Nominal Murni"'];
+        let csv = ['"ID","Tanggal","Kategori","Keterangan","Dompet / Rekening","Jenis Transaksi","Nominal"'];
         filteredHistory.forEach(h => csv.push(`"${h.id}","${h.tglStr}","${h.timeStr}","${h.kategori}","${h.keterangan}","${h.sumberDana}","${h.jenis}","${h.nominal}"`));
         const a = document.createElement("a");
         a.href = window.URL.createObjectURL(new Blob([csv.join("\n")], { type: "text/csv" }));
@@ -294,6 +294,24 @@ export default function Transaksi() {
             alert('Gagal menambah kategori');
         } finally {
             setIsSavingKategoriBaru(false); // Buka kembali kuncinya (berhasil maupun gagal)
+        }
+    };
+
+    // Helper function untuk UX label yang dinamis
+    const getLabelSumberDana = (jenis) => {
+        switch (jenis) {
+            case 'Pemasukan':
+                return 'Simpan ke Dompet / Rekening';
+            case 'Pengeluaran':
+                return 'Gunakan Saldo Dari';
+            case 'Transfer':
+                return 'Dari Dompet / Rekening (Asal)';
+            case 'Rencana Pemasukan':
+                return 'Rencana Masuk ke Dompet';
+            case 'Rencana Pengeluaran':
+                return 'Rencana Gunakan Saldo Dari';
+            default:
+                return 'Pilih Dompet / Rekening';
         }
     };
 
@@ -436,11 +454,11 @@ export default function Transaksi() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jenis Arus Kas</label>
+                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">Jenis Transaksi</label>
                                         <select name="jenis" value={formData.jenis} onChange={handleInputChange} required className="w-full px-4 py-3 text-base md:text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 transition">
-                                            <option value="Pemasukan">Pemasukan Riil</option>
-                                            <option value="Pengeluaran">Pengeluaran Riil</option>
-                                            <option value="Transfer">Transfer Aset (Auto 2 Baris)</option>
+                                            <option value="Pemasukan">Pemasukan</option>
+                                            <option value="Pengeluaran">Pengeluaran</option>
+                                            <option value="Transfer">Pindah Saldo (Transfer)</option>
                                             <option value="Rencana Pemasukan">Rencana Pemasukan</option>
                                             <option value="Rencana Pengeluaran">Rencana Pengeluaran</option>
                                         </select>
@@ -511,7 +529,7 @@ export default function Transaksi() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
-                                            {formData.jenis === 'Transfer' ? 'Dari Dompet (Asal)' : 'Sumber Dana / Lokasi Aset'}
+                                            {getLabelSumberDana(formData.jenis)}
                                         </label>
                                         <select
                                             name="sumberDana"
@@ -543,7 +561,7 @@ export default function Transaksi() {
                                     {formData.jenis === 'Transfer' && (
                                         <div className="md:col-span-2 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-5 rounded-2xl border border-dashed border-blue-300 dark:border-blue-700/50 mt-1">
                                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-100 mb-2">
-                                                Ke Dompet / Aset (Tujuan)
+                                                Pindah ke Dompet / Rekening (Tujuan)
                                             </label>
                                             <select
                                                 name="sumberDanaTujuan"

@@ -13,8 +13,7 @@ export default function Dashboard() {
     const token = localStorage.getItem('token');
 
     const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
-    const API_URL = `${baseUrl}/api/transaksi`;
-
+    
     const [filterBulan, setFilterBulan] = useState(() => {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -252,7 +251,7 @@ export default function Dashboard() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Dompet Harian belum diatur</p>
-                                        <p className="text-xs text-blue-500 dark:text-blue-400">Pilih aset yang sering kamu gunakan untuk transaksi harian</p>
+                                        <p className="text-xs text-blue-500 dark:text-blue-400">Pilih dompet/rekening yang sering kamu gunakan untuk transaksi harian</p>
                                     </div>
                                 </div>
                                 <button
@@ -264,13 +263,13 @@ export default function Dashboard() {
                             </div>
                         )}
 
-                        {/* Arus Kas */}
+                        {/* Arus Kas -> Pemasukan & Pengeluaran */}
                         <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl shadow-lg dark:shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 w-full min-w-0">
                             <h3 className="flex items-center gap-3 font-bold text-slate-800 dark:text-slate-50 mb-6 pb-4 border-b border-slate-200 dark:border-slate-700/50">
                                 <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg text-white">
                                     <PieChart size={20} />
                                 </div>
-                                <span className="text-lg">Arus Kas & Budget</span>
+                                <span className="text-lg">Pemasukan & Pengeluaran</span>
                             </h3>
                             <div className="space-y-4 w-full">
                                 {/* Saldo Awal */}
@@ -291,19 +290,19 @@ export default function Dashboard() {
                                         <p className="text-base font-bold text-red-600 dark:text-red-400">- {formatRp(summary.totalKeluar)}</p>
                                     </div>
                                 </div>
-                                {/* Sisa Kas */}
+                                {/* Sisa Kas -> Sisa Saldo */}
                                 <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 dark:from-emerald-600 dark:via-teal-600 dark:to-cyan-600 rounded-xl p-4 text-white shadow-lg">
                                     <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)' }}></div>
                                     <div className="relative flex justify-between items-center w-full">
                                         <div className="min-w-0">
-                                            <p className="text-emerald-100 text-xs font-semibold uppercase tracking-wide mb-1">💰 Sisa Kas</p>
+                                            <p className="text-emerald-100 text-xs font-semibold uppercase tracking-wide mb-1">💰 Sisa Saldo / Uang</p>
                                             <p className="text-2xl md:text-3xl font-black tracking-tight truncate">{formatRp(sisaKas)}</p>
                                         </div>
                                     </div>
                                 </div>
                                 {/* Proyeksi */}
                                 <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
-                                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">📊 Proyeksi Kas</p>
+                                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">📊 Rencana & Proyeksi</p>
                                     <div className="grid grid-cols-2 gap-3 mb-3">
                                         <div className="text-sm overflow-hidden">
                                             <p className="text-slate-600 dark:text-slate-400 text-xs font-medium mb-1 truncate">Rencana Masuk</p>
@@ -342,7 +341,7 @@ export default function Dashboard() {
                                 <div className="p-2.5 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg text-white">
                                     <PieChart size={20} />
                                 </div>
-                                <span className="text-lg">Sebaran Pengeluaran Riil</span>
+                                <span className="text-lg">Sebaran Pengeluaran</span>
                             </h3>
                             <div className="relative w-full h-64 flex justify-center items-center">
                                 {Object.keys(dataChartPengeluaran).length > 0
@@ -351,13 +350,13 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Net Worth & Aset */}
+                        {/* Net Worth & Aset -> Ringkasan Saldo & Utang */}
                         <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl shadow-lg dark:shadow-xl border border-slate-200/50 dark:border-slate-700/50 w-full min-w-0 flex flex-col">
                             <h3 className="flex items-center gap-3 font-bold text-slate-800 dark:text-slate-50 mb-6 pb-4 border-b border-slate-200 dark:border-slate-700/50 w-full">
                                 <div className="p-2.5 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg text-white">
                                     <Wallet size={20} />
                                 </div>
-                                <span className="text-lg">Net Worth & Aset</span>
+                                <span className="text-lg">Ringkasan Saldo & Utang</span>
                             </h3>
                             <div className="space-y-2 text-sm max-h-48 overflow-y-auto pr-2 flex-1 w-full">
                                 {Object.entries(portofolio).map(([aset, nilai]) => (
@@ -380,7 +379,7 @@ export default function Dashboard() {
                             <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 space-y-2">
                                 {/* 1. Total Aset */}
                                 <div className="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
-                                    <span className="text-emerald-900 dark:text-emerald-200 font-semibold text-sm">Total Aset (Dompet)</span>
+                                    <span className="text-emerald-900 dark:text-emerald-200 font-semibold text-sm">Total Saldo Dompet</span>
                                     <span className="text-lg font-bold text-emerald-700 dark:text-emerald-300">{formatRp(summary.totalNetWorth)}</span>
                                 </div>
 
@@ -409,7 +408,7 @@ export default function Dashboard() {
                                     <div className="flex justify-between items-center bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/30 dark:to-violet-900/30 p-3 rounded-lg border border-indigo-200 dark:border-indigo-700/50 mt-1 shadow-sm">
                                         <div className="flex flex-col">
                                             <span className="text-indigo-900 dark:text-indigo-200 font-bold text-sm">Kekayaan Bersih</span>
-                                            <span className="text-[10px] text-indigo-500 dark:text-indigo-400">Aset + Piutang - Utang</span>
+                                            <span className="text-[10px] text-indigo-500 dark:text-indigo-400">Saldo + Piutang - Utang</span>
                                         </div>
                                         <span className="text-xl font-black text-indigo-700 dark:text-indigo-300">
                                             {formatRp(summary.totalNetWorth + totalPiutangAktif - totalUtangAktif)}
@@ -419,18 +418,18 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Grafik Aset */}
+                        {/* Grafik Aset -> Sebaran Saldo Dompet */}
                         <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl shadow-lg dark:shadow-xl border border-slate-200/50 dark:border-slate-700/50 w-full min-w-0 flex flex-col items-center">
                             <h3 className="flex items-center gap-3 font-bold text-slate-800 dark:text-slate-50 mb-6 pb-4 border-b border-slate-200 dark:border-slate-700/50 w-full">
                                 <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg text-white">
                                     <Wallet size={20} />
                                 </div>
-                                <span className="text-lg">Alokasi Aset Anda</span>
+                                <span className="text-lg">Sebaran Saldo Dompet</span>
                             </h3>
                             <div className="relative w-full h-64 flex justify-center items-center">
                                 {asetLabels.length > 0
                                     ? <Pie data={asetData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 16, font: { size: 12, weight: 500 } } } } }} />
-                                    : <div className="text-center py-10"><p className="text-5xl mb-2">💼</p><p className="text-slate-400 dark:text-slate-500">Belum ada aset</p></div>}
+                                    : <div className="text-center py-10"><p className="text-5xl mb-2">💼</p><p className="text-slate-400 dark:text-slate-500">Belum ada saldo dompet</p></div>}
                             </div>
                         </div>
 

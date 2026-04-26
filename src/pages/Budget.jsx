@@ -48,55 +48,76 @@ export default function Budget() {
             .catch(() => { });
     }, [token]);
 
-    // Fetch budgets & realisasi
-    const fetchAll = async () => {
+    // Gunakan AbortSignal untuk mencegah memory leak saat unmount/re-render cepat
+    const fetchAll = async (abortSignal) => {
         setIsLoading(true);
         try {
-            // Fetch budgets
-            const resBudget = await fetch(`${baseUrl}/api/budget?bulan=${filterBulan}`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            if (resBudget.status === 401) { localStorage.clear(); navigate('/'); return; }
+            const headers = { 'Authorization': 'Bearer ' + token };
+
+            // BEST PRACTICE: Parallel Fetching menggunakan Promise.all
+            // Bug Fix: Menambahkan parameter ?bulan= pada fetch transaksi
+            const [resBudget, resTrx] = await Promise.all([
+                fetch(`${baseUrl}/api/budget?bulan=${filterBulan}`, { headers, signal: abortSignal }),
+                fetch(`${baseUrl}/api/transaksi?bulan=${filterBulan}`, { headers, signal: abortSignal })
+            ]);
+
+            if (resBudget.status === 401 || resTrx.status === 401) {
+                localStorage.clear();
+                navigate('/');
+                return;
+            }
+
             const budgetData = resBudget.ok ? await resBudget.json() : [];
             setBudgets(budgetData);
 
-            // Fetch transaksi untuk hitung realisasi
-            const resTrx = await fetch(`${baseUrl}/api/transaksi`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
             if (resTrx.ok) {
-                const trxData = await resTrx.json();
-                const [fYear, fMonth] = filterBulan.split('-');
+                const trxResponse = await resTrx.json();
+
+                // Bug Fix: Ambil array dari key "data" sesuai struktur Backend baru
+                // Defensive programming: pastikan fallback ke array kosong jika null/undefined
+                const trxList = Array.isArray(trxResponse.data) ? trxResponse.data : [];
                 const realisasiMap = {};
 
-                trxData.forEach(row => {
-                    const rowDate = new Date(row.tanggal);
-                    const rYear = rowDate.getFullYear().toString();
-                    const rMonth = (rowDate.getMonth() + 1).toString().padStart(2, '0');
-
-                    if (rYear === fYear && rMonth === fMonth && row.jenis === 'Pengeluaran') {
+                // Karena backend sudah memfilter by 'bulan', kita tidak perlu lagi memotong tanggal manual.
+                // Cukup validasi jenis transaksinya saja untuk memangkas Cyclomatic Complexity.
+                trxList.forEach(row => {
+                    if (row.jenis === 'Pengeluaran' && row.nominal > 0) {
                         const kat = row.kategori || 'Lain-lain';
-                        realisasiMap[kat] = (realisasiMap[kat] || 0) + (row.nominal || 0);
+                        realisasiMap[kat] = (realisasiMap[kat] || 0) + row.nominal;
                     }
                 });
+
                 setRealisasi(realisasiMap);
             }
         } catch (err) {
-            console.error(err);
+            // Abaikan error jika itu disebabkan oleh AbortController (komponen unmount)
+            if (err.name !== 'AbortError') {
+                console.error("Gagal memuat data budget atau transaksi:", err);
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => { if (!token) navigate('/'); }, [token, navigate]);
-    useEffect(() => { if (token) fetchAll(); }, [filterBulan, token]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        // BEST PRACTICE: Cleanup network request
+        const controller = new AbortController();
+        fetchAll(controller.signal);
+
+        return () => controller.abort();
+    }, [filterBulan, token]);
 
     const handleSimpan = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         const payload = {
             kategori: formData.kategori,
-            limitBulan: parseInt(formData.limitBulan.replace(/\D/g, '')) || 0,
+            // BEST PRACTICE: Selalu gunakan radix 10 pada parseInt
+            limitBulan: parseInt(formData.limitBulan.replace(/\D/g, ''), 10) || 0,
             bulan: filterBulan,
             catatan: formData.catatan
         };
@@ -116,12 +137,14 @@ export default function Budget() {
             if (res.ok) {
                 setShowModal(false);
                 resetForm();
+                // Panggil fetch tanpa argument signal khusus untuk refresh data
                 fetchAll();
             } else {
                 alert(await res.text());
             }
-        } catch {
-            alert('Gagal menyimpan');
+        } catch (err) {
+            console.error(err);
+            alert('Gagal menyimpan. Periksa koneksi jaringan Anda.');
         } finally {
             setIsSubmitting(false);
         }
@@ -336,30 +359,30 @@ export default function Budget() {
                 {!isLoading && Object.keys(realisasi).filter(kat =>
                     !budgets.some(b => b.kategori === kat) && realisasi[kat] > 0
                 ).length > 0 && (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-3">
-                            Pengeluaran Tanpa Anggaran
-                        </p>
-                        <div className="space-y-2">
-                            {Object.entries(realisasi)
-                                .filter(([kat]) => !budgets.some(b => b.kategori === kat))
-                                .map(([kat, nom]) => (
-                                    <div key={kat} className="flex justify-between items-center text-sm py-1.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
-                                        <span className="text-slate-600 dark:text-slate-300">{kat}</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-slate-700 dark:text-slate-200">{formatRp(nom)}</span>
-                                            <button
-                                                onClick={() => { setFormData({ kategori: kat, limitBulan: '', catatan: '' }); setShowModal(true); }}
-                                                className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded hover:bg-blue-100 transition"
-                                            >
-                                                + Atur Budget
-                                            </button>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-3">
+                                Pengeluaran Tanpa Anggaran
+                            </p>
+                            <div className="space-y-2">
+                                {Object.entries(realisasi)
+                                    .filter(([kat]) => !budgets.some(b => b.kategori === kat))
+                                    .map(([kat, nom]) => (
+                                        <div key={kat} className="flex justify-between items-center text-sm py-1.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                            <span className="text-slate-600 dark:text-slate-300">{kat}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-slate-700 dark:text-slate-200">{formatRp(nom)}</span>
+                                                <button
+                                                    onClick={() => { setFormData({ kategori: kat, limitBulan: '', catatan: '' }); setShowModal(true); }}
+                                                    className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded hover:bg-blue-100 transition"
+                                                >
+                                                    + Atur Budget
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
             </div>
 
             {/* Modal Tambah/Edit Budget */}

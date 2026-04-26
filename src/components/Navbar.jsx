@@ -1,12 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, HandCoins, FileText, Settings, Target, PiggyBank } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, HandCoins, FileText, Settings, Target, Landmark } from 'lucide-react';
 
 const menus = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/transaksi', label: 'Transaksi', icon: ArrowLeftRight },
     { path: '/utang-piutang', label: 'Utang Piutang', icon: HandCoins },
     { path: '/budget', label: 'Budget', icon: Target },
-    { path: '/tabungan', label: 'Tabungan', icon: PiggyBank },
+    { path: '/tabungan', label: 'Tabungan', icon: Landmark },
     { path: '/laporan', label: 'Laporan', icon: FileText },
     { path: '/settings', label: 'Settings', icon: Settings },
 ];

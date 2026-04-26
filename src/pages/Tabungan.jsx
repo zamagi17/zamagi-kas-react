@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PiggyBank, Plus, X, Edit3, Trash2, Target, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { Landmark, Plus, X, Edit3, Trash2, Target, Calendar, CheckCircle, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
@@ -163,7 +163,7 @@ export default function Tabungan() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-50 flex items-center gap-2">
-                            <PiggyBank className="text-pink-500" /> Target Tabungan
+                            <Landmark className="text-pink-500" /> Target Tabungan
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Pantau progress mimpimu di sini.</p>
                     </div>
@@ -202,7 +202,7 @@ export default function Tabungan() {
                     </div>
                 ) : tabunganList.length === 0 ? (
                     <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-10 text-center">
-                        <PiggyBank size={36} className="text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <Landmark size={36} className="text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                         <p className="font-semibold text-slate-500 dark:text-slate-400">Belum ada target tabungan</p>
                         <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Klik "Tambah Target" untuk mulai menabung</p>
                     </div>

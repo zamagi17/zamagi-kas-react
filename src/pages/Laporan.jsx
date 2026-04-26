@@ -50,7 +50,6 @@ export default function Laporan() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // Panggil endpoint khusus laporan yang baru dibuat
             const res = await fetch(`${baseUrl}/api/transaksi/ringkasan?bulan=${filterBulan}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -58,13 +57,11 @@ export default function Laporan() {
 
             const data = await res.json();
 
-            // React langsung menelan data mentah-mentah dari Backend
             setSummary(data.summary);
             setPortofolio(data.portofolio);
             setDataChartPengeluaran(data.chartPengeluaran);
-            setHistoryData(data.historyData); // Backend sudah mengurutkannya
+            setHistoryData(data.historyData);
 
-            // Panggil API Utang Piutang tetap seperti biasa
             try {
                 const resUP = await fetch(`${baseUrl}/api/utang-piutang`, {
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -98,40 +95,25 @@ export default function Laporan() {
         }]
     };
 
-    // Generate PDF via Backend
     const handleDownloadPDF = async () => {
         setIsGenerating(true);
-
         try {
-            // Panggil API Backend yang baru dibuat
             const response = await fetch(`${baseUrl}/api/transaksi/download-laporan?bulan=${filterBulan}`, {
                 method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
+                headers: { 'Authorization': 'Bearer ' + token }
             });
 
-            if (!response.ok) {
-                throw new Error("Gagal mengunduh laporan dari server.");
-            }
+            if (!response.ok) throw new Error("Gagal mengunduh laporan dari server.");
 
-            // Ubah response menjadi Blob (tipe data file)
             const blob = await response.blob();
-
-            // Buat URL sementara untuk file PDF tersebut
             const url = window.URL.createObjectURL(blob);
-
-            // Buat elemen <a> fiktif untuk memicu trigger download di browser
             const a = document.createElement('a');
             a.href = url;
             a.download = `Laporan_${currentUser}_${filterBulan}.pdf`;
             document.body.appendChild(a);
             a.click();
-
-            // Bersihkan elemen dan memory setelah download selesai
             a.remove();
             window.URL.revokeObjectURL(url);
-
         } catch (err) {
             console.error(err);
             alert("Terjadi kesalahan: " + err.message);
@@ -192,7 +174,7 @@ export default function Laporan() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        {/* ===== AREA PREVIEW (yang akan di-screenshot) ===== */}
+                        {/* ===== AREA PREVIEW ===== */}
                         <div ref={previewRef} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden"
                             style={{ fontFamily: 'sans-serif' }}>
 
@@ -209,17 +191,17 @@ export default function Laporan() {
 
                             <div className="p-6 space-y-6">
 
-                                {/* Ringkasan Arus Kas */}
+                                {/* Ringkasan Pemasukan & Pengeluaran */}
                                 <div>
                                     <h2 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 pb-1 border-b">
-                                        Ringkasan Arus Kas
+                                        Ringkasan Pemasukan & Pengeluaran
                                     </h2>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         {[
                                             { label: 'Saldo Awal', value: summary.saldoAwal, warna: 'text-slate-700 dark:text-slate-300' },
-                                            { label: 'Total Masuk', value: summary.totalMasuk, warna: 'text-emerald-600 dark:text-emerald-400' },
-                                            { label: 'Total Keluar', value: summary.totalKeluar, warna: 'text-red-600 dark:text-red-400' },
-                                            { label: 'Sisa Kas', value: sisaKas, warna: sisaKas >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400' },
+                                            { label: 'Total Pemasukan', value: summary.totalMasuk, warna: 'text-emerald-600 dark:text-emerald-400' },
+                                            { label: 'Total Pengeluaran', value: summary.totalKeluar, warna: 'text-red-600 dark:text-red-400' },
+                                            { label: 'Sisa Saldo', value: sisaKas, warna: sisaKas >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400' },
                                         ].map(item => (
                                             <div key={item.label} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-100 dark:border-slate-700">
                                                 <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">{item.label}</p>
@@ -240,7 +222,7 @@ export default function Laporan() {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <h2 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 pb-1 border-b">
-                                            Saldo Per Aset
+                                            Saldo per Dompet / Rekening
                                         </h2>
                                         <div className="space-y-1.5">
                                             {Object.entries(portofolio).filter(([, v]) => v !== 0).map(([aset, nilai]) => (
@@ -254,7 +236,7 @@ export default function Laporan() {
                                         {/* Net Worth Summary */}
                                         <div className="mt-3 text-sm">
                                             <div className="flex justify-between font-bold bg-blue-600 text-white px-3 py-2.5 rounded-lg">
-                                                <span>Total Net Worth</span>
+                                                <span>Total Saldo Dompet</span>
                                                 <span>{formatRp(summary.totalNetWorth)}</span>
                                             </div>
 
@@ -273,12 +255,11 @@ export default function Laporan() {
 
                                             {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
                                                 <div className="flex justify-between font-bold bg-indigo-600 text-white px-3 py-2.5 rounded-lg">
-                                                    <span>Net Worth Bersih</span>
+                                                    <span>Kekayaan Bersih</span>
                                                     <span>{formatRp(netWorthBersih)}</span>
                                                 </div>
                                             )}
 
-                                            {/* Tambahkan ini */}
                                             {(totalUtangAktif > 0 || totalPiutangAktif > 0) && (
                                                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">
                                                     *Utang/piutang aktif berdasarkan status saat ini
@@ -333,7 +314,7 @@ export default function Laporan() {
                                                         <th className="px-3 py-2 text-left font-semibold">Tanggal</th>
                                                         <th className="px-3 py-2 text-left font-semibold">Kategori</th>
                                                         <th className="px-3 py-2 text-left font-semibold">Keterangan</th>
-                                                        <th className="px-3 py-2 text-left font-semibold">Aset</th>
+                                                        <th className="px-3 py-2 text-left font-semibold">Dompet / Rekening</th>
                                                         <th className="px-3 py-2 text-left font-semibold">Jenis</th>
                                                         <th className="px-3 py-2 text-right font-semibold">Nominal</th>
                                                     </tr>
@@ -353,10 +334,10 @@ export default function Laporan() {
                                                                     </span>
                                                                 </td>
                                                                 <td className={`px-3 py-2 text-right font-bold whitespace-nowrap
-                                                            ${h.jenis === 'Pemasukan' ? 'text-emerald-600 dark:text-emerald-400' : ''}
-                                                            ${h.jenis === 'Pengeluaran' ? 'text-red-600 dark:text-red-400' : ''}
-                                                            ${h.jenis.includes('Rencana') ? 'text-orange-600 dark:text-orange-400' : ''}
-                                                        `}>
+                                                                    ${h.jenis === 'Pemasukan' ? 'text-emerald-600 dark:text-emerald-400' : ''}
+                                                                    ${h.jenis === 'Pengeluaran' ? 'text-red-600 dark:text-red-400' : ''}
+                                                                    ${h.jenis.includes('Rencana') ? 'text-orange-600 dark:text-orange-400' : ''}
+                                                                `}>
                                                                     {formatRp(h.nominal)}
                                                                 </td>
                                                             </tr>
@@ -365,15 +346,15 @@ export default function Laporan() {
                                                 </tbody>
                                                 <tfoot>
                                                     <tr className="bg-slate-100 dark:bg-slate-700 font-bold text-slate-700 dark:text-slate-200">
-                                                        <td colSpan="5" className="px-3 py-2 text-right">Total Masuk Riil:</td>
+                                                        <td colSpan="5" className="px-3 py-2 text-right">Total Pemasukan:</td>
                                                         <td className="px-3 py-2 text-right text-emerald-600 dark:text-emerald-400">{formatRp(summary.totalMasuk)}</td>
                                                     </tr>
                                                     <tr className="bg-slate-100 dark:bg-slate-700 font-bold text-slate-700 dark:text-slate-200">
-                                                        <td colSpan="5" className="px-3 py-2 text-right">Total Keluar Riil:</td>
+                                                        <td colSpan="5" className="px-3 py-2 text-right">Total Pengeluaran:</td>
                                                         <td className="px-3 py-2 text-right text-red-600 dark:text-red-400">{formatRp(summary.totalKeluar)}</td>
                                                     </tr>
                                                     <tr className="bg-slate-700 dark:bg-slate-800 text-white font-bold">
-                                                        <td colSpan="5" className="px-3 py-2 text-right">Sisa Kas:</td>
+                                                        <td colSpan="5" className="px-3 py-2 text-right">Sisa Saldo:</td>
                                                         <td className="px-3 py-2 text-right">{formatRp(sisaKas)}</td>
                                                     </tr>
                                                 </tfoot>
