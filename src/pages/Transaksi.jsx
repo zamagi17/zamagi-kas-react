@@ -168,12 +168,24 @@ export default function Transaksi() {
                     body: JSON.stringify(payload)
                 });
             } else if (formData.jenis === 'Transfer') {
-                const p1 = { ...basePayload, jenis: 'Pengeluaran', sumberDana: formData.sumberDana, keterangan: formData.keterangan + " (Mutasi Keluar)" };
-                const p2 = { ...basePayload, jenis: 'Pemasukan', sumberDana: formData.sumberDanaTujuan, keterangan: formData.keterangan + " (Mutasi Masuk)" };
-                await Promise.all([
-                    fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(p1) }),
-                    fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(p2) })
-                ]);
+                // Menggunakan Endpoint khusus Transfer (Lebih aman, di-handle @Transactional Backend)
+                const payloadTransfer = {
+                    tanggal: formData.tanggal,
+                    sumberDana: formData.sumberDana,
+                    sumberDanaTujuan: formData.sumberDanaTujuan,
+                    nominal: nominalAngka,
+                    keterangan: formData.keterangan
+                };
+
+                const res = await fetch(`${API_URL}/transfer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(payloadTransfer)
+                });
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
             } else {
                 const payload = { ...basePayload, jenis: formData.jenis, sumberDana: formData.sumberDana };
                 await fetch(API_URL, {
