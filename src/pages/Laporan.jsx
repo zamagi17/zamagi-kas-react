@@ -60,7 +60,31 @@ export default function Laporan() {
             setSummary(data.summary);
             setPortofolio(data.portofolio);
             setDataChartPengeluaran(data.chartPengeluaran);
-            setHistoryData(data.historyData);
+            // ==========================================
+            // PERBAIKAN: FORMATTING TANGGAL HISTORY DATA
+            // ==========================================
+            const rawHistory = data.historyData || [];
+            const formattedHistory = rawHistory.map(row => {
+                let rowDate = new Date(row.tanggal);
+                let timeStr = "";
+                
+                // Cek jika createdAt tersedia untuk menampilkan jam
+                if (row.createdAt) {
+                    const createdDate = new Date(row.createdAt);
+                    timeStr = createdDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                }
+
+                return {
+                    ...row,
+                    tglStr: rowDate.toLocaleDateString('id-ID'),
+                    timeStr: timeStr,
+                    sumberDana: row.sumberDana || 'Lain-lain',
+                    nominal: row.nominal || 0
+                };
+            });
+
+            setHistoryData(formattedHistory);
+            // ==========================================
 
             try {
                 const resUP = await fetch(`${baseUrl}/api/utang-piutang`, {
