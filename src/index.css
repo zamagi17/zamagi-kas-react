@@ -8,3 +8,9 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+@media (min-width: 768px) {
+  body:has(.desktop-sidebar-nav) .min-h-screen {
+    padding-left: 16rem;
+  }
+}

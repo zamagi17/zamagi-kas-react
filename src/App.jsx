@@ -11,6 +11,7 @@ import useDarkMode from './hooks/useDarkMode';
 import useAuth from './hooks/useAuth';
 import Tabungan from './pages/Tabungan'; 
 import Validasi from './pages/Validasi';
+import Schedule from './pages/Schedule';
 
 const HEALTH_URL = `${import.meta.env.VITE_API_URL}/api/health`;
 
@@ -34,6 +35,7 @@ function AppInner() {
             <Route path="/utang-piutang" element={<UtangPiutang />} />
             <Route path="/budget"        element={<Budget />} />
             <Route path="/tabungan"      element={<Tabungan />} />
+            <Route path="/schedule"      element={<Schedule />} />
             <Route path="/laporan"       element={<Laporan />} />
             <Route path="/settings"      element={<Settings />} />
             <Route path="/validasi"      element={<Validasi />} />
