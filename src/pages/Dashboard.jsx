@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Doughnut, Pie } from 'react-chartjs-2';
-import { Wallet, PieChart, Settings, LayoutDashboard, Eye, EyeOff, Calendar } from 'lucide-react';
+import {
+    Chart as ChartJS, ArcElement, Tooltip, Legend,
+    CategoryScale, LinearScale, PointElement, LineElement, Filler
+} from 'chart.js';
+import { Doughnut, Line, Pie } from 'react-chartjs-2';
+import { Wallet, PieChart, Settings, LayoutDashboard, Eye, EyeOff, Calendar, TrendingUp } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler);
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -29,6 +32,7 @@ export default function Dashboard() {
     });
     const [portofolio, setPortofolio] = useState({});
     const [dataChartPengeluaran, setDataChartPengeluaran] = useState({});
+    const [trendEnamBulan, setTrendEnamBulan] = useState([]);
     const [totalUtangAktif, setTotalUtangAktif] = useState(0);
     const [totalPiutangAktif, setTotalPiutangAktif] = useState(0);
 
@@ -56,6 +60,44 @@ export default function Dashboard() {
             .catch(() => { });
     }, [token]);
 
+    const getLastSixMonths = () => {
+        const [year, month] = filterBulan.split('-').map(Number);
+        const baseDate = new Date(year, month - 1, 1);
+
+        return Array.from({ length: 6 }, (_, index) => {
+            const date = new Date(baseDate.getFullYear(), baseDate.getMonth() - (5 - index), 1);
+            const bulan = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const label = date.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+            return { bulan, label };
+        });
+    };
+
+    const fetchTrendEnamBulan = async () => {
+        const months = getLastSixMonths();
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        const results = await Promise.all(months.map(async ({ bulan, label }) => {
+            const res = await fetch(`${baseUrl}/api/transaksi?bulan=${bulan}`, { headers });
+            if (!res.ok) return { bulan, label, pemasukan: 0, pengeluaran: 0 };
+
+            const payload = await res.json();
+            const transaksi = Array.isArray(payload.data) ? payload.data : [];
+
+            return transaksi.reduce((acc, row) => {
+                const isTransferAuto = row.kategori === 'Transfer Aset (Auto)'
+                    && (row.keterangan || '').includes('Mutasi');
+                if (isTransferAuto) return acc;
+
+                const nominal = row.nominal || 0;
+                if (row.jenis === 'Pemasukan') acc.pemasukan += nominal;
+                if (row.jenis === 'Pengeluaran') acc.pengeluaran += nominal;
+                return acc;
+            }, { bulan, label, pemasukan: 0, pengeluaran: 0 });
+        }));
+
+        setTrendEnamBulan(results);
+    };
+
     const fetchDashboardData = async () => {
         setIsLoading(true);
         try {
@@ -73,6 +115,7 @@ export default function Dashboard() {
             setSummary(data.summary);
             setPortofolio(data.portofolio);
             setDataChartPengeluaran(data.chartPengeluaran);
+            await fetchTrendEnamBulan();
 
             try {
                 const resUP = await fetch(`${baseUrl}/api/utang-piutang`, {
@@ -118,6 +161,70 @@ export default function Dashboard() {
             backgroundColor: ['#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#34495e', '#e67e22', '#1abc9c'],
             borderWidth: 0, hoverOffset: 4
         }]
+    };
+
+    const trendData = {
+        labels: trendEnamBulan.map(item => item.label),
+        datasets: [
+            {
+                label: 'Pemasukan',
+                data: trendEnamBulan.map(item => item.pemasukan),
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                tension: 0.35,
+                fill: true,
+            },
+            {
+                label: 'Pengeluaran',
+                data: trendEnamBulan.map(item => item.pengeluaran),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                pointBackgroundColor: '#ef4444',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                tension: 0.35,
+                fill: true,
+            },
+        ],
+    };
+
+    const trendOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { usePointStyle: true, pointStyle: 'circle', padding: 18, font: { size: 12, weight: 600 } }
+            },
+            tooltip: isSaldoHidden ? customTooltips : {
+                callbacks: {
+                    label: (context) => `${context.dataset.label}: ${formatRp(context.parsed.y)}`
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { size: 11, weight: 600 } }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                ticks: {
+                    color: '#64748b',
+                    font: { size: 11, weight: 600 },
+                    callback: (value) => isSaldoHidden
+                        ? 'Rp ...'
+                        : new Intl.NumberFormat('id-ID', { notation: 'compact', compactDisplay: 'short' }).format(value)
+                }
+            }
+        }
     };
 
     const asetLabels = [], asetValues = [];
@@ -449,6 +556,32 @@ export default function Dashboard() {
                                 {asetLabels.length > 0
                                     ? <Pie data={asetData} options={{ maintainAspectRatio: false, plugins: { tooltip: customTooltips, legend: { position: 'bottom', labels: { padding: 16, font: { size: 12, weight: 500 } } } } }} />
                                     : <div className="text-center py-10"><p className="text-5xl mb-2">💼</p><p className="text-slate-400 dark:text-slate-500">Belum ada saldo dompet</p></div>}
+                            </div>
+                        </div>
+
+                         {/* Grafik Trend 6 Bulan */}
+                        <div className="md:col-span-2 bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl shadow-lg dark:shadow-xl border border-slate-200/50 dark:border-slate-700/50 w-full flex flex-col">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-200 dark:border-slate-700/50">
+                                <h3 className="flex items-center gap-3 font-bold text-slate-800 dark:text-slate-50">
+                                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-sky-500 rounded-lg text-white">
+                                        <TrendingUp size={18} />
+                                    </div>
+                                    <span>Grafik Trend 6 Bulan</span>
+                                </h3>
+                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                                    Pemasukan vs Pengeluaran
+                                </span>
+                            </div>
+
+                            <div className="relative w-full h-72">
+                                {trendEnamBulan.some(item => item.pemasukan > 0 || item.pengeluaran > 0)
+                                    ? <Line data={trendData} options={trendOptions} />
+                                    : (
+                                        <div className="h-full flex flex-col items-center justify-center text-center">
+                                            <p className="text-5xl mb-2">📈</p>
+                                            <p className="text-slate-400 dark:text-slate-500">Belum ada data trend 6 bulan</p>
+                                        </div>
+                                    )}
                             </div>
                         </div>
 
