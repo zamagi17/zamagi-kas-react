@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
+import useModal from '../hooks/useModal';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 
@@ -68,6 +69,7 @@ export default function Settings() {
     const refreshToken = localStorage.getItem('refreshToken');
     const currentUser = localStorage.getItem('username');
     const { isDark, toggle } = useDarkMode();
+    const { confirm, renderModal } = useModal();
 
     // ===== STATE PROFIL =====
     const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
@@ -217,7 +219,9 @@ export default function Settings() {
             if (res.ok) { setMsgAset({ text: editAset ? '✅ Aset diperbarui!' : '✅ Aset ditambahkan!', ok: true }); setInputAset(''); setEditAset(null); fetchAset(); setTimeout(() => setMsgAset(null), 2000); } else { setMsgAset({ text: `❌ ${msg}`, ok: false }); }
         } catch { setMsgAset({ text: '❌ Gagal terhubung', ok: false }); } finally { setIsSavingAset(false); }
     };
-    const hapusAset = async (id) => { if (!window.confirm('Yakin ingin menghapus aset ini?')) return; try { const res = await fetch(`${baseUrl}/api/master/aset/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { fetchAset(); } else { alert(await res.text()); } } catch { alert('Gagal menghapus aset'); } };
+    const hapusAset = async (id) => {
+        const confirmed = await confirm('Yakin ingin menghapus aset ini?', 'Konfirmasi Hapus');
+        if (!confirmed) return; try { const res = await fetch(`${baseUrl}/api/master/aset/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { fetchAset(); } else { alert(await res.text()); } } catch { alert('Gagal menghapus aset'); } };
     const toggleAktifAset = async (aset) => { try { await fetch(`${baseUrl}/api/master/aset/${aset.id}`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ isAktif: !aset.isAktif }) }); fetchAset(); } catch { alert('Gagal mengubah status aset'); } };
     const fetchKategori = async () => { try { const res = await fetch(`${baseUrl}/api/master/kategori`, { headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) setListKategori(await res.json()); } catch (e) { console.error(e); } };
     const simpanKategori = async () => {
@@ -230,15 +234,18 @@ export default function Settings() {
             if (res.ok) { setMsgKategori({ text: editKategori ? '✅ Kategori diperbarui!' : '✅ Kategori ditambahkan!', ok: true }); setInputKategori(''); setEditKategori(null); fetchKategori(); setTimeout(() => setMsgKategori(null), 2000); } else { setMsgKategori({ text: `❌ ${msg}`, ok: false }); }
         } catch { setMsgKategori({ text: '❌ Gagal terhubung', ok: false }); } finally { setIsSavingKategori(false); }
     };
-    const hapusKategori = async (id) => { if (!window.confirm('Yakin ingin menghapus kategori ini?')) return; try { const res = await fetch(`${baseUrl}/api/master/kategori/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { fetchKategori(); } else { alert(await res.text()); } } catch { alert('Gagal menghapus kategori'); } };
+    const hapusKategori = async (id) => {
+        const confirmed = await confirm('Yakin ingin menghapus kategori ini?', 'Konfirmasi Hapus');
+        if (!confirmed) return; try { const res = await fetch(`${baseUrl}/api/master/kategori/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }); if (res.ok) { fetchKategori(); } else { alert(await res.text()); } } catch { alert('Gagal menghapus kategori'); } };
 
     if (!token) return null;
     const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
-            <Navbar />
-            <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
+        <>
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
+                <Navbar />
+                <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
 
                 {/* Header Baru (Sama seperti halaman lainnya) */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
@@ -813,5 +820,7 @@ export default function Settings() {
             </Modal>
 
         </div>
+        {renderModal()}
+        </>
     );
 }

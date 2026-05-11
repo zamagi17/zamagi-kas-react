@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, X, Wallet, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Check, HandCoins, Trash } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import useModal from '../hooks/useModal';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 const API_URL = `${baseUrl}/api/utang-piutang`;
@@ -9,6 +10,7 @@ const API_URL = `${baseUrl}/api/utang-piutang`;
 export default function UtangPiutang() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const { confirm, renderModal } = useModal();
 
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -181,7 +183,8 @@ export default function UtangPiutang() {
 
     // Handle hapus
     const handleHapus = async (id) => {
-        if (!window.confirm("Yakin ingin menghapus data ini? Transaksi terkait tidak ikut terhapus.")) return;
+        const confirmed = await confirm("Yakin ingin menghapus data ini? Transaksi terkait tidak ikut terhapus.", "Konfirmasi Hapus");
+        if (!confirmed) return;
         await fetch(`${API_URL}/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + token }
@@ -192,9 +195,10 @@ export default function UtangPiutang() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
-            <Navbar />
-            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+        <>
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
+                <Navbar />
+                <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
                 {/* Header Baru */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
@@ -660,5 +664,7 @@ export default function UtangPiutang() {
                 </div>
             )}
         </div>
+        {renderModal()}
+        </>
     );
 }

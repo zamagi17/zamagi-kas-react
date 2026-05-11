@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, X, AlertTriangle, CheckCircle, TrendingUp, Edit3, Trash2, Target } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import useModal from '../hooks/useModal';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 
 export default function Budget() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const { confirm, renderModal } = useModal();
 
     const [filterBulan, setFilterBulan] = useState(() => {
         const now = new Date();
@@ -137,7 +139,8 @@ export default function Budget() {
     };
 
     const handleHapus = async (id) => {
-        if (!window.confirm('Yakin ingin menghapus budget ini?')) return;
+        const confirmed = await confirm('Yakin ingin menghapus budget ini?', 'Konfirmasi Hapus');
+        if (!confirmed) return;
         try {
             await fetch(`${baseUrl}/api/budget/${id}`, {
                 method: 'DELETE',
@@ -174,9 +177,10 @@ export default function Budget() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
-            <Navbar />
-            <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+        <>
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
+                <Navbar />
+                <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
 
                 {/* Header dengan Styling Baru & Icon Target */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
@@ -455,5 +459,7 @@ export default function Budget() {
                 </div>
             )}
         </div>
+        {renderModal()}
+        </>
     );
 }

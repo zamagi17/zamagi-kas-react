@@ -5,11 +5,13 @@ import {
     Download, RefreshCw, ArrowLeftRight
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import useModal from '../hooks/useModal';
 
 export default function Transaksi() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const currentUser = localStorage.getItem('username');
+    const { confirm, renderModal } = useModal();
 
     const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
     const API_URL = `${baseUrl}/api/transaksi`;
@@ -226,10 +228,11 @@ export default function Transaksi() {
         const item = historyData.find(h => h.id === id);
         const isTransfer = item?.kategori === 'Transfer Aset (Auto)';
 
-        const konfirmasi = window.confirm(
+        const konfirmasi = await confirm(
             isTransfer
                 ? "Ini adalah transaksi transfer. Menghapus ini akan menghapus pasangannya juga. Lanjutkan?"
-                : "Yakin ingin menghapus data ini?"
+                : "Yakin ingin menghapus data ini?",
+            "Konfirmasi Hapus"
         );
         if (!konfirmasi) return;
 
@@ -732,6 +735,7 @@ export default function Transaksi() {
                     )}
                 </div>
             </div>
+            {renderModal()}
         </div>
     );
 }

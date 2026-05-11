@@ -4,6 +4,7 @@ import {
     CalendarClock, Clock3, Edit3, PauseCircle, PlayCircle, Plus, Trash2, Wallet, X
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import useModal from '../hooks/useModal';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 const DAYS = [
@@ -39,6 +40,7 @@ const initialForm = () => ({
 export default function Schedule() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const { confirm, renderModal } = useModal();
 
     const [schedules, setSchedules] = useState([]);
     const [masterAset, setMasterAset] = useState([]);
@@ -222,7 +224,8 @@ export default function Schedule() {
     };
 
     const deleteSchedule = async (item) => {
-        if (!window.confirm(`Hapus schedule "${item.title}"?`)) return;
+        const confirmed = await confirm(`Hapus schedule "${item.title}"?`, 'Konfirmasi Hapus');
+        if (!confirmed) return;
         try {
             const res = await fetch(`${baseUrl}/api/schedules/${item.id}`, {
                 method: 'DELETE',
@@ -241,9 +244,10 @@ export default function Schedule() {
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
-            <Navbar />
-            <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
+        <>
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
+                <Navbar />
+                <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg text-white shadow-sm">
@@ -549,5 +553,7 @@ export default function Schedule() {
                 </div>
             )}
         </div>
+        {renderModal()}
+        </>
     );
 }
