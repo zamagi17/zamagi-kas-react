@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import Modal from './Modal';
+import Modal from "../components/Modal";
 
 const useModal = () => {
   const [modalState, setModalState] = useState({
