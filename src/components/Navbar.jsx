@@ -13,7 +13,7 @@ const menus = [
     { path: '/transaksi', label: 'Transaksi', icon: ArrowLeftRight },
     { path: '/utang-piutang', label: 'Utang Piutang', icon: HandCoins },
     { path: '/budget', label: 'Budget', icon: Target },
-    { path: '/tabungan', label: 'Tabungan', icon: Landmark },
+    { path: '/tabungan', label: 'Target Tabungan', icon: Landmark },
     { path: '/schedule', label: 'Schedule', icon: CalendarClock },
     { path: '/laporan', label: 'Laporan', icon: FileText },
     { path: '/settings', label: 'Settings', icon: Settings },
