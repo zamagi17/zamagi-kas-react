@@ -72,7 +72,7 @@ export default function Settings() {
     const { confirm, renderModal } = useModal();
 
     // ===== STATE PROFIL =====
-    const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '', avatarUrl: '' });
+    const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '', avatarUrl: '', authProvider: localStorage.getItem('authProvider') || 'LOCAL' });
     const [showProfilModal, setShowProfilModal] = useState(false);
     const [formProfil, setFormProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
     const [avatarFile, setAvatarFile] = useState(null);
@@ -138,8 +138,10 @@ export default function Settings() {
                     namaLengkap: data.namaLengkap || '',
                     email: data.email || '',
                     nomorHp: data.nomorHp || '',
-                    avatarUrl: data.avatarUrl || ''
+                    avatarUrl: data.avatarUrl || '',
+                    authProvider: data.authProvider || 'LOCAL'
                 });
+                localStorage.setItem('authProvider', data.authProvider || 'LOCAL');
                 setTerimaLaporan(data.terimaLaporanBulanan === 'true');
             }
         } catch (e) { console.error('Gagal mengambil data profil', e); }
@@ -352,6 +354,7 @@ export default function Settings() {
     const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
     const currentAvatarSrc = profil.avatarUrl;
     const modalAvatarSrc = avatarPreview || profil.avatarUrl;
+    const isLocalAccount = (profil.authProvider || 'LOCAL').toUpperCase() === 'LOCAL';
 
     return (
         <>
@@ -414,10 +417,9 @@ export default function Settings() {
                         </div>
                     </div>
 
-                    {/* Tombol Buka Modal Ganti Password */}
                     <div
-                        className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
-                        onClick={() => setShowPwdModal(true)}
+                        className={`flex items-center justify-between px-4 py-4 transition-colors ${isLocalAccount ? 'hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer' : ''}`}
+                        onClick={() => { if (isLocalAccount) setShowPwdModal(true); }}
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
@@ -425,12 +427,20 @@ export default function Settings() {
                             </div>
                             <div>
                                 <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Password Akun</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-500">Perbarui password secara berkala</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500">
+                                    {isLocalAccount ? 'Perbarui password secara berkala' : 'Akun Google/Firebase dikelola oleh provider login'}
+                                </p>
                             </div>
                         </div>
-                        <button className="text-xs font-semibold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
-                            Ubah
-                        </button>
+                        {isLocalAccount ? (
+                            <button className="text-xs font-semibold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                                Ubah
+                            </button>
+                        ) : (
+                            <span className="text-xs font-semibold px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 rounded-lg">
+                                Google
+                            </span>
+                        )}
                     </div>
                 </div>
 

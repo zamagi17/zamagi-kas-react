@@ -91,6 +91,7 @@ export default function Login() {
         if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('username', data.username);
         if (data.namaLengkap) localStorage.setItem('namaLengkap', data.namaLengkap);
+        if (data.authProvider) localStorage.setItem('authProvider', data.authProvider);
 
         showMessage('✅ Login dengan Google berhasil! Mengalihkan...', false);
         setTimeout(() => {
@@ -158,6 +159,7 @@ export default function Login() {
           localStorage.setItem('username', data.username || username.trim());
           
           if (data.namaLengkap) localStorage.setItem('namaLengkap', data.namaLengkap);
+          if (data.authProvider) localStorage.setItem('authProvider', data.authProvider);
 
           showMessage('✅ Login berhasil! Mengalihkan...', false);
           setTimeout(() => {
