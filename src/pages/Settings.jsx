@@ -72,9 +72,12 @@ export default function Settings() {
     const { confirm, renderModal } = useModal();
 
     // ===== STATE PROFIL =====
-    const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
+    const [profil, setProfil] = useState({ namaLengkap: '', email: '', nomorHp: '', avatarUrl: '' });
     const [showProfilModal, setShowProfilModal] = useState(false);
     const [formProfil, setFormProfil] = useState({ namaLengkap: '', email: '', nomorHp: '' });
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [terimaLaporan, setTerimaLaporan] = useState(false);
     const [isSavingProfil, setIsSavingProfil] = useState(false);
     const [msgProfil, setMsgProfil] = useState(null);
@@ -134,7 +137,8 @@ export default function Settings() {
                 setProfil({
                     namaLengkap: data.namaLengkap || '',
                     email: data.email || '',
-                    nomorHp: data.nomorHp || ''
+                    nomorHp: data.nomorHp || '',
+                    avatarUrl: data.avatarUrl || ''
                 });
                 setTerimaLaporan(data.terimaLaporanBulanan === 'true');
             }
@@ -142,9 +146,108 @@ export default function Settings() {
     };
 
     const handleBukaProfilModal = () => {
-        setFormProfil(profil);
+        setFormProfil({ namaLengkap: profil.namaLengkap, email: profil.email, nomorHp: profil.nomorHp });
+        setAvatarFile(null);
+        setAvatarPreview('');
         setShowProfilModal(true);
         setMsgProfil(null);
+    };
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) return;
+        setAvatarFile(file);
+        setAvatarPreview(URL.createObjectURL(file));
+    };
+
+    const uploadAvatar = async () => {
+        if (!avatarFile) return true;
+        setIsUploadingAvatar(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', avatarFile);
+
+            let currentToken = token;
+            const res = await fetch(`${baseUrl}/api/user/profile/photo`, {
+                method: 'PUT',
+                headers: { Authorization: 'Bearer ' + currentToken },
+                body: formData
+            });
+
+            console.log('Upload response status:', res.status);
+
+            // Jika 401 Unauthorized, coba refresh token
+            if (res.status === 401) {
+                console.log('Token expired, trying to refresh...');
+                const refreshRes = await fetch(`${baseUrl}/api/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+
+                if (refreshRes.ok) {
+                    const refreshData = await refreshRes.json();
+                    localStorage.setItem('token', refreshData.token);
+                    if (refreshData.refreshToken) {
+                        localStorage.setItem('refreshToken', refreshData.refreshToken);
+                    }
+                    currentToken = refreshData.token;
+
+                    // Retry upload dengan token baru
+                    const retryRes = await fetch(`${baseUrl}/api/user/profile/photo`, {
+                        method: 'PUT',
+                        headers: { Authorization: 'Bearer ' + currentToken },
+                        body: formData
+                    });
+
+                    console.log('Retry upload response status:', retryRes.status);
+                    if (!retryRes.ok) {
+                        const text = await retryRes.text();
+                        throw new Error(text || 'Gagal mengunggah foto profil');
+                    }
+
+                    const data = await retryRes.json();
+                    if (data.avatarUrl) {
+                        setProfil(prev => ({ ...prev, avatarUrl: data.avatarUrl }));
+                    }
+                    setAvatarFile(null);
+                    setAvatarPreview('');
+                    return true;
+                } else {
+                    throw new Error('Sesi login telah berakhir, silakan login ulang');
+                }
+            }
+
+            console.log('Upload response headers:', Object.fromEntries(res.headers.entries()));
+
+            let responseData;
+            try {
+                responseData = await res.json();
+                console.log('Upload response JSON:', responseData);
+            } catch (e) {
+                const text = await res.text();
+                console.log('Upload response text:', text);
+                responseData = { message: text };
+            }
+
+            if (!res.ok) {
+                throw new Error(responseData.message || 'Gagal mengunggah foto profil');
+            }
+
+            const data = responseData;
+            if (data.avatarUrl) {
+                setProfil(prev => ({ ...prev, avatarUrl: data.avatarUrl }));
+            }
+            setAvatarFile(null);
+            setAvatarPreview('');
+            return true;
+        } catch (error) {
+            setMsgProfil({ text: `❌ ${error.message}`, ok: false });
+            return false;
+        } finally {
+            setIsUploadingAvatar(false);
+        }
     };
 
     const handleSimpanProfil = async (e) => {
@@ -163,7 +266,14 @@ export default function Settings() {
             });
 
             if (res.ok) {
-                setProfil(formProfil);
+                setProfil(prev => ({ ...prev, ...formProfil }));
+                if (avatarFile) {
+                    const avatarOk = await uploadAvatar();
+                    if (!avatarOk) {
+                        setIsSavingProfil(false);
+                        return;
+                    }
+                }
                 setMsgProfil({ text: '✅ Profil berhasil diperbarui!', ok: true });
                 setTimeout(() => setShowProfilModal(false), 1500);
             } else {
@@ -240,6 +350,8 @@ export default function Settings() {
 
     if (!token) return null;
     const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
+    const currentAvatarSrc = profil.avatarUrl;
+    const modalAvatarSrc = avatarPreview || profil.avatarUrl;
 
     return (
         <>
@@ -271,8 +383,12 @@ export default function Settings() {
 
                     {/* Info Profil Utama */}
                     <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-                        <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 border border-blue-200 dark:border-blue-800">
-                            <User size={26} className="text-blue-500" />
+                        <div className="w-14 h-14 rounded-full overflow-hidden bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 border border-blue-200 dark:border-blue-800">
+                            {currentAvatarSrc ? (
+                                <img src={currentAvatarSrc} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <User size={26} className="text-blue-500" />
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="font-bold text-lg text-slate-800 dark:text-slate-100 truncate">
@@ -526,6 +642,20 @@ export default function Settings() {
             <Modal isOpen={showProfilModal} onClose={() => setShowProfilModal(false)} title="Edit Profil">
                 <form onSubmit={handleSimpanProfil} className="space-y-4">
                     <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
+                            <div className="w-24 h-24 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 flex items-center justify-center">
+                                {modalAvatarSrc ? (
+                                    <img src={modalAvatarSrc} alt="Preview avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="text-slate-400 text-sm text-center px-2">Preview Foto</div>
+                                )}
+                            </div>
+                            <label className="w-full sm:w-auto cursor-pointer inline-flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                                Pilih Foto Profil
+                                <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+                            </label>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Format: JPG/PNG/WebP. Maksimum 5MB.</p>
                         <div>
                             <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Nama Lengkap</label>
                             <input type="text"
@@ -577,8 +707,8 @@ export default function Settings() {
                     )}
 
                     <div className="pt-2">
-                        <button type="submit" disabled={isSavingProfil} className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition-colors shadow-sm">
-                            {isSavingProfil ? 'Menyimpan...' : 'Simpan Profil'}
+                        <button type="submit" disabled={isSavingProfil || isUploadingAvatar} className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition-colors shadow-sm">
+                            {(isSavingProfil || isUploadingAvatar) ? 'Menyimpan...' : 'Simpan Profil'}
                         </button>
                     </div>
                 </form>

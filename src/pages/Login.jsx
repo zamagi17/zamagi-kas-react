@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react'; // Ikon Mail dihapus
+import { auth } from '../config/firebase';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function Login() {
   
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [pesan, setPesan] = useState({ text: '', isError: false, show: false });
   
   // State untuk indikator server
@@ -56,6 +59,52 @@ export default function Login() {
     return () => clearInterval(intervalId);
   }, []);
 
+  // --- FUNGSI LOGIN DENGAN GOOGLE ---
+  const handleGoogleLogin = async () => {
+    setPesan({ text: '', isError: false, show: false });
+    setIsGoogleLoading(true);
+
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      // Kirim Firebase ID token ke backend untuk verifikasi dan login
+      const res = await fetch(`${AUTH_URL}/google-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Gagal login dengan Google');
+      }
+
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('username', data.username);
+        if (data.namaLengkap) localStorage.setItem('namaLengkap', data.namaLengkap);
+
+        showMessage('✅ Login dengan Google berhasil! Mengalihkan...', false);
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 800);
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      showMessage(err.message || 'Gagal login dengan Google');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   // --- FUNGSI HANDLE AUTH ---
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -78,7 +127,6 @@ export default function Login() {
       const endpoint = isLoginMode ? 'login' : 'register';
       
       // Siapkan data yang akan dikirim (payload)
-      // Jika login, kirim username & password saja. Jika register, kirim semuanya.
       const payload = isLoginMode 
         ? { username: username.trim(), password }
         : { 
@@ -109,7 +157,6 @@ export default function Login() {
           if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
           localStorage.setItem('username', data.username || username.trim());
           
-          // Opsional: Simpan nama lengkap jika dikembalikan dari server
           if (data.namaLengkap) localStorage.setItem('namaLengkap', data.namaLengkap);
 
           showMessage('✅ Login berhasil! Mengalihkan...', false);
@@ -121,7 +168,6 @@ export default function Login() {
         const msg = await res.text();
         showMessage(`✅ ${msg || 'Pendaftaran berhasil! Silakan login.'}`, false);
         setTimeout(() => {
-          // Reset form dan pindah ke mode login
           setIsLoginMode(true);
           setPassword('');
           setNamaLengkap('');
@@ -145,7 +191,6 @@ export default function Login() {
     if (pesan.show) setPesan({ show: false, text: '', isError: false });
   };
 
-  // Fungsi untuk mengganti mode dan membersihkan input
   const toggleMode = () => {
     setIsLoginMode(!isLoginMode); 
     setPesan({ show: false });
@@ -183,7 +228,6 @@ export default function Login() {
             {/* Input Tambahan: Hanya muncul saat mendaftar */}
             {!isLoginMode && (
               <>
-                {/* Input Nama Lengkap */}
                 <div className="relative">
                   <input
                     type="text"
@@ -199,7 +243,6 @@ export default function Login() {
                   </label>
                 </div>
 
-                {/* Input Email */}
                 <div className="relative">
                   <input
                     type="email"
@@ -270,6 +313,29 @@ export default function Login() {
               {isLoading ? (isLoginMode ? 'Memproses...' : 'Mendaftar...') : (isLoginMode ? 'Masuk' : 'Daftar')}
             </button>
           </form>
+
+          {/* Divider (Dikeluarkan dari isLoginMode agar tampil di kedua form) */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-300 dark:bg-slate-700"></div>
+            <span className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase">Atau</span>
+            <div className="flex-1 h-px bg-gray-300 dark:bg-slate-700"></div>
+          </div>
+
+          {/* Google Login Button */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={isGoogleLoading}
+            className="w-full py-3.5 rounded-lg text-base font-semibold text-gray-700 dark:text-slate-100 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all transform hover:-translate-y-px disabled:opacity-60 flex items-center justify-center gap-3"
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+            </svg>
+            {isGoogleLoading ? 'Memproses...' : (isLoginMode ? 'Masuk dengan Google' : 'Daftar dengan Google')}
+          </button>
 
           {/* Toggle Link */}
           <div className="text-center mt-5 text-[0.95rem] text-gray-500 dark:text-slate-400">
