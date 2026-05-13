@@ -89,6 +89,7 @@ export function useAuth() {
                 const data = await res.json();
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('refreshToken', data.refreshToken);
+                if (data.authProvider) localStorage.setItem('authProvider', data.authProvider);
                 console.log('Token berhasil di-refresh');
             } else {
                 console.warn('Refresh gagal:', res.status);

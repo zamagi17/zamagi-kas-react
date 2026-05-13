@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     LayoutDashboard, ArrowLeftRight, HandCoins, FileText, Settings,
     Target, Landmark, CalendarClock, MoreHorizontal, ShieldCheck, X,
-    Bell, AlertTriangle, CheckCircle2
+    Bell, AlertTriangle, CheckCircle2, LogOut
 } from 'lucide-react';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
@@ -45,6 +45,13 @@ export default function Navbar() {
 
     const goTo = (path) => {
         navigate(path);
+        setShowMore(false);
+        setShowNotifications(false);
+    };
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/');
         setShowMore(false);
         setShowNotifications(false);
     };
@@ -166,6 +173,12 @@ export default function Navbar() {
                         <p className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Login sebagai</p>
                         <p className="mt-1 text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{currentUser}</p>
                     </div>
+                    <button
+                        onClick={handleLogout}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-red-500 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                    >
+                        <LogOut size={17} /> Logout
+                    </button>
                 </div>
             </aside>
 

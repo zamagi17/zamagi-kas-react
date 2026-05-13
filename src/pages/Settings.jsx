@@ -141,7 +141,9 @@ export default function Settings() {
                     avatarUrl: data.avatarUrl || '',
                     authProvider: data.authProvider || 'LOCAL'
                 });
-                localStorage.setItem('authProvider', data.authProvider || 'LOCAL');
+                if (!localStorage.getItem('authProvider')) {
+                    localStorage.setItem('authProvider', data.authProvider || 'LOCAL');
+                }
                 setTerimaLaporan(data.terimaLaporanBulanan === 'true');
             }
         } catch (e) { console.error('Gagal mengambil data profil', e); }
@@ -304,17 +306,25 @@ export default function Settings() {
     const handleClosePwdModal = () => { setShowPwdModal(false); setFormPwd({ passwordLama: '', passwordBaru: '', konfirmasi: '' }); setMsgPwd(null); };
     const handleGantiPassword = async (e) => {
         e.preventDefault();
+        if (isLocalAccount && !formPwd.passwordLama) return setMsgPwd({ text: '❌ Password lama wajib diisi', ok: false });
         if (formPwd.passwordBaru !== formPwd.konfirmasi) return setMsgPwd({ text: '❌ Konfirmasi password tidak cocok', ok: false });
         if (kekuatan.level < 2) return setMsgPwd({ text: '❌ Password terlalu lemah', ok: false });
         setIsSavingPwd(true); setMsgPwd(null);
         try {
+            const payload = isLocalAccount
+                ? formPwd
+                : {
+                    passwordBaru: formPwd.passwordBaru,
+                    konfirmasi: formPwd.konfirmasi
+                };
             const res = await fetch(`${baseUrl}/api/user/password`, {
-                method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(formPwd)
+                method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
             const text = await res.text(); let data = null; try { data = JSON.parse(text); } catch { data = null; }
             if (res.ok && data?.token) {
                 localStorage.setItem('token', data.token); if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-                setMsgPwd({ text: '✅ Password berhasil diubah!', ok: true }); setTimeout(() => handleClosePwdModal(), 2000);
+                if (data.authProvider) localStorage.setItem('authProvider', data.authProvider);
+                setMsgPwd({ text: isLocalAccount ? '✅ Password berhasil diubah!' : '✅ Password lokal berhasil dibuat!', ok: true }); setTimeout(() => handleClosePwdModal(), 2000);
             } else { setMsgPwd({ text: `❌ ${data?.message || text || 'Gagal mengubah password'}`, ok: false }); }
         } catch { setMsgPwd({ text: '❌ Gagal terhubung ke server', ok: false }); } finally { setIsSavingPwd(false); setTimeout(() => setMsgPwd(null), 4000); }
     };
@@ -354,7 +364,13 @@ export default function Settings() {
     const sisaAkses = formatSisaToken(token); const sisaRefresh = formatSisaToken(refreshToken);
     const currentAvatarSrc = profil.avatarUrl;
     const modalAvatarSrc = avatarPreview || profil.avatarUrl;
-    const isLocalAccount = (profil.authProvider || 'LOCAL').toUpperCase() === 'LOCAL';
+    const activeAuthProvider = localStorage.getItem('authProvider') || profil.authProvider || 'LOCAL';
+    const isLocalAccount = activeAuthProvider.toUpperCase() === 'LOCAL';
+    const passwordFields = [
+        ...(isLocalAccount ? [{ key: 'lama', field: 'passwordLama', placeholder: 'Password lama' }] : []),
+        { key: 'baru', field: 'passwordBaru', placeholder: 'Password baru (min. 8 karakter)' },
+        { key: 'konfirmasi', field: 'konfirmasi', placeholder: 'Ulangi password baru' },
+    ];
 
     return (
         <>
@@ -418,8 +434,8 @@ export default function Settings() {
                     </div>
 
                     <div
-                        className={`flex items-center justify-between px-4 py-4 transition-colors ${isLocalAccount ? 'hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer' : ''}`}
-                        onClick={() => { if (isLocalAccount) setShowPwdModal(true); }}
+                        className="flex items-center justify-between px-4 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+                        onClick={() => setShowPwdModal(true)}
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
@@ -428,7 +444,7 @@ export default function Settings() {
                             <div>
                                 <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Password Akun</p>
                                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                                    {isLocalAccount ? 'Perbarui password secara berkala' : 'Akun Google/Firebase dikelola oleh provider login'}
+                                    {isLocalAccount ? 'Perbarui password secara berkala' : 'Buat password lokal tanpa password lama'}
                                 </p>
                             </div>
                         </div>
@@ -437,9 +453,9 @@ export default function Settings() {
                                 Ubah
                             </button>
                         ) : (
-                            <span className="text-xs font-semibold px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 rounded-lg">
-                                Google
-                            </span>
+                            <button className="text-xs font-semibold px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 rounded-lg">
+                                Buat
+                            </button>
                         )}
                     </div>
                 </div>
@@ -640,7 +656,7 @@ export default function Settings() {
 
                 {/* Logout */}
                 <button onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-slate-900 text-red-500 font-bold rounded-xl border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition shadow-sm">
+                    className="md:hidden w-full flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-slate-900 text-red-500 font-bold rounded-xl border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition shadow-sm">
                     <LogOut size={18} /> Logout Akun
                 </button>
 
@@ -725,13 +741,14 @@ export default function Settings() {
             </Modal>
 
             {/* MODAL: Ganti Password */}
-            <Modal isOpen={showPwdModal} onClose={handleClosePwdModal} title="Ganti Password">
+            <Modal isOpen={showPwdModal} onClose={handleClosePwdModal} title={isLocalAccount ? 'Ganti Password' : 'Buat Password Lokal'}>
                 <form onSubmit={handleGantiPassword} className="space-y-4">
-                    {[
-                        { key: 'lama', field: 'passwordLama', placeholder: 'Password lama' },
-                        { key: 'baru', field: 'passwordBaru', placeholder: 'Password baru (min. 8 karakter)' },
-                        { key: 'konfirmasi', field: 'konfirmasi', placeholder: 'Ulangi password baru' },
-                    ].map(({ key, field, placeholder }) => (
+                    {!isLocalAccount && (
+                        <p className="text-sm text-slate-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl px-4 py-3">
+                            Sesi ini login lewat Google/Firebase, jadi cukup masukkan password baru untuk membuat password lokal.
+                        </p>
+                    )}
+                    {passwordFields.map(({ key, field, placeholder }) => (
                         <div key={field} className="relative">
                             <input
                                 type={showPwd[key] ? 'text' : 'password'}
