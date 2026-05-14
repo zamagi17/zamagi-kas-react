@@ -5,6 +5,7 @@ import {
     Target, Landmark, CalendarClock, MoreHorizontal, ShieldCheck, X,
     Bell, AlertTriangle, CheckCircle2, LogOut
 } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 
@@ -142,9 +143,16 @@ export default function Navbar() {
             <aside className="desktop-sidebar-nav hidden md:flex fixed inset-y-0 left-0 z-50 w-64 flex-col bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-700 shadow-sm">
                 <div className="px-5 py-5 border-b border-slate-200 dark:border-gray-800">
                     <div className="flex items-center justify-between gap-3">
-                        <span className="block text-blue-500 font-black text-2xl tracking-tight">
-                            ZonaKas
-                        </span>
+                        <div className="flex items-center gap-3">
+                            <img 
+                                src={logo} 
+                                alt="ZonaKas Logo" 
+                                className="w-8 h-8 rounded-lg object-contain"
+                            />
+                            <span className="block text-blue-500 font-black text-2xl tracking-tight">
+                                ZonaKas
+                            </span>
+                        </div>
                         {renderNotificationBell(true)}
                     </div>
                 </div>

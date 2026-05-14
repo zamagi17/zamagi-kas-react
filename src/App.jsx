@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Transaksi from './pages/Transaksi';
 import UtangPiutang from './pages/UtangPiutang';
@@ -30,6 +32,9 @@ function AppInner() {
     return (
         <Routes>
             <Route path="/"              element={<Login />} />
+            <Route path="/login"         element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard"     element={<Dashboard />} />
             <Route path="/transaksi"     element={<Transaksi />} />
             <Route path="/utang-piutang" element={<UtangPiutang />} />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Landmark, Plus, X, Edit3, Trash2, Target, Calendar, CheckCircle, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useModal from '../hooks/useModal';
+import logo from '../assets/logo.png';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 const API_URL = `${baseUrl}/api/tabungan`;
@@ -163,6 +164,19 @@ export default function Tabungan() {
         <>
             <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6">
                 <Navbar />
+
+                {/* Mobile Header */}
+                <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30">
+                    <div className="flex items-center gap-2">
+                        <img src={logo} alt="ZonaKas" className="w-6 h-6 rounded" />
+                        <span className="font-bold text-slate-800 dark:text-slate-100">ZonaKas</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-500">{localStorage.getItem('username')}</span>
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    </div>
+                </div>
+
                 <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
 
                 {/* Header Baru (Sama seperti Dashboard & Transaksi) */}

@@ -307,6 +307,19 @@ export default function Login() {
               </button>
             </div>
 
+            {/* Lupa Password Link - Hanya tampil saat login */}
+            {isLoginMode && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm text-blue-500 hover:text-blue-600 font-semibold hover:underline focus:outline-none"
+                >
+                  Lupa Password?
+                </button>
+              </div>
+            )}
+
             {/* Tombol Aksi */}
             <button
               type="submit"

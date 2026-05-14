@@ -8,6 +8,7 @@ import {
 import Navbar from '../components/Navbar';
 import useDarkMode from '../hooks/useDarkMode';
 import useModal from '../hooks/useModal';
+import logo from '../assets/logo.png';
 
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8081').replace(/\/+$/, '');
 
@@ -324,7 +325,7 @@ export default function Settings() {
             if (res.ok && data?.token) {
                 localStorage.setItem('token', data.token); if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
                 if (data.authProvider) localStorage.setItem('authProvider', data.authProvider);
-                setMsgPwd({ text: isLocalAccount ? '✅ Password berhasil diubah!' : '✅ Password lokal berhasil dibuat!', ok: true }); setTimeout(() => handleClosePwdModal(), 2000);
+                setMsgPwd({ text: isLocalAccount ? '✅ Password berhasil diubah!' : '✅ Password berhasil ditambahkan!', ok: true }); setTimeout(() => handleClosePwdModal(), 2000);
             } else { setMsgPwd({ text: `❌ ${data?.message || text || 'Gagal mengubah password'}`, ok: false }); }
         } catch { setMsgPwd({ text: '❌ Gagal terhubung ke server', ok: false }); } finally { setIsSavingPwd(false); setTimeout(() => setMsgPwd(null), 4000); }
     };
@@ -376,6 +377,19 @@ export default function Settings() {
         <>
             <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 pb-24 md:pb-6 relative">
                 <Navbar />
+
+                {/* Mobile Header */}
+                <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30">
+                    <div className="flex items-center gap-2">
+                        <img src={logo} alt="ZonaKas" className="w-6 h-6 rounded" />
+                        <span className="font-bold text-slate-800 dark:text-slate-100">ZonaKas</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-500">{currentUser}</span>
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    </div>
+                </div>
+
                 <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
 
                 {/* Header Baru (Sama seperti halaman lainnya) */}
@@ -444,7 +458,7 @@ export default function Settings() {
                             <div>
                                 <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Password Akun</p>
                                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                                    {isLocalAccount ? 'Perbarui password secara berkala' : 'Buat password lokal tanpa password lama'}
+                                    {isLocalAccount ? 'Perbarui password secara berkala' : 'Tambahkan password untuk login alternatif'}
                                 </p>
                             </div>
                         </div>
@@ -650,7 +664,7 @@ export default function Settings() {
                                 <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">Versi</p>
                             </div>
                         </div>
-                        <p className="text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">2.0.0</p>
+                        <p className="text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">3.0.0</p>
                     </div>
                 </div>
 
@@ -741,11 +755,11 @@ export default function Settings() {
             </Modal>
 
             {/* MODAL: Ganti Password */}
-            <Modal isOpen={showPwdModal} onClose={handleClosePwdModal} title={isLocalAccount ? 'Ganti Password' : 'Buat Password Lokal'}>
+            <Modal isOpen={showPwdModal} onClose={handleClosePwdModal} title={isLocalAccount ? 'Ganti Password' : 'Tambah Password'}>
                 <form onSubmit={handleGantiPassword} className="space-y-4">
                     {!isLocalAccount && (
                         <p className="text-sm text-slate-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl px-4 py-3">
-                            Sesi ini login lewat Google/Firebase, jadi cukup masukkan password baru untuk membuat password lokal.
+                            Anda login menggunakan Google. Tambahkan password untuk bisa login tanpa Google.
                         </p>
                     )}
                     {passwordFields.map(({ key, field, placeholder }) => (
